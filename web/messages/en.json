@@ -124,6 +124,52 @@
     "loginShort": "Sign in",
     "legal": "By signing in you agree to the terms of use.",
     "errorGoogle": "Google sign-in failed. Please try again.",
-    "menu": "Account menu"
+    "menu": "Account menu",
+    "legalLink": "Privacy and terms"
+  },
+  "privacy": {
+    "title": "Privacy policy and terms of use",
+    "updated": "Updated: 2026-09-15",
+    "intro": "Promptcha (promptcha.uz) turns plain words into a ready-to-use AI prompt. This page explains what data we collect, why, and the terms under which you use the service.",
+    "sections": [
+      {
+        "title": "What data is collected",
+        "body": [
+          "When you sign in with Google we receive only your account identifier, email address, name and profile picture URL. We never see your password.",
+          "The text you enter, the chosen direction and AI tool, answers to clarifying questions and the generated prompts are kept as history — on our server for signed-in users, only in your browser (localStorage) otherwise.",
+          "Technical data: IP address (to count the daily free limit), request time, the AI provider used and token counts."
+        ]
+      },
+      {
+        "title": "How data is used",
+        "body": [
+          "To run the service: generating prompts, showing your history, counting free limits.",
+          "To improve quality: understanding which tools are popular and what they cost. Personal data is never sold or shared with third parties for advertising.",
+          "Your text is sent to AI providers (for example Groq, Google Gemini) to produce the prompt. Your name and email are not sent to them."
+        ]
+      },
+      {
+        "title": "Cookies",
+        "body": [
+          "After signing in, only a session cookie (promptcha_session, 30 days) and theme/language preferences are stored. No advertising or tracking cookies."
+        ]
+      },
+      {
+        "title": "Retention and deletion",
+        "body": [
+          "Your account and history are kept until you ask us to delete them. Email the address below and everything is removed within 7 days.",
+          "Data is stored on a server outside Uzbekistan and only the service owner has access."
+        ]
+      },
+      {
+        "title": "Terms of use",
+        "body": [
+          "The service is provided as is. You are responsible for the prompts you generate and the results you obtain with them.",
+          "Using the service for unlawful purposes, to harm others or to overload the system is prohibited and may lead to account restrictions.",
+          "The free plan has a daily limit; Pro terms are shown at checkout. Changes to these terms are published on this page."
+        ]
+      }
+    ],
+    "contact": "Questions and requests: team.robbit@gmail.com"
   }
 }

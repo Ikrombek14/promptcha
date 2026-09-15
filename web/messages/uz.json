@@ -124,6 +124,52 @@
     "loginShort": "Kirish",
     "legal": "Kirish orqali siz foydalanish shartlariga rozilik bildirasiz.",
     "errorGoogle": "Google orqali kirishda xatolik. Qayta urinib koʻring.",
-    "menu": "Hisob menyusi"
+    "menu": "Hisob menyusi",
+    "legalLink": "Maxfiylik siyosati va shartlar"
+  },
+  "privacy": {
+    "title": "Maxfiylik siyosati va foydalanish shartlari",
+    "updated": "Yangilangan: 2026-09-15",
+    "intro": "Promptcha (promptcha.uz) — oddiy soʻzdan tayyor AI prompt yasaydigan xizmat. Bu sahifada qaysi maʼlumotlarni yigʻishimiz, ularni nima uchun ishlatishimiz va xizmatdan foydalanish shartlari bayon etilgan.",
+    "sections": [
+      {
+        "title": "Qanday maʼlumotlar yigʻiladi",
+        "body": [
+          "Google orqali kirganingizda Google'dan faqat quyidagilarni olamiz: hisob identifikatori, elektron pochta manzili, ism va profil rasmi havolasi. Parolingizga kirish yoʻq.",
+          "Siz kiritgan matnlar, tanlangan yoʻnalish va AI vositasi, aniqlashtiruvchi savollarga javoblar va yasalgan promptlar tarix sifatida saqlanadi — kirgan foydalanuvchilarda serverda, kirmaganlarda faqat brauzeringizda (localStorage).",
+          "Texnik maʼlumotlar: IP manzil (kunlik bepul limitni hisoblash uchun), soʻrov vaqti, ishlatilgan AI provayder va token soni."
+        ]
+      },
+      {
+        "title": "Maʼlumotlar nima uchun ishlatiladi",
+        "body": [
+          "Xizmatni koʻrsatish: prompt yasash, tarixni koʻrsatish, bepul limitlarni hisoblash.",
+          "Sifatni oshirish: qaysi vositalar koʻp ishlatilayotganini va xarajatni tushunish. Shaxsiy maʼlumotlar reklama uchun sotilmaydi va uchinchi tomonga berilmaydi.",
+          "Kiritgan matningiz promptni yasash uchun AI provayderlariga (masalan Groq, Google Gemini) yuboriladi. Ularga ismingiz yoki emailingiz yuborilmaydi."
+        ]
+      },
+      {
+        "title": "Cookie",
+        "body": [
+          "Kirganingizdan soʻng brauzerga faqat sessiya cookie'si (promptcha_session, 30 kun) va tema/til sozlamalari yoziladi. Kuzatuv yoki reklama cookie'lari yoʻq."
+        ]
+      },
+      {
+        "title": "Saqlash va oʻchirish",
+        "body": [
+          "Hisobingiz va tarixingiz siz soʻragunga qadar saqlanadi. Hisobni va unga bogʻliq barcha maʼlumotlarni oʻchirish uchun quyidagi manzilga yozing — 7 kun ichida oʻchiriladi.",
+          "Maʼlumotlar Oʻzbekistondan tashqaridagi serverda saqlanadi va faqat xizmat egasi kira oladi."
+        ]
+      },
+      {
+        "title": "Foydalanish shartlari",
+        "body": [
+          "Xizmat «qanday boʻlsa shundayligicha» taqdim etiladi. Yasalgan promptlar va ular asosida olingan natijalar uchun javobgarlik foydalanuvchida.",
+          "Xizmatdan qonunga zid, boshqalarga zarar yetkazuvchi yoki tizimni ortiqcha yuklovchi maqsadlarda foydalanish taqiqlanadi. Bunday hollarda hisob cheklanishi mumkin.",
+          "Bepul tarifda kunlik limit bor; Pro tarif shartlari toʻlov paytida koʻrsatiladi. Shartlar oʻzgarsa shu sahifada eʼlon qilinadi."
+        ]
+      }
+    ],
+    "contact": "Savol yoki soʻrovlar uchun: team.robbit@gmail.com"
   }
 }

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { MotionConfig, motion } from "motion/react";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { Callout } from "@/components/ui/callout";
 import { googleLoginUrl, useUser } from "@/lib/auth";
@@ -79,7 +79,15 @@ export function LoginCard({ error, next }: Props) {
           {t("google")}
         </a>
 
-        <p className="mt-4 text-body-sm text-muted">{t("legal")}</p>
+        <p className="mt-4 text-body-sm text-muted">
+          {t("legal")}{" "}
+          <Link
+            href="/privacy"
+            className="underline underline-offset-2 hover:text-text"
+          >
+            {t("legalLink")}
+          </Link>
+        </p>
       </motion.div>
     </MotionConfig>
   );
