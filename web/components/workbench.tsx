@@ -37,7 +37,14 @@ import {
   readGuest,
   saveGuestPrompt,
   subscribeGuest,
+  takeGuestPrompts,
 } from "@/lib/guest";
+import {
+  currentUser,
+  migrateGuestPrompts,
+  refreshUser,
+  useUser,
+} from "@/lib/auth";
 
 const getServerRemaining = () => null;
 
@@ -51,7 +58,9 @@ const controlsGroup: Variants = {
 export function Workbench() {
   const t = useTranslations("app");
   const tr = useTranslations("result");
+  const ta = useTranslations("auth");
   const locale = useLocale() as Locale;
+  const user = useUser();
 
   // Butun holat bitta obyektda — localStorage'ga yoziladi, yangilanganda tiklanadi
   const [s, setS] = useState<Draft>(loadDraft);
@@ -66,17 +75,49 @@ export function Workbench() {
     saveDraft(s);
   }, [s]);
 
-  const remaining = useSyncExternalStore<number | null>(
+  const guestLeft = useSyncExternalStore<number | null>(
     subscribeGuest,
     guestRemaining,
     getServerRemaining,
   );
+  // Qoldiq: kirgan → serverdagi kunlik limit (Pro'da null → cheksiz);
+  // kirmagan → guest hisobi; hali yuklanmagan → koʻrsatilmaydi
+  const remaining: number | null = user
+    ? user.remaining_today
+    : user === null
+      ? guestLeft
+      : null;
+  const remainingLabel: string | null = user
+    ? user.remaining_today === null
+      ? null
+      : ta("remainingToday", { n: user.remaining_today })
+    : remaining !== null
+      ? t("guestLeft", { n: remaining })
+      : null;
   const abortRef = useRef<AbortController | null>(null);
   // Ish shu sessiyada jonli tugagan boʻlsa — vosita «ochilish» animatsiyasi (reload'da emas)
   const [liveDoneJobId, setLiveDoneJobId] = useState<string | null>(null);
 
   const busy = s.phase === "loading" || s.phase === "streaming";
   const exhausted = remaining !== null && remaining <= 0;
+
+  // Kirgach guest promptlar hisobga koʻchiriladi (bir marta, xato boʻlsa joyida qoladi)
+  const userId = user?.id ?? null;
+  const migratedFor = useRef<string | null>(null);
+  useEffect(() => {
+    if (!userId || migratedFor.current === userId) return;
+    migratedFor.current = userId;
+    const prompts = readGuest().prompts;
+    if (!prompts.length) return;
+    migrateGuestPrompts(prompts)
+      .then(() => {
+        takeGuestPrompts();
+        return refreshUser();
+      })
+      .catch(() => {
+        migratedFor.current = null;
+      });
+  }, [userId]);
 
   // Matn tahlili: yozib toʻxtagach tur + 2–3 ta mos vosita (birinchisi tanlanadi)
   const [analyzing, setAnalyzing] = useState(false);
@@ -214,7 +255,10 @@ export function Workbench() {
               } else {
                 finalPrompt = ev.data.prompt || finalPrompt;
                 const cur = stateRef.current;
-                if (cur.savedJobId !== jobId) {
+                if (currentUser()) {
+                  // Server oʻzi saqlaydi; kunlik qoldiq yangilansin
+                  void refreshUser();
+                } else if (cur.savedJobId !== jobId) {
                   saveGuestPrompt({
                     input_text: cur.text,
                     kind: ev.data.kind,
@@ -292,6 +336,10 @@ export function Workbench() {
         });
         await attach(jobId);
       } catch (e) {
+        // Limit tugagan (429) — kirgan foydalanuvchida qoldiq serverdan yangilanadi
+        if (e instanceof ApiError && e.status === 429 && currentUser()) {
+          void refreshUser();
+        }
         patch({
           error: e instanceof ApiError ? e.message : String(e),
           phase: "error",
@@ -460,59 +508,59 @@ export function Workbench() {
                                 transition: { delay: 0.15 },
                               }}
                             >
-                              {t("guestExhausted")}
+                              {user ? t("userExhausted") : t("guestExhausted")}
                             </motion.span>
-                            <motion.span
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{
-                                opacity: 1,
-                                scale: 1,
-                                transition: { ...springPop, delay: 0.3 },
-                              }}
-                              className="shrink-0"
-                            >
-                              <Link
-                                href="/login"
-                                className={cn(
-                                  buttonVariants({
-                                    variant: "secondary",
-                                    size: "sm",
-                                  }),
-                                )}
+                            {!user && (
+                              <motion.span
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{
+                                  opacity: 1,
+                                  scale: 1,
+                                  transition: { ...springPop, delay: 0.3 },
+                                }}
+                                className="shrink-0"
                               >
-                                <LogIn size={16} />
-                                {t("loginGoogle")}
-                              </Link>
-                            </motion.span>
+                                <Link
+                                  href="/login"
+                                  className={cn(
+                                    buttonVariants({
+                                      variant: "secondary",
+                                      size: "sm",
+                                    }),
+                                  )}
+                                >
+                                  <LogIn size={16} />
+                                  {t("loginGoogle")}
+                                </Link>
+                              </motion.span>
+                            )}
                           </Callout>
                         </motion.div>
                       ) : (
-                        remaining !== null && (
-                          <motion.div
-                            key={`left-${remaining}`}
-                            {...swap}
-                            className="flex items-center justify-between gap-3"
-                          >
-                            <p
-                              className={cn(
-                                "font-mono text-code-sm",
-                                remaining === 1 ? "text-text" : "text-muted",
-                              )}
-                            >
-                              {t("guestLeft", { n: remaining })}
-                            </p>
-                            {(s.text || s.phase !== "idle") && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={resetAll}
-                              >
-                                <RotateCcw size={14} />
-                                {t("reset")}
-                              </Button>
+                        <motion.div
+                          key={`left-${remainingLabel ?? "none"}`}
+                          {...swap}
+                          className="flex min-h-9 items-center justify-between gap-3"
+                        >
+                          <p
+                            className={cn(
+                              "font-mono text-code-sm",
+                              remaining === 1 ? "text-text" : "text-muted",
                             )}
-                          </motion.div>
-                        )
+                          >
+                            {remainingLabel}
+                          </p>
+                          {(s.text || s.phase !== "idle") && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={resetAll}
+                            >
+                              <RotateCcw size={14} />
+                              {t("reset")}
+                            </Button>
+                          )}
+                        </motion.div>
                       )}
                     </AnimatePresence>
                   </motion.div>

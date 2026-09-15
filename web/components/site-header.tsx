@@ -1,8 +1,8 @@
 import { useTranslations } from "next-intl";
-import { User } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserMenu } from "@/components/user-menu";
 
 export function SiteHeader() {
   const t = useTranslations("header");
@@ -16,13 +16,7 @@ export function SiteHeader() {
           <LocaleSwitcher />
           <span className="hidden h-6 w-px bg-border sm:block" aria-hidden />
           <ThemeToggle label={t("theme")} />
-          <Link
-            href="/login"
-            aria-label={t("login")}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-on-accent"
-          >
-            <User size={16} />
-          </Link>
+          <UserMenu />
         </div>
       </div>
     </header>

@@ -1,3 +1,129 @@
 {
-  "admin": {}
+  "admin": {
+    "title": "Admin",
+    "nav": {
+      "aria": "Admin boʻlimlari",
+      "overview": "Umumiy",
+      "users": "Foydalanuvchilar",
+      "payments": "Toʻlovlar",
+      "settings": "Sozlamalar"
+    },
+    "common": {
+      "loading": "Yuklanmoqda…",
+      "empty": "Hali maʼlumot yoʻq",
+      "errorTitle": "Xatolik",
+      "retry": "Qayta urinish",
+      "prev": "Oldingi",
+      "next": "Keyingi",
+      "range": "{from}–{to} / {total}",
+      "cancel": "Bekor qilish",
+      "never": "—",
+      "notFound": "Topilmadi",
+      "invalidNumber": "Butun son kiriting",
+      "estimatedHint": "~ — token soni taxminiy (provayder qaytarmagan)"
+    },
+    "overview": {
+      "period": "Davr",
+      "days": "{n} kun",
+      "activeUsers": "Faol foydalanuvchilar",
+      "generations": "Generatsiyalar",
+      "tokens": "Tokenlar",
+      "avgTokens": "Oʻrtacha token / generatsiya",
+      "avgHint": "Tanlangan davr boʻyicha",
+      "today": "bugun",
+      "d7": "7 kun",
+      "d30": "30 kun",
+      "input": "kirish",
+      "output": "chiqish",
+      "daily": "Kunlik generatsiyalar",
+      "dailyTip": "{date}: {n} generatsiya, {tokens} token",
+      "byTool": "Vosita boʻyicha",
+      "byProvider": "Provayder va model boʻyicha",
+      "byStage": "Bosqich boʻyicha",
+      "topUsers": "Eng faol foydalanuvchilar",
+      "cols": {
+        "tool": "Vosita",
+        "provider": "Provayder",
+        "model": "Model",
+        "stage": "Bosqich",
+        "user": "Foydalanuvchi",
+        "calls": "Chaqiruvlar",
+        "generations": "Generatsiyalar",
+        "input": "Kirish token",
+        "output": "Chiqish token"
+      }
+    },
+    "users": {
+      "searchPlaceholder": "Email yoki ism boʻyicha qidiruv",
+      "searchLabel": "Qidiruv",
+      "cols": {
+        "user": "Foydalanuvchi",
+        "plan": "Reja",
+        "bonus": "Bonus",
+        "generations": "Generatsiyalar",
+        "tokens": "Tokenlar (kirish / chiqish)",
+        "lastLogin": "Oxirgi kirish",
+        "actions": "Amallar"
+      },
+      "plan": {
+        "free": "Bepul",
+        "pro": "Pro"
+      },
+      "proUntil": "{date} gacha",
+      "adminBadge": "admin",
+      "grantPro": "Pro berish",
+      "toFree": "Bepulga qaytarish",
+      "addBonus": "Bonus qoʻshish",
+      "proDays": "Kun soni",
+      "bonusCount": "Bonus soni",
+      "give": "Berish",
+      "add": "Qoʻshish",
+      "confirmFree": "Ishonchingiz komilmi? {email} bepul rejaga oʻtadi.",
+      "yesFree": "Ha, bepulga qaytarish",
+      "updated": "Yangilandi"
+    },
+    "payments": {
+      "addTitle": "Qoʻlda toʻlov qoʻshish",
+      "listTitle": "Toʻlovlar roʻyxati",
+      "user": "Foydalanuvchi",
+      "userSearch": "Email boʻyicha qidiring…",
+      "selectUser": "Roʻyxatdan foydalanuvchini tanlang",
+      "change": "Oʻzgartirish",
+      "amount": "Summa (soʻm)",
+      "days": "Kunlar",
+      "method": "Usul",
+      "methods": {
+        "manual": "Qoʻlda",
+        "payme": "Payme",
+        "click": "Click"
+      },
+      "note": "Izoh",
+      "notePlaceholder": "Masalan: naqd, 15-sentabr",
+      "submit": "Toʻlov qoʻshish",
+      "submitting": "Yuborilmoqda…",
+      "created": "Toʻlov qoʻshildi: {email}, {days} kun",
+      "cols": {
+        "date": "Sana",
+        "user": "Foydalanuvchi",
+        "amount": "Summa",
+        "method": "Usul",
+        "days": "Kunlar",
+        "note": "Izoh",
+        "by": "Kim qoʻshdi"
+      }
+    },
+    "settings": {
+      "intro": "Limitlar darhol kuchga kiradi. Boʻsh qoldirilsa .env dagi standart qiymat ishlaydi.",
+      "guest_total_generations": "Mehmon — jami bepul urinish",
+      "guest_total_generations_help": "Kirmagan foydalanuvchi uchun umumiy generatsiya soni",
+      "guest_daily_ip_generations": "Mehmon — bir IP uchun kunlik",
+      "guest_daily_ip_generations_help": "Bir IP manzildan kuniga ruxsat etilgan generatsiya",
+      "free_daily_generations": "Kirgan bepul — kunlik",
+      "free_daily_generations_help": "Bepul rejadagi kirgan foydalanuvchi uchun kunlik generatsiya",
+      "default": "standart: {n}",
+      "save": "Saqlash",
+      "saving": "Saqlanmoqda…",
+      "saved": "Saqlandi"
+    }
+  }
 }

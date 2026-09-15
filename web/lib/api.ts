@@ -65,6 +65,17 @@ async function readError(res: Response): Promise<string> {
   try {
     const j = await res.json();
     if (typeof j?.detail === "string") return j.detail;
+    // pydantic 422: detail = [{loc, msg, ...}]
+    if (Array.isArray(j?.detail)) {
+      const msgs = (j.detail as { msg?: string; loc?: unknown[] }[])
+        .map((d) =>
+          d.loc?.length
+            ? `${String(d.loc[d.loc.length - 1])}: ${d.msg ?? ""}`
+            : (d.msg ?? ""),
+        )
+        .filter(Boolean);
+      if (msgs.length) return msgs.join("; ");
+    }
     if (typeof j?.error === "string") return j.error;
   } catch {
     /* JSON emas */

@@ -3,6 +3,7 @@
 
 import { useSyncExternalStore } from "react";
 import { apiJson } from "@/lib/api";
+import type { GuestPrompt } from "@/lib/guest";
 
 export type User = {
   id: string;
@@ -68,6 +69,34 @@ const getServerSnapshot = (): State => undefined;
 /** Joriy foydalanuvchi: undefined (yuklanmoqda) | null (kirmagan) | User. */
 export function useUser(): State {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+/** Hook'siz oʻqish (callback/async ichida): undefined | null | User. */
+export function currentUser(): State {
+  return state;
+}
+
+/**
+ * Guest promptlarni kirgan foydalanuvchi hisobiga koʻchirish.
+ * Muvaffaqiyatda chaqiruvchi `takeGuestPrompts()` bilan localStorage'ni tozalaydi.
+ */
+export function migrateGuestPrompts(
+  prompts: GuestPrompt[],
+): Promise<{ saved: number }> {
+  return apiJson<{ saved: number }>("/api/auth/migrate", {
+    method: "POST",
+    json: {
+      prompts: prompts.map((p) => ({
+        input_text: p.input_text,
+        kind: p.kind,
+        ai: p.ai,
+        clarifications: p.clarifications,
+        result: p.result,
+        explanations: p.explanations,
+        locale: p.locale,
+      })),
+    },
+  });
 }
 
 /** Login sahifasiga yoʻl (locale'siz; Link o'zi qo'shadi). */

@@ -8,7 +8,7 @@ import re
 import time
 from collections.abc import AsyncIterator
 
-from app.ai import llm
+from app.ai import llm, metering
 from app.ai.catalog import TOOLS, classifier_guide
 from app.ai.llm import ProviderError
 from app.ai.prompts import (
@@ -216,6 +216,7 @@ async def explain(text: str, prompt: str, ai: str, locale: str) -> list[str]:
 
 async def extract_facts(text: str, answers: dict[str, str]) -> dict[str, str]:
     """Doimiy faktlar (soha, brend, uslub). Kirgan foydalanuvchi uchun UserContext'ga yoziladi."""
+    metering.set_stage("facts")
     system = (
         "Extract durable facts about the user that would be useful for their FUTURE requests: "
         "industry (e.g. 'restaurant'), brand name, preferred style, city, audience. "
@@ -244,6 +245,7 @@ async def run(
     kind = body.kind
     ai = body.ai
     if kind is None or ai is None:
+        metering.set_stage("classify")
         yield "stage", {"stage": "classify"}
         c = await classify(body.text)
         ask = kind is None and c.confidence < CONFIDENCE_THRESHOLD
@@ -266,6 +268,7 @@ async def run(
             kind = c.kind
 
     if not body.answers:
+        metering.set_stage("clarify")
         yield "stage", {"stage": "clarify"}
         questions = await clarify(body.text, kind, ai, body.locale, context)
         if questions:
@@ -274,6 +277,7 @@ async def run(
             return
 
     parts: list[str] = []
+    metering.set_stage("generate")
     yield "stage", {"stage": "generate"}
     for attempt in range(2):
         try:
@@ -293,6 +297,7 @@ async def run(
     if not prompt:
         raise PipelineError("Prompt boʻsh chiqdi. Qayta urinib koʻring.")
 
+    metering.set_stage("explain")
     yield "stage", {"stage": "explain"}
     notes = await explain(body.text, prompt, ai, body.locale)
     yield "explain", {"notes": notes}

@@ -11,14 +11,44 @@ Har provayder ichida ham model zaxiralari bor (*_FALLBACK_MODELS). Xatolar Provi
 import json
 import logging
 import re
+import time
 from collections.abc import AsyncIterator
 from functools import lru_cache
 
 from pydantic import BaseModel, ValidationError
 
+from app.ai import metering
 from app.config import Settings, get_settings
 
 log = logging.getLogger(__name__)
+
+
+def _ms(t0: float) -> int:
+    return int((time.monotonic() - t0) * 1000)
+
+
+def _record(
+    provider: str,
+    model: str,
+    t0: float,
+    *,
+    input_tokens: int | None,
+    output_tokens: int | None,
+    input_text: str,
+    output_text: str = "",
+    ok: bool = True,
+) -> None:
+    """Har bir provayder chaqiruvi shu orqali oʻlchanadi (meter yoʻq boʻlsa jim)."""
+    metering.record(
+        provider,
+        model,
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        input_text=input_text,
+        output_text=output_text,
+        ok=ok,
+        duration_ms=_ms(t0),
+    )
 
 
 class ProviderError(Exception):
@@ -116,28 +146,62 @@ def _gemini_retryable(e: Exception) -> bool:
     return isinstance(e, errors.APIError) and getattr(e, "code", None) in (429, 503)
 
 
+def _gemini_usage(resp) -> tuple[int | None, int | None]:
+    """(prompt_token_count, candidates_token_count + thoughts) — usage_metadata boʻlmasa (None, None)."""
+    u = getattr(resp, "usage_metadata", None)
+    if u is None:
+        return None, None
+    out = getattr(u, "candidates_token_count", None)
+    thoughts = getattr(u, "thoughts_token_count", None)
+    if out is not None and thoughts:
+        out += thoughts  # fikrlash tokenlari ham chiqish sifatida hisoblanadi
+    return getattr(u, "prompt_token_count", None), out
+
+
 async def _gemini_parse[T: BaseModel](
     system: str, user: str, schema: type[T], max_tokens: int
 ) -> T:
     s = get_settings()
     config = _gemini_config(system, max_tokens, schema)
+    prompt_text = system + user
     last: Exception | None = None
     for model in _models(s.gemini_model, s.gemini_fallback_models):
+        t0 = time.monotonic()
         try:
             resp = await _gemini_client().aio.models.generate_content(
                 model=model, contents=user, config=config
             )
         except Exception as e:
+            _record(
+                "gemini",
+                model,
+                t0,
+                input_tokens=None,
+                output_tokens=0,
+                input_text=prompt_text,
+                ok=False,
+            )
             if _gemini_retryable(e):
                 log.warning("gemini %s band (%s) — keyingi model", model, getattr(e, "code", "?"))
                 last = e
                 continue
             raise _gemini_error(e) from e
+        text = resp.text or ""
+        inp, out = _gemini_usage(resp)
+        _record(
+            "gemini",
+            model,
+            t0,
+            input_tokens=inp,
+            output_tokens=out,
+            input_text=prompt_text,
+            output_text=text,
+        )
         parsed = resp.parsed
         if isinstance(parsed, schema):
             return parsed
-        if resp.text:
-            return _parse_json(schema, resp.text)
+        if text:
+            return _parse_json(schema, text)
         raise ProviderError("AI javobi boʻsh keldi. Qayta urinib koʻring.")
     assert last is not None
     raise _Retryable(_gemini_error(last)) from last
@@ -146,19 +210,47 @@ async def _gemini_parse[T: BaseModel](
 async def _gemini_stream(system: str, user: str, max_tokens: int) -> AsyncIterator[str]:
     s = get_settings()
     config = _gemini_config(system, max_tokens, None)
+    prompt_text = system + user
     last: Exception | None = None
     for model in _models(s.gemini_model, s.gemini_fallback_models):
         yielded = False
+        parts: list[str] = []
+        usage: tuple[int | None, int | None] = (None, None)
+        t0 = time.monotonic()
         try:
             st = await _gemini_client().aio.models.generate_content_stream(
                 model=model, contents=user, config=config
             )
             async for chunk in st:
+                # usage_metadata odatda oxirgi boʻlakda toʻliq keladi
+                u = _gemini_usage(chunk)
+                if u[0] is not None or u[1] is not None:
+                    usage = u
                 if chunk.text:
                     yielded = True
+                    parts.append(chunk.text)
                     yield chunk.text
+            _record(
+                "gemini",
+                model,
+                t0,
+                input_tokens=usage[0],
+                output_tokens=usage[1],
+                input_text=prompt_text,
+                output_text="".join(parts),
+            )
             return
         except Exception as e:
+            _record(
+                "gemini",
+                model,
+                t0,
+                input_tokens=None,
+                output_tokens=None,
+                input_text=prompt_text,
+                output_text="".join(parts),
+                ok=False,
+            )
             if _gemini_retryable(e):
                 if yielded:
                     # Matn chiqa boshlagan — pipeline `reset` berib qaytadan boshlaydi
@@ -280,10 +372,12 @@ async def _openai_parse[T: BaseModel](
         "temperature": s.ai_temperature,
         "max_tokens": s.ai_max_tokens,
     }
+    prompt_text = messages[0]["content"] + user
     # Groq gpt-oss: fikrlashni qisqartirish (boshqa provayderlar 400 bersa, usiz qayta)
     extra = {"reasoning_effort": "low"} if name == "groq" else {}
     last: Exception | None = None
     for model in models:
+        t0 = time.monotonic()
         try:
             try:
                 resp = await client.chat.completions.create(
@@ -293,12 +387,31 @@ async def _openai_parse[T: BaseModel](
                 # Baʼzi modellar response_format / reasoning_effort'ni qabul qilmaydi — usiz qayta
                 resp = await client.chat.completions.create(model=model, **common)
         except Exception as e:
+            _record(
+                name,
+                model,
+                t0,
+                input_tokens=None,
+                output_tokens=None,
+                input_text=prompt_text,
+                ok=False,
+            )
             if _openai_retryable(e):
                 log.warning("%s %s band — keyingi model", name, model)
                 last = e
                 continue
             raise _openai_error(name, e) from e
         text = resp.choices[0].message.content or ""
+        inp, out = _openai_usage(resp)
+        _record(
+            name,
+            model,
+            t0,
+            input_tokens=inp,
+            output_tokens=out,
+            input_text=prompt_text,
+            output_text=text,
+        )
         if not text.strip():
             raise ProviderError("AI javobi boʻsh keldi. Qayta urinib koʻring.")
         return _parse_json(schema, text)
@@ -306,34 +419,78 @@ async def _openai_parse[T: BaseModel](
     raise _Retryable(_openai_error(name, last)) from last
 
 
+def _openai_usage(resp) -> tuple[int | None, int | None]:
+    """(prompt_tokens, completion_tokens) — usage boʻlmasa (None, None)."""
+    u = getattr(resp, "usage", None)
+    if u is None:
+        return None, None
+    return getattr(u, "prompt_tokens", None), getattr(u, "completion_tokens", None)
+
+
 async def _openai_stream(name: str, system: str, user: str, max_tokens: int) -> AsyncIterator[str]:
+    import openai
+
     s = get_settings()
     _, _, models = _openai_settings(name, s)
     client = _openai_client(name)
+    prompt_text = system + user
+    common = {
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+        "temperature": s.ai_temperature,
+        "max_tokens": min(max_tokens, s.ai_max_tokens),
+        "stream": True,
+    }
+    # Qoʻshimchalar: oxirgi boʻlakda usage (token hisobi) + Groq'da qisqa fikrlash.
+    # Provayder 400 bersa — usiz qayta.
+    extra: dict = {"stream_options": {"include_usage": True}}
+    if name == "groq":
+        extra["reasoning_effort"] = "low"
     last: Exception | None = None
     for model in models:
         yielded = False
+        parts: list[str] = []
+        usage: tuple[int | None, int | None] = (None, None)
+        t0 = time.monotonic()
         try:
-            st = await client.chat.completions.create(
-                model=model,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-                temperature=s.ai_temperature,
-                max_tokens=min(max_tokens, s.ai_max_tokens),
-                stream=True,
-                **({"reasoning_effort": "low"} if name == "groq" else {}),
-            )
+            try:
+                st = await client.chat.completions.create(model=model, **common, **extra)
+            except openai.BadRequestError:
+                st = await client.chat.completions.create(model=model, **common)
             async for chunk in st:
+                u = _openai_usage(chunk)
+                if u[0] is not None or u[1] is not None:
+                    usage = u
                 if not chunk.choices:
                     continue
                 text = chunk.choices[0].delta.content
                 if text:
                     yielded = True
+                    parts.append(text)
                     yield text
+            _record(
+                name,
+                model,
+                t0,
+                input_tokens=usage[0],
+                output_tokens=usage[1],
+                input_text=prompt_text,
+                output_text="".join(parts),
+            )
             return
         except Exception as e:
+            _record(
+                name,
+                model,
+                t0,
+                input_tokens=None,
+                output_tokens=None,
+                input_text=prompt_text,
+                output_text="".join(parts),
+                ok=False,
+            )
             if _openai_retryable(e):
                 if yielded:
                     raise MidStreamError(str(_openai_error(name, e))) from e
@@ -376,37 +533,98 @@ async def _anthropic_parse[T: BaseModel](
 ) -> T:
     from app.ai.client import get_client, request_kwargs
 
+    kw = request_kwargs(max_tokens=max_tokens)
+    model = kw["model"]
+    prompt_text = system + user
+    t0 = time.monotonic()
     try:
         resp = await get_client().messages.parse(
-            **request_kwargs(max_tokens=max_tokens),
+            **kw,
             system=system,
             messages=[{"role": "user", "content": user}],
             output_format=schema,
         )
     except Exception as e:
+        _record(
+            "anthropic",
+            model,
+            t0,
+            input_tokens=None,
+            output_tokens=None,
+            input_text=prompt_text,
+            ok=False,
+        )
         err = _anthropic_error(e)
         raise (_Retryable(err) if _anthropic_retryable(e) else err) from e
+    inp, out = _anthropic_usage(resp)
+    _record(
+        "anthropic",
+        model,
+        t0,
+        input_tokens=inp,
+        output_tokens=out,
+        input_text=prompt_text,
+        output_text=_anthropic_text(resp),
+    )
     return resp.parsed_output
+
+
+def _anthropic_usage(msg) -> tuple[int | None, int | None]:
+    u = getattr(msg, "usage", None)
+    if u is None:
+        return None, None
+    return getattr(u, "input_tokens", None), getattr(u, "output_tokens", None)
+
+
+def _anthropic_text(msg) -> str:
+    return "".join(getattr(b, "text", "") or "" for b in (getattr(msg, "content", None) or []))
 
 
 async def _anthropic_stream(system: str, user: str, max_tokens: int) -> AsyncIterator[str]:
     from app.ai.client import get_client, request_kwargs
 
+    kw = request_kwargs(max_tokens=max_tokens)
+    model = kw["model"]
+    prompt_text = system + user
     yielded = False
+    parts: list[str] = []
+    t0 = time.monotonic()
     try:
         async with get_client().messages.stream(
-            **request_kwargs(max_tokens=max_tokens),
+            **kw,
             system=system,
             messages=[{"role": "user", "content": user}],
         ) as st:
             async for chunk in st.text_stream:
                 yielded = True
+                parts.append(chunk)
                 yield chunk
+            final = await st.get_final_message()
     except Exception as e:
+        _record(
+            "anthropic",
+            model,
+            t0,
+            input_tokens=None,
+            output_tokens=None,
+            input_text=prompt_text,
+            output_text="".join(parts),
+            ok=False,
+        )
         err = _anthropic_error(e)
         if _anthropic_retryable(e):
             raise (MidStreamError(str(err)) if yielded else _Retryable(err)) from e
         raise err from e
+    inp, out = _anthropic_usage(final)
+    _record(
+        "anthropic",
+        model,
+        t0,
+        input_tokens=inp,
+        output_tokens=out,
+        input_text=prompt_text,
+        output_text="".join(parts),
+    )
 
 
 # --------------------------------------------------------------------------- zanjir

@@ -6,7 +6,9 @@ Oqim:
   GET  /api/prompts/jobs/{id}         → SSE: avval toʻplangan hodisalar, keyin jonli
   POST /api/prompts/jobs/{id}/cancel  → ishni toʻxtatish
 Brauzer yangilansa ham ish davom etadi; qayta GET qilinsa boʻlgan joyidan ulanadi.
-Limitlar: daqiqalik (IP), guest jami 3 (usage_log), IP kuniga 15.
+Limitlar (`services/usage.check_quota`, qiymatlar admin sozlamalaridan yoki .env):
+  daqiqalik (IP, slowapi); guest jami `guest_total_generations` va IP kuniga
+  `guest_daily_ip_generations`; kirgan bepul kuniga `free_daily_generations` (+ bonus); Pro cheksiz.
 """
 
 import json
@@ -22,6 +24,7 @@ from app.rate_limit import limiter
 from app.schemas import AnalyzeRequest, GenerateRequest
 from app.security import client_ip
 from app.services import jobs, usage
+from app.services.auth import CurrentUser
 
 router = APIRouter(prefix="/prompts", tags=["prompts"])
 
@@ -47,11 +50,12 @@ async def generate(
     request: Request,
     body: GenerateRequest,
     session: Annotated[AsyncSession, Depends(get_session)],
+    user: CurrentUser,
 ):
     """Ishni boshlaydi va id qaytaradi. Hodisalar: GET /jobs/{id}. Avval server limitlari."""
     ip = client_ip(request)
-    await usage.check_guest_quota(session, body.guest_id, ip)
-    job = jobs.create(body, ip=ip)
+    await usage.check_quota(session, user, body.guest_id, ip)
+    job = jobs.create(body, ip=ip, user_id=user.id if user else None)
     return {"job_id": job.id}
 
 

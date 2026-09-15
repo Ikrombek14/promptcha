@@ -3,18 +3,22 @@
 Brauzer sahifani yangilasa yoki boshqa joyga oʻtsa, ish serverda davom etadi; qayta ulanganda
 toʻplangan hodisalar boshidan qaytariladi (replay), keyin jonli davom etadi.
 Xotira ichida (Redis yoʻq); bitta uvicorn jarayoni uchun yetarli.
+
+Hisob: ish boshida `metering.new()`; oxirida (ok/xato/cancel) `usage.record_llm_calls`;
+`done ok` da `usage.record_usage` (+ kirgan foydalanuvchida bonus sarfi va Prompt avto-saqlash).
 """
 
 import asyncio
 import logging
 import secrets
 import time
+import uuid
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 
-from app.ai import pipeline
+from app.ai import metering, pipeline
 from app.schemas import GenerateRequest
-from app.services.usage import record_usage
+from app.services import usage
 
 log = logging.getLogger(__name__)
 
@@ -31,6 +35,7 @@ class Job:
     id: str
     body: GenerateRequest
     ip: str = "unknown"
+    user_id: uuid.UUID | None = None
     events: list[Event] = field(default_factory=list)
     done: bool = False
     created_at: float = field(default_factory=time.monotonic)
@@ -61,13 +66,31 @@ def _prune() -> None:
             del _jobs[job_id]
 
 
+async def _on_success(job: Job, meter: metering.Meter, done: dict, notes: list[str]) -> None:
+    """Muvaffaqiyatli generate — server tomondagi limit hisobi va tarix."""
+    await usage.record_usage(
+        user_id=job.user_id,
+        guest_id=job.body.guest_id,
+        ip=job.ip,
+        ai=done.get("ai"),
+        input_tokens=meter.input_tokens,
+        output_tokens=meter.output_tokens,
+    )
+    if job.user_id is not None:
+        await usage.consume_bonus_if_needed(job.user_id)
+        await usage.save_prompt(job.user_id, job.body, done, notes)
+
+
 async def _run(job: Job, context: dict[str, str] | None) -> None:
+    meter = metering.new()
+    notes: list[str] = []
     try:
         async for name, data in pipeline.run(job.body, context):
             await job.push(name, data)
-            if name == "done" and data.get("status") == "ok":
-                # Muvaffaqiyatli generate — server tomondagi limit hisobi
-                await record_usage(job.body.guest_id, job.ip, data.get("ai"))
+            if name == "explain":
+                notes = list(data.get("notes") or [])
+            elif name == "done" and data.get("status") == "ok":
+                await _on_success(job, meter, data, notes)
     except asyncio.CancelledError:
         await job.push("error", {"detail": CANCELLED_ERROR})
         raise
@@ -78,13 +101,17 @@ async def _run(job: Job, context: dict[str, str] | None) -> None:
         await job.push("error", {"detail": GENERIC_ERROR})
     finally:
         await job.finish()
+        await usage.record_llm_calls(meter, job)
 
 
 def create(
-    body: GenerateRequest, context: dict[str, str] | None = None, ip: str = "unknown"
+    body: GenerateRequest,
+    context: dict[str, str] | None = None,
+    ip: str = "unknown",
+    user_id: uuid.UUID | None = None,
 ) -> Job:
     _prune()
-    job = Job(id=secrets.token_urlsafe(16), body=body, ip=ip)
+    job = Job(id=secrets.token_urlsafe(16), body=body, ip=ip, user_id=user_id)
     _jobs[job.id] = job
     job.task = asyncio.create_task(_run(job, context), name=f"generate:{job.id}")
     return job

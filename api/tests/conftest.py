@@ -29,13 +29,18 @@ def _clear_classify_cache():
 
 @pytest.fixture(autouse=True)
 def _no_db(monkeypatch):
-    """Baza yoʻq: limit tekshiruvi va usage yozuvi oʻchiriladi (alohida testlarda soxta sessiya bilan)."""
+    """Baza yoʻq: limit tekshiruvi va usage/llm_calls/prompt yozuvlari oʻchiriladi (alohida testlarda soxta sessiya bilan)."""
 
     async def _ok(*a, **k):
         return None
 
+    monkeypatch.setattr(usage, "check_quota", _ok)
     monkeypatch.setattr(usage, "check_guest_quota", _ok)
-    monkeypatch.setattr(jobs, "record_usage", _ok)
+    # jobs.py `from app.services import usage` qiladi — jobs.usage oʻsha modul, shu orqali patch
+    monkeypatch.setattr(jobs.usage, "record_usage", _ok)
+    monkeypatch.setattr(jobs.usage, "record_llm_calls", _ok)
+    monkeypatch.setattr(jobs.usage, "save_prompt", _ok)
+    monkeypatch.setattr(jobs.usage, "consume_bonus_if_needed", _ok)
 
     async def _session():
         yield None

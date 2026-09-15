@@ -1,3 +1,129 @@
 {
-  "admin": {}
+  "admin": {
+    "title": "Admin",
+    "nav": {
+      "aria": "Admin sections",
+      "overview": "Overview",
+      "users": "Users",
+      "payments": "Payments",
+      "settings": "Settings"
+    },
+    "common": {
+      "loading": "Loading…",
+      "empty": "No data yet",
+      "errorTitle": "Error",
+      "retry": "Retry",
+      "prev": "Previous",
+      "next": "Next",
+      "range": "{from}–{to} of {total}",
+      "cancel": "Cancel",
+      "never": "—",
+      "notFound": "Nothing found",
+      "invalidNumber": "Enter a whole number",
+      "estimatedHint": "~ — token count is estimated (provider did not report it)"
+    },
+    "overview": {
+      "period": "Period",
+      "days": "{n} days",
+      "activeUsers": "Active users",
+      "generations": "Generations",
+      "tokens": "Tokens",
+      "avgTokens": "Avg tokens / generation",
+      "avgHint": "Over the selected period",
+      "today": "today",
+      "d7": "7 days",
+      "d30": "30 days",
+      "input": "input",
+      "output": "output",
+      "daily": "Daily generations",
+      "dailyTip": "{date}: {n} generations, {tokens} tokens",
+      "byTool": "By tool",
+      "byProvider": "By provider and model",
+      "byStage": "By stage",
+      "topUsers": "Most active users",
+      "cols": {
+        "tool": "Tool",
+        "provider": "Provider",
+        "model": "Model",
+        "stage": "Stage",
+        "user": "User",
+        "calls": "Calls",
+        "generations": "Generations",
+        "input": "Input tokens",
+        "output": "Output tokens"
+      }
+    },
+    "users": {
+      "searchPlaceholder": "Search by email or name",
+      "searchLabel": "Search",
+      "cols": {
+        "user": "User",
+        "plan": "Plan",
+        "bonus": "Bonus",
+        "generations": "Generations",
+        "tokens": "Tokens (input / output)",
+        "lastLogin": "Last login",
+        "actions": "Actions"
+      },
+      "plan": {
+        "free": "Free",
+        "pro": "Pro"
+      },
+      "proUntil": "until {date}",
+      "adminBadge": "admin",
+      "grantPro": "Grant Pro",
+      "toFree": "Revert to free",
+      "addBonus": "Add bonus",
+      "proDays": "Days",
+      "bonusCount": "Bonus count",
+      "give": "Grant",
+      "add": "Add",
+      "confirmFree": "Are you sure? {email} will be moved to the free plan.",
+      "yesFree": "Yes, revert to free",
+      "updated": "Updated"
+    },
+    "payments": {
+      "addTitle": "Add a manual payment",
+      "listTitle": "Payments",
+      "user": "User",
+      "userSearch": "Search by email…",
+      "selectUser": "Pick a user from the list",
+      "change": "Change",
+      "amount": "Amount (UZS)",
+      "days": "Days",
+      "method": "Method",
+      "methods": {
+        "manual": "Manual",
+        "payme": "Payme",
+        "click": "Click"
+      },
+      "note": "Note",
+      "notePlaceholder": "e.g. cash, 15 September",
+      "submit": "Add payment",
+      "submitting": "Submitting…",
+      "created": "Payment added: {email}, {days} days",
+      "cols": {
+        "date": "Date",
+        "user": "User",
+        "amount": "Amount",
+        "method": "Method",
+        "days": "Days",
+        "note": "Note",
+        "by": "Added by"
+      }
+    },
+    "settings": {
+      "intro": "Limits take effect immediately. Leave a field empty to fall back to the .env default.",
+      "guest_total_generations": "Guest — total free attempts",
+      "guest_total_generations_help": "Total generations for a signed-out visitor",
+      "guest_daily_ip_generations": "Guest — per IP per day",
+      "guest_daily_ip_generations_help": "Generations allowed per day from one IP address",
+      "free_daily_generations": "Free plan — per day",
+      "free_daily_generations_help": "Daily limit for a signed-in user on the free plan",
+      "default": "default: {n}",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved"
+    }
+  }
 }

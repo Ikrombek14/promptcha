@@ -7,7 +7,7 @@ Oddiy so'zdan tayyor AI prompt yasaydigan platforma. Auditoriya: O'zbekistondagi
 **Backend (`api/`)** — Python 3.12, FastAPI, uvicorn
 - SQLAlchemy 2.0 async + asyncpg, Alembic
 - AI provayderlar zanjiri (`AI_PROVIDERS=gemini,groq,mistral,openrouter`, `ai/llm.py`): kvota tugasa keyingisiga oʻtadi. Gemini — `google-genai`; Groq/Mistral/OpenRouter/custom — `openai` SDK (OpenAI-mos `/v1/chat/completions`); Anthropic — `anthropic` SDK (kalit kelganda zanjirga qoʻshiladi). Streaming — SSE orqali `sse-starlette`
-- authlib (Google OAuth 2.0) + python-jose (JWT, httpOnly cookie). Faqat Google, parol yo'q
+- Google OAuth 2.0 (httpx bilan qoʻlda: authorize URL → token → userinfo, `services/auth.py`) + python-jose (JWT, httpOnly cookie `promptcha_session`). Faqat Google, parol yo'q. Admin = `ADMIN_EMAILS`
 - slowapi (rate limit), pydantic-settings (`.env`)
 - pytest + httpx (test)
 
@@ -190,6 +190,14 @@ Boshqa (Nginx'li) server uchun umumiy yoʻriqnoma: `deploy/README.md`. Deploy'da
 - Prod'da `/api/docs`, `/api/openapi.json` yoʻq (FastAPI ham, Nginx ham). Next: `poweredByHeader: false`, xavfsizlik sarlavhalari, rewrites faqat dev'da.
 - Dev'da port 8000 «arvoh» soket bilan band boʻlib qolgani uchun API 8001 da, `web/.env.local` → `API_URL=http://127.0.0.1:8001` (git'da yoʻq).
 
+### Auth, token hisobi, admin (2026-09-15) — spec: `docs/superpowers/specs/2026-09-15-auth-admin-design.md`
+
+- **Sessiya:** `GET /api/auth/google?next=` → Google → `/callback` → JWT cookie (30 kun) → `FRONTEND_URL+next`; xato → `/{locale}/login?error=google`. `/me`, `POST /logout`, `POST /migrate` (guest promptlar → `prompts`). `/api/auth/google*` SecurityMiddleware'da ochiq (brauzer navigatsiyasi). Dev: `AUTH_DEV_LOGIN=true` → `GET /api/auth/dev-login?email=` (prod'da server ishga tushmaydi).
+- **Limitlar:** guest 3 jami + IP 15/kun; kirgan bepul — kuniga 5 (`free_daily_generations`) + admin bergan `bonus_generations`; Pro (`plan=pro`, `pro_until`) — cheksiz. Qiymatlar `app_settings` jadvalidan (admin oʻzgartiradi, 60 s kesh), yoʻq boʻlsa `.env`. `services/usage.check_quota`.
+- **Token hisobi:** `ai/metering.py` (contextvar) — har LLM chaqiruvi `llm_calls` ga (bosqich, provayder, model, tokenlar, `estimated`, `ok`, davomiylik); Groq/Gemini/Anthropic haqiqiy usage (OpenAI-mos stream `stream_options.include_usage`), boʻlmasa belgi/4 taxmin. `usage_log` `done ok` da token summalari va `user_id` bilan; kirgan foydalanuvchida prompt avtomatik `prompts` ga saqlanadi.
+- **Admin:** `/api/admin/*` (`require_admin`): stats (days), users (qidiruv, grant Pro/bonus), payments (qoʻlda; `method` manual|payme|click, Pro uzayadi), settings. Frontend `/[locale]/admin` (Umumiy, Foydalanuvchilar, Toʻlovlar, Sozlamalar), matnlari `messages/admin/*.json` (i18n `request.ts` birlashtiradi). Grafik kutubxonasi yoʻq.
+- **Prod .env:** `ADMIN_EMAILS`, `GOOGLE_CLIENT_ID/SECRET` (egasi beradi), `GOOGLE_REDIRECT_URI=https://promptcha.uz/api/auth/google/callback`. Kalit yoʻq boʻlsa `/api/auth/google` 503 «Google kirish sozlanmagan».
+
 ## Qabul qilingan qarorlar (2026-09-14)
 
 - **Next.js 16** (create-next-app shuni beradi; 15 eskirgan). Farqlar: `middleware.ts` → `proxy.ts`, `params` async. Dev'da `/api/*` → FastAPI `next.config.ts` rewrites orqali (prod'da Nginx).
@@ -215,7 +223,9 @@ Boshqa (Nginx'li) server uchun umumiy yoʻriqnoma: `deploy/README.md`. Deploy'da
 - [x] `/api/prompts/generate` SSE bilan (auth'siz, test uchun) — 14 test o'tadi, haqiqiy API kalit bilan hali sinalmagan
 - [x] `design/` papkasini o'rganish, `design/tokens.md` yozish
 - [x] Step1–Step5 komponentlar (dizayn asosida) — `/[locale]/app` ishlaydi, build o'tadi
-- [ ] Google auth (authlib) + guest → user ko'chirish
+- [x] Google auth + guest → user ko'chirish (`/login`, header menyu; Google kalitlari serverga qoʻyilishi kerak)
+- [x] Admin panel `/admin` — statistika (faol foydalanuvchilar, tokenlar vosita/provayder/bosqich/foydalanuvchi kesimida), foydalanuvchilar (Pro/bonus), qoʻlda toʻlov, limitlar
+- [ ] Onlayn toʻlov (Payme/Click) — `payments` jadvali tayyor
 - [ ] Tarix sahifasi
 - [ ] UserContext — kontekst xotirasi va settings'da ko'rsatish
 - [ ] uz/ru/en — UI matnlari va pipeline'ga locale

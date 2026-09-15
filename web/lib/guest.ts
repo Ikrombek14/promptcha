@@ -42,7 +42,11 @@ export function readGuest(): GuestState {
     const raw = localStorage.getItem(GUEST_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<GuestState>;
-      if (parsed && typeof parsed.id === "string" && Array.isArray(parsed.prompts)) {
+      if (
+        parsed &&
+        typeof parsed.id === "string" &&
+        Array.isArray(parsed.prompts)
+      ) {
         return { id: parsed.id, prompts: parsed.prompts };
       }
     }
@@ -72,9 +76,26 @@ export function guestRemaining(): number {
   return Math.max(0, GUEST_LIMIT - readGuest().prompts.length);
 }
 
-export function saveGuestPrompt(p: Omit<GuestPrompt, "id" | "created_at">): GuestPrompt {
+/**
+ * Guest promptlarni olib, roʻyxatni boʻshatadi (id saqlanadi). Kirgan foydalanuvchiga
+ * koʻchirish (`POST /api/auth/migrate`) muvaffaqiyatli boʻlgach chaqiriladi.
+ */
+export function takeGuestPrompts(): GuestPrompt[] {
   const state = readGuest();
-  const item: GuestPrompt = { ...p, id: newId(), created_at: new Date().toISOString() };
+  const prompts = state.prompts;
+  if (prompts.length) writeGuest({ id: state.id, prompts: [] });
+  return prompts;
+}
+
+export function saveGuestPrompt(
+  p: Omit<GuestPrompt, "id" | "created_at">,
+): GuestPrompt {
+  const state = readGuest();
+  const item: GuestPrompt = {
+    ...p,
+    id: newId(),
+    created_at: new Date().toISOString(),
+  };
   state.prompts.unshift(item);
   writeGuest(state);
   return item;

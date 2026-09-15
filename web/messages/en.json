@@ -56,6 +56,7 @@
     "checkBody": "Generated parameters are fully aligned with the syntax rules of the selected model ({ai} {version}).",
     "guestLeft": "Free attempts left: {n}",
     "guestExhausted": "Free attempts are used up. Sign in to continue.",
+    "userExhausted": "Today's free limit is used up. Come back tomorrow.",
     "loginGoogle": "Sign in with Google",
     "reset": "Start over",
     "textTooShort": "Write at least a few words.",
@@ -120,6 +121,9 @@
     "remainingToday": "Today: {n} left",
     "pro": "Pro",
     "free": "Free",
-    "loginShort": "Sign in"
+    "loginShort": "Sign in",
+    "legal": "By signing in you agree to the terms of use.",
+    "errorGoogle": "Google sign-in failed. Please try again.",
+    "menu": "Account menu"
   }
 }

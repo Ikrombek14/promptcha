@@ -1,3 +1,129 @@
 {
-  "admin": {}
+  "admin": {
+    "title": "Админ",
+    "nav": {
+      "aria": "Разделы админки",
+      "overview": "Обзор",
+      "users": "Пользователи",
+      "payments": "Платежи",
+      "settings": "Настройки"
+    },
+    "common": {
+      "loading": "Загрузка…",
+      "empty": "Данных пока нет",
+      "errorTitle": "Ошибка",
+      "retry": "Повторить",
+      "prev": "Назад",
+      "next": "Далее",
+      "range": "{from}–{to} / {total}",
+      "cancel": "Отмена",
+      "never": "—",
+      "notFound": "Не найдено",
+      "invalidNumber": "Введите целое число",
+      "estimatedHint": "~ — число токенов оценочное (провайдер не вернул)"
+    },
+    "overview": {
+      "period": "Период",
+      "days": "{n} дн.",
+      "activeUsers": "Активные пользователи",
+      "generations": "Генерации",
+      "tokens": "Токены",
+      "avgTokens": "Средне токенов / генерацию",
+      "avgHint": "За выбранный период",
+      "today": "сегодня",
+      "d7": "7 дн.",
+      "d30": "30 дн.",
+      "input": "вход",
+      "output": "выход",
+      "daily": "Генерации по дням",
+      "dailyTip": "{date}: {n} генераций, {tokens} токенов",
+      "byTool": "По инструментам",
+      "byProvider": "По провайдерам и моделям",
+      "byStage": "По этапам",
+      "topUsers": "Самые активные пользователи",
+      "cols": {
+        "tool": "Инструмент",
+        "provider": "Провайдер",
+        "model": "Модель",
+        "stage": "Этап",
+        "user": "Пользователь",
+        "calls": "Вызовы",
+        "generations": "Генерации",
+        "input": "Вход. токены",
+        "output": "Выход. токены"
+      }
+    },
+    "users": {
+      "searchPlaceholder": "Поиск по email или имени",
+      "searchLabel": "Поиск",
+      "cols": {
+        "user": "Пользователь",
+        "plan": "План",
+        "bonus": "Бонус",
+        "generations": "Генерации",
+        "tokens": "Токены (вход / выход)",
+        "lastLogin": "Последний вход",
+        "actions": "Действия"
+      },
+      "plan": {
+        "free": "Бесплатно",
+        "pro": "Pro"
+      },
+      "proUntil": "до {date}",
+      "adminBadge": "админ",
+      "grantPro": "Выдать Pro",
+      "toFree": "Вернуть на бесплатный",
+      "addBonus": "Добавить бонус",
+      "proDays": "Дней",
+      "bonusCount": "Количество бонусов",
+      "give": "Выдать",
+      "add": "Добавить",
+      "confirmFree": "Вы уверены? {email} перейдёт на бесплатный план.",
+      "yesFree": "Да, вернуть на бесплатный",
+      "updated": "Обновлено"
+    },
+    "payments": {
+      "addTitle": "Добавить платёж вручную",
+      "listTitle": "Список платежей",
+      "user": "Пользователь",
+      "userSearch": "Поиск по email…",
+      "selectUser": "Выберите пользователя из списка",
+      "change": "Изменить",
+      "amount": "Сумма (сум)",
+      "days": "Дней",
+      "method": "Способ",
+      "methods": {
+        "manual": "Вручную",
+        "payme": "Payme",
+        "click": "Click"
+      },
+      "note": "Примечание",
+      "notePlaceholder": "Например: наличные, 15 сентября",
+      "submit": "Добавить платёж",
+      "submitting": "Отправка…",
+      "created": "Платёж добавлен: {email}, {days} дн.",
+      "cols": {
+        "date": "Дата",
+        "user": "Пользователь",
+        "amount": "Сумма",
+        "method": "Способ",
+        "days": "Дней",
+        "note": "Примечание",
+        "by": "Кто добавил"
+      }
+    },
+    "settings": {
+      "intro": "Лимиты применяются сразу. Если оставить пустым — действует значение из .env.",
+      "guest_total_generations": "Гость — всего бесплатных попыток",
+      "guest_total_generations_help": "Общее число генераций для незалогиненного пользователя",
+      "guest_daily_ip_generations": "Гость — в день с одного IP",
+      "guest_daily_ip_generations_help": "Сколько генераций в день разрешено с одного IP-адреса",
+      "free_daily_generations": "Бесплатный план — в день",
+      "free_daily_generations_help": "Дневной лимит для залогиненного пользователя на бесплатном плане",
+      "default": "по умолчанию: {n}",
+      "save": "Сохранить",
+      "saving": "Сохранение…",
+      "saved": "Сохранено"
+    }
+  }
 }

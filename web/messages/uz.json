@@ -56,6 +56,7 @@
     "checkBody": "Hosil qilingan parametrlar tanlangan modelning ({ai} {version}) sintaksis qoidalariga toʻliq moslashtiriladi.",
     "guestLeft": "Bepul urinish: {n} ta qoldi",
     "guestExhausted": "Bepul urinishlar tugadi. Davom etish uchun kiring.",
+    "userExhausted": "Bugungi bepul limit tugadi. Ertaga qayting.",
     "loginGoogle": "Google orqali kirish",
     "reset": "Boshidan",
     "textTooShort": "Kamida bir necha soʻz yozing.",
@@ -120,6 +121,9 @@
     "remainingToday": "Bugun: {n} ta qoldi",
     "pro": "Pro",
     "free": "Bepul",
-    "loginShort": "Kirish"
+    "loginShort": "Kirish",
+    "legal": "Kirish orqali siz foydalanish shartlariga rozilik bildirasiz.",
+    "errorGoogle": "Google orqali kirishda xatolik. Qayta urinib koʻring.",
+    "menu": "Hisob menyusi"
   }
 }

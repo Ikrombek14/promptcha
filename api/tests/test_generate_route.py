@@ -107,6 +107,110 @@ async def test_generate_validates_body(client):
     assert r.status_code == 422
 
 
+async def _fake_run_metered(body, context=None):
+    """Pipeline oʻrnida: llm chaqiruvlarini meter'ga yozadi (job ichidagi contextvar tekshiriladi)."""
+    from app.ai import metering
+
+    metering.set_stage("generate")
+    metering.record("groq", "q1", input_tokens=100, output_tokens=40)
+    yield "delta", {"text": "hello"}
+    metering.set_stage("explain")
+    metering.record("groq", "q1", input_tokens=50, output_tokens=10)
+    yield "explain", {"notes": ["a — b"]}
+    yield "done", {"status": "ok", "kind": "image", "ai": "midjourney", "prompt": "hello"}
+
+
+async def _drain(client, job_id):
+    r = await client.get(f"/api/prompts/jobs/{job_id}")
+    assert "event: done" in r.text
+    # `done` dan keyingi finally (record_llm_calls) tugashini kutamiz
+    await asyncio.wait_for(jobs.get(job_id).task, timeout=2)
+
+
+async def test_guest_job_records_usage_with_token_sums(client, monkeypatch):
+    monkeypatch.setattr(pipeline, "run", _fake_run_metered)
+    calls = {}
+
+    async def record_usage(**kw):
+        calls["usage"] = kw
+
+    async def record_llm_calls(meter, job):
+        calls["llm"] = (list(meter.calls), job)
+
+    async def never(*a, **k):
+        raise AssertionError("guest uchun chaqirilmasligi kerak")
+
+    monkeypatch.setattr(jobs.usage, "record_usage", record_usage)
+    monkeypatch.setattr(jobs.usage, "record_llm_calls", record_llm_calls)
+    monkeypatch.setattr(jobs.usage, "save_prompt", never)
+    monkeypatch.setattr(jobs.usage, "consume_bonus_if_needed", never)
+
+    job_id = await _start(client, guest_id="g1")
+    assert jobs.get(job_id).user_id is None
+    await _drain(client, job_id)
+
+    assert calls["usage"] == {
+        "user_id": None,
+        "guest_id": "g1",
+        "ip": "127.0.0.1",
+        "ai": "midjourney",
+        "input_tokens": 150,
+        "output_tokens": 50,
+    }
+    meter_calls, job = calls["llm"]
+    assert job.id == job_id
+    assert [(c.stage, c.input_tokens) for c in meter_calls] == [("generate", 100), ("explain", 50)]
+
+
+async def test_user_job_has_user_id_and_saves_prompt(client, as_user, monkeypatch):
+    monkeypatch.setattr(pipeline, "run", _fake_run_metered)
+    calls = {}
+
+    async def record_usage(**kw):
+        calls["usage"] = kw
+
+    async def consume(user_id):
+        calls["bonus"] = user_id
+
+    async def save_prompt(user_id, body, done, notes):
+        calls["prompt"] = (user_id, body.text, done["prompt"], notes)
+
+    monkeypatch.setattr(jobs.usage, "record_usage", record_usage)
+    monkeypatch.setattr(jobs.usage, "consume_bonus_if_needed", consume)
+    monkeypatch.setattr(jobs.usage, "save_prompt", save_prompt)
+
+    job_id = await _start(client)
+    assert jobs.get(job_id).user_id == as_user.id
+    await _drain(client, job_id)
+
+    assert calls["usage"]["user_id"] == as_user.id
+    assert calls["usage"]["input_tokens"] == 150
+    assert calls["bonus"] == as_user.id
+    assert calls["prompt"] == (as_user.id, "restoran uchun logo", "hello", ["a — b"])
+
+
+async def test_failed_job_still_records_llm_calls(client, monkeypatch):
+    async def run_fail(body, context=None):
+        from app.ai import metering
+
+        metering.record("groq", "q1", input_tokens=None, output_tokens=None, ok=False)
+        raise pipeline.PipelineError("AI xizmati band.")
+        yield  # pragma: no cover
+
+    monkeypatch.setattr(pipeline, "run", run_fail)
+    seen = []
+
+    async def record_llm_calls(meter, job):
+        seen.extend(meter.calls)
+
+    monkeypatch.setattr(jobs.usage, "record_llm_calls", record_llm_calls)
+    job_id = await _start(client)
+    r = await client.get(f"/api/prompts/jobs/{job_id}")
+    assert "event: error" in r.text
+    await asyncio.wait_for(jobs.get(job_id).task, timeout=2)
+    assert len(seen) == 1 and seen[0].ok is False and seen[0].estimated
+
+
 async def test_health(client):
     r = await client.get("/api/health")
     assert r.status_code == 200
