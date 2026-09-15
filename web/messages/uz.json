@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "title": "Promptcha — prompt ustaxonasi",
+    "description": "Oddiy soʻzdan tayyor AI prompt. Midjourney, ChatGPT, Claude, DALL·E, Sora va Cursor uchun."
+  },
+  "header": {
+    "brand": "Promptcha",
+    "tagline": "prompt ustaxonasi",
+    "theme": "Tema",
+    "account": "Hisob",
+    "login": "Kirish"
+  },
+  "locales": { "uz": "Oʻz", "ru": "Ru", "en": "En" },
+  "footer": {
+    "brand": "Promptcha",
+    "tagline": "Editorial AI Workbench",
+    "workbench": "Ustaxona",
+    "archive": "Arxiv",
+    "settings": "Sozlamalar",
+    "protocol": "Protokol: {protocol}",
+    "charLimit": "Belgilar chegarasi: {limit}",
+    "langLayer": "Til qatlami: Oʻzbekcha / English",
+    "checker": "Sintaktik tekshirgich faol"
+  },
+  "app": {
+    "project": "LOYIHA:",
+    "projectName": "Yangi prompt",
+    "activeMode": "Faol rejim: {ai} {version}",
+    "title": "Fikringizni aniq promptga aylantiring",
+    "subtitle": "Xomaki gʻoyalarni professional sunʼiy intellekt tushunadigan texnik buyruqlarga aylantirish ustaxonasi.",
+    "inputLabel": "Birlamchi gʻoya tavsifi",
+    "chars": "{count} belgi",
+    "placeholder": "Masalan: Milliy taomlar restorani uchun logotip kerak. Oddiy, zamonaviy, tandir yoki non belgisi bilan.",
+    "hint": "Maslahat: Asosiy obyekt, uslub va kayfiyatni erkin oʻzbek tilida bayon qiling.",
+    "kindLabel": "YOʻNALISH",
+    "kinds": { "image": "Rasm", "app": "Ilova", "design": "Dizayn", "video": "Video", "text": "Matn" },
+    "kindAuto": "Avto",
+    "kindAutoResolved": "Avto → {kind}",
+    "kindSuggested": "Bu «{kind}» yoʻnalishiga oʻxshaydi. Toʻgʻri boʻlsa, qayta yasang yoki boshqasini tanlang.",
+    "generate": "Prompt yasash",
+    "regenerate": "Qayta yasash",
+    "generating": "Yasalmoqda…",
+    "shortcut": "Ctrl + Enter",
+    "stop": "Toʻxtatish",
+    "checkTitle": "Standart tekshiruv",
+    "checkBody": "Hosil qilingan parametrlar tanlangan modelning ({ai} {version}) sintaksis qoidalariga toʻliq moslashtiriladi.",
+    "guestLeft": "Bepul urinish: {n} ta qoldi",
+    "guestExhausted": "Bepul urinishlar tugadi. Davom etish uchun kiring.",
+    "loginGoogle": "Google orqali kirish",
+    "reset": "Boshidan",
+    "textTooShort": "Kamida bir necha soʻz yozing.",
+    "connectionLost": "Aloqa uzildi, natija olinmadi. Qayta urinib koʻring."
+  },
+  "clarify": {
+    "title": "Aniqlashtirish",
+    "subtitle": "Sifatli prompt uchun bir-ikki savol. Variantni tanlang yoki oʻzingiz yozing.",
+    "custom": "Boshqa…",
+    "customPlaceholder": "Oʻz javobingiz",
+    "continue": "Davom etish",
+    "skip": "Savolsiz yasash"
+  },
+  "tools": {
+    "analyzing": "Mos vositalar tanlanmoqda…",
+    "bestFit": "Eng mos vosita"
+  },
+  "families": {
+    "chat": "chat",
+    "image": "rasm",
+    "video": "video",
+    "code": "kod",
+    "search": "qidiruv",
+    "design": "dizayn",
+    "slides": "taqdimot",
+    "voice": "ovoz",
+    "avatar": "avatar video"
+  },
+  "stages": {
+    "aria": "Bosqichlar",
+    "classify": "Tahlil",
+    "clarify": "Savollar",
+    "generate": "Prompt",
+    "explain": "Izohlar"
+  },
+  "result": {
+    "title": "Tayyor prompt",
+    "writing": "Prompt yozilmoqda",
+    "chosenTool": "Tanlangan vosita",
+    "chosenAuto": "Sayt tanlagan vosita",
+    "toolLabel": "Vosita",
+    "why": "Nega shunday?",
+    "copy": "Nusxa olish",
+    "copied": "Nusxalandi",
+    "format": "{format} formati",
+    "words": "{n} soʻz",
+    "notesLabel": "MUHANDISLIK TAHLILI (SHARHLAR)",
+    "notesCount": "{n} ta izoh",
+    "emptyTitle": "Natija shu yerda chiqadi",
+    "emptyBody": "Chapda gʻoyangizni yozing, AI vositasini tanlang va «Prompt yasash» tugmasini bosing.",
+    "loading": "Prompt yasalmoqda…",
+    "errorTitle": "Xatolik",
+    "retry": "Qayta urinish",
+    "answersLabel": "ANIQLASHTIRILGAN JAVOBLAR"
+  }
+}

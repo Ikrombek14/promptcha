@@ -1,0 +1,30 @@
+"""Anthropic klienti. Faqat AI_PROVIDER=anthropic boʻlganda ishlatiladi (app.ai.llm orqali)."""
+
+from functools import lru_cache
+
+import anthropic
+
+from app.config import get_settings
+
+# temperature SDK 1.x imzosidan olib tashlangan; API'da faqat 4.6/4.5 oilasi qabul qiladi.
+_TEMPERATURE_MODELS = ("4-6", "4-5")
+
+
+@lru_cache
+def get_client() -> anthropic.AsyncAnthropic:
+    s = get_settings()
+    return anthropic.AsyncAnthropic(
+        api_key=s.anthropic_api_key or None, max_retries=2, timeout=60.0
+    )
+
+
+def request_kwargs(*, max_tokens: int | None = None) -> dict:
+    """Har bir chaqiruv uchun umumiy parametrlar: model, max_tokens (≤ limit), temperature."""
+    s = get_settings()
+    kwargs: dict = {
+        "model": s.anthropic_model,
+        "max_tokens": min(max_tokens or s.ai_max_tokens, s.ai_max_tokens),
+    }
+    if any(tag in s.anthropic_model for tag in _TEMPERATURE_MODELS):
+        kwargs["extra_body"] = {"temperature": s.ai_temperature}
+    return kwargs

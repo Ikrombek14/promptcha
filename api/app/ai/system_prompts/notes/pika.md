@@ -1,0 +1,3 @@
+- Pika: short (3–5 s) fun social clips and effects (inflate, melt, explode, squish): name the effect if the user wants one.
+- Keep the prompt simple: subject, action, style, vertical format.
+- Avoid complex scenes and text.

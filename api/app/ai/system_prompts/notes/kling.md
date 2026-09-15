@@ -1,0 +1,3 @@
+- Kling 3.0: strong realistic human motion and physics; describe the motion path clearly ("walks from left to right", "hands lift the jar").
+- Choose 5 s or 10 s; mention "camera slowly pushes in" style moves; avoid text on screen.
+- Works well from a reference image: say "animate the reference image" if the user has one.

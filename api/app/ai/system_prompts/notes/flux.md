@@ -1,0 +1,3 @@
+- Flux follows long, precise natural-language prompts: be explicit about every element, position and material; 60–100 words is fine.
+- Flux renders short text well: give exact words in quotes.
+- No --parameters; state the aspect ratio in words. Photorealism is its strength: name lens/lighting for photos.

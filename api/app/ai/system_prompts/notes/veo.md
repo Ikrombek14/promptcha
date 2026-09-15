@@ -1,0 +1,3 @@
+- Veo 3.1 generates native audio: add ambient sound and, if needed, ONE short line of dialogue in quotes with the language stated (e.g. Uzbek).
+- Clips are about 8 seconds; describe one continuous shot.
+- Veo understands cinematic terms: lens (35mm, 85mm), camera move, lighting; realism is its strength.

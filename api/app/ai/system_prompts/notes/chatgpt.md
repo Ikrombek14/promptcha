@@ -1,0 +1,3 @@
+- ChatGPT makes images with GPT Image when the task is a picture: it renders exact text and logos reliably, so give the exact wording in quotes; it prefers natural sentences and one clear subject.
+- For text tasks it is the general assistant: keep the Role/Task/Context/Requirements/Format structure.
+- Say "Answer in Uzbek (Latin script)" or Russian explicitly; otherwise it answers in English.

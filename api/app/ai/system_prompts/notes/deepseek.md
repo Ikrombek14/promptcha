@@ -1,0 +1,3 @@
+- DeepSeek is strong at reasoning and code and is free; for hard tasks add "think step by step before answering".
+- Ask explicitly for the answer language (Uzbek Latin / Russian); default tends to be English or Chinese.
+- Keep prompts self-contained: no web browsing assumed.

@@ -1,0 +1,27 @@
+# /etc/systemd/system/promptcha-web.service
+[Unit]
+Description=Promptcha Web (Next.js)
+After=network.target
+
+[Service]
+User=promptcha
+Group=promptcha
+WorkingDirectory=/srv/promptcha/web
+Environment=NODE_ENV=production
+Environment=HOSTNAME=127.0.0.1
+Environment=PORT=3000
+ExecStart=/usr/bin/npx next start -p 3000 -H 127.0.0.1
+Restart=always
+RestartSec=3
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/promptcha/web
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

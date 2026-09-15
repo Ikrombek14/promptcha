@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html lang="uz"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-lowest": "#ffffff", "primary": "#0037b0", "primary-fixed": "#dce1ff", "secondary-fixed": "#dee2ef", "error": "#ba1a1a", "secondary": "#5a5e69", "on-error-container": "#93000a", "on-surface": "#1a1b1f", "outline": "#747686", "surface-variant": "#e3e2e7", "surface-dim": "#dad9df", "on-surface-variant": "#434655", "inverse-primary": "#b7c4ff", "on-background": "#1a1b1f", "on-secondary-fixed": "#171c25", "tertiary-fixed": "#ffdbcf", "secondary-fixed-dim": "#c2c6d3", "primary-fixed-dim": "#b7c4ff", "on-tertiary-fixed-variant": "#832700", "error-container": "#ffdad6", "inverse-on-surface": "#f1f0f6", "inverse-surface": "#2f3034", "tertiary-fixed-dim": "#ffb59c", "on-tertiary-fixed": "#390c00", "secondary-container": "#dee2ef", "surface-tint": "#2151da", "on-primary-fixed": "#001551", "surface-container-low": "#f4f3f8", "surface-container-high": "#e9e7ed", "on-primary": "#ffffff", "surface-container-highest": "#e3e2e7", "surface": "#faf8fe", "on-secondary": "#ffffff", "surface-container": "#efedf3", "on-primary-container": "#cad3ff", "on-tertiary": "#ffffff", "on-tertiary-container": "#ffc9b7", "background": "#faf8fe", "outline-variant": "#c4c5d7", "on-primary-fixed-variant": "#0039b5", "surface-bright": "#faf8fe", "on-secondary-container": "#60646f", "on-error": "#ffffff", "primary-container": "#1d4ed8", "tertiary": "#7f2500", "tertiary-container": "#a73400", "on-secondary-fixed-variant": "#424751" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "gutter-mobile": "1rem", "space-xl": "2rem", "space-2xl": "3rem", "gutter": "1.5rem", "space-xs": "0.5rem", "margin-mobile": "1rem", "margin": "2rem", "space-md": "1rem", "space-sm": "0.75rem", "space-lg": "1.5rem", "space-2xs": "0.25rem", "space-3xl": "4rem" }, "fontFamily": { "code-sm": [ "JetBrains Mono" ], "headline-xl": [ "Instrument Serif" ], "code-md": [ "JetBrains Mono" ], "body-md": [ "Inter" ], "headline-xl-mobile": [ "Instrument Serif" ], "body-lg": [ "Inter" ], "label-sm": [ "Inter" ], "label-md": [ "Inter" ], "headline-sm": [ "Instrument Serif" ], "headline-lg": [ "Instrument Serif" ], "headline-md": [ "Instrument Serif" ], "body-sm": [ "Inter" ] }, "fontSize": { "code-sm": [ "13px", { "lineHeight": "20px", "fontWeight": "400" } ], "headline-xl": [ "44px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "400" } ], "code-md": [ "15px", { "lineHeight": "24px", "fontWeight": "400" } ], "body-md": [ "16px", { "lineHeight": "25.6px", "fontWeight": "400" } ], "headline-xl-mobile": [ "32px", { "lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "400" } ], "body-lg": [ "18px", { "lineHeight": "28.8px", "fontWeight": "400" } ], "label-sm": [ "12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" } ], "label-md": [ "14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" } ], "headline-sm": [ "20px", { "lineHeight": "28px", "fontWeight": "400" } ], "headline-lg": [ "32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "400" } ], "headline-md": [ "24px", { "lineHeight": "32px", "fontWeight": "400" } ], "body-sm": [ "14px", { "lineHeight": "22.4px", "fontWeight": "400" } ] } } } };</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen flex flex-col justify-between"><header class="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-outline-variant"><div class="h-16 max-w-[1100px] mx-auto px-gutter flex items-center justify-between"><div class="flex items-baseline gap-space-xs"><a class="font-headline-md text-headline-md text-on-surface tracking-tight hover:text-primary transition-colors" data-path="workbench" href="#">Promptcha</a><span class="font-code-sm text-code-sm text-outline select-none">·</span><span class="font-code-sm text-code-sm text-secondary tracking-normal">prompt ustaxonasi</span></div><div class="flex items-center gap-space-md"><div aria-label="Language selector" class="flex items-center p-space-2xs bg-surface-container-low rounded-xl border border-outline-variant" role="group"><button class="px-space-xs py-space-2xs rounded-lg bg-surface-container-lowest text-on-surface font-label-sm text-label-sm border border-outline-variant select-none shadow-none" type="button">Oʻz</button><button class="px-space-xs py-space-2xs rounded-lg text-secondary hover:text-on-surface font-label-sm text-label-sm transition-colors select-none" type="button">Ru</button><button class="px-space-xs py-space-2xs rounded-lg text-secondary hover:text-on-surface font-label-sm text-label-sm transition-colors select-none" type="button">En</button></div><div aria-hidden="true" class="h-4 w-px bg-outline-variant"></div><button aria-label="Mavzuni almashtirish" class="w-8 h-8 flex items-center justify-center rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">light_mode</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center select-none"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 flex-1"><div class="max-w-[1100px] mx-auto px-gutter py-space-xl"><div class="flex flex-col w-full">
+<!-- Top Context Ribbon / Editorial Meta Bar -->
+<div class="flex flex-wrap items-center justify-between pb-space-md mb-space-lg border-b border-outline-variant gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-code-sm text-code-sm text-secondary uppercase tracking-wider">Loyixa:</span>
+<span class="font-label-md text-label-md text-on-surface font-medium">№ 084 / Restoran brendingi</span>
+<span class="font-code-sm text-code-sm text-outline select-none">·</span>
+<span class="inline-flex items-center gap-1.5 px-space-xs py-0.5 rounded-lg bg-surface-container text-on-surface-variant font-code-sm text-code-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+        Faol rejim: Midjourney v6
+      </span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="font-code-sm text-code-sm text-secondary">Holat simulyatsiyasi:</span>
+<div class="inline-flex p-0.5 rounded-lg bg-surface-container border border-outline-variant" role="tablist">
+<button class="px-space-xs py-1 rounded-[6px] bg-surface-container-lowest text-on-surface font-label-sm text-label-sm border border-outline-variant shadow-none transition-all" id="btn-state-success" onclick="switchState('success')" type="button">Natija</button>
+<button class="px-space-xs py-1 rounded-[6px] text-secondary hover:text-on-surface font-label-sm text-label-sm transition-all" id="btn-state-loading" onclick="switchState('loading')" type="button">Yuklanmoqda</button>
+<button class="px-space-xs py-1 rounded-[6px] text-secondary hover:text-on-surface font-label-sm text-label-sm transition-all" id="btn-state-error" onclick="switchState('error')" type="button">Xato</button>
+<button class="px-space-xs py-1 rounded-[6px] text-secondary hover:text-on-surface font-label-sm text-label-sm transition-all" id="btn-state-empty" onclick="switchState('empty')" type="button">Boʻsh</button>
+</div>
+</div>
+</div>
+<!-- Main 2-Column Editorial Workbench -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start min-h-[640px]">
+<!-- LEFT PANEL: Configuration & Formulation -->
+<div class="lg:col-span-6 flex flex-col gap-space-md p-space-lg bg-surface-container-lowest rounded-xl border border-outline-variant">
+<!-- Panel Header -->
+<div class="space-y-1">
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Fikringizni aniq promptga aylantiring</h1>
+<p class="font-body-sm text-body-sm text-secondary">Xomaki gʻoyalarni professional sunʼiy intellekt tushunadigan texnik buyruqlarga aylantirish ustaxonasi.</p>
+</div>
+<!-- Main Input Textarea Section -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-sm text-label-sm text-on-surface-variant font-medium" for="user-prompt-input">Birlamchi gʻoya tavsifi</label>
+<span class="font-code-sm text-code-sm text-secondary" id="char-counter">138 belgi</span>
+</div>
+<div class="relative">
+<textarea class="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md p-space-sm rounded-xl border border-outline-variant focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors resize-none leading-relaxed placeholder:text-secondary" id="user-prompt-input" oninput="updateCharCount(this)" placeholder="Nima yasamoqchisiz?" rows="5">Milliy taomlar restorani uchun logotip konsepsiyasi kerak. Oddiy, lekin zamonaviy, tandir yoki non belgisi bilan, minimalist uslubda.</textarea>
+</div>
+<p class="font-body-sm text-body-sm text-secondary italic">Maslahat: Asosiy obyekt, uslub va kayfiyatni erkin oʻzbek tilida bayon qiling.</p>
+</div>
+<!-- Target Domain Selection (Yoʻnalish) -->
+<div class="space-y-2">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider block">Yoʻnalish</span>
+<div class="flex flex-wrap gap-space-xs" id="domain-chip-group">
+<button class="domain-chip px-space-sm py-1.5 rounded-lg font-label-md text-label-md border border-on-surface bg-on-surface text-surface-container-lowest transition-all select-none" onclick="selectDomain(this)" type="button">Rasm</button>
+<button class="domain-chip px-space-sm py-1.5 rounded-lg font-label-md text-label-md border border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container transition-all select-none" onclick="selectDomain(this)" type="button">Ilova</button>
+<button class="domain-chip px-space-sm py-1.5 rounded-lg font-label-md text-label-md border border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container transition-all select-none" onclick="selectDomain(this)" type="button">Dizayn</button>
+<button class="domain-chip px-space-sm py-1.5 rounded-lg font-label-md text-label-md border border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container transition-all select-none" onclick="selectDomain(this)" type="button">Ssenariy</button>
+</div>
+</div>
+<!-- Destination AI Selection (AI vositasi) -->
+<div class="space-y-2">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider block">AI vositasi</span>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-space-xs" id="tool-chip-group">
+<!-- Midjourney (Selected) -->
+<button class="tool-chip flex items-center gap-2 px-space-sm py-2 rounded-xl border border-primary-container bg-surface-container-lowest text-on-surface text-left font-label-md text-label-md transition-all" onclick="selectTool(this, 'midjourney')" type="button">
+<span class="w-2 h-2 rounded-full bg-[#2563EB] flex-shrink-0"></span>
+<span class="truncate font-medium">Midjourney</span>
+</button>
+<!-- ChatGPT -->
+<button class="tool-chip flex items-center gap-2 px-space-sm py-2 rounded-xl border border-outline-variant bg-surface-container-low text-on-surface-variant text-left font-label-md text-label-md hover:border-outline transition-all" onclick="selectTool(this, 'chatgpt')" type="button">
+<span class="w-2 h-2 rounded-full bg-[#10A37F] flex-shrink-0"></span>
+<span class="truncate">ChatGPT</span>
+</button>
+<!-- Claude -->
+<button class="tool-chip flex items-center gap-2 px-space-sm py-2 rounded-xl border border-outline-variant bg-surface-container-low text-on-surface-variant text-left font-label-md text-label-md hover:border-outline transition-all" onclick="selectTool(this, 'claude')" type="button">
+<span class="w-2 h-2 rounded-full bg-[#D97706] flex-shrink-0"></span>
+<span class="truncate">Claude</span>
+</button>
+<!-- DALL-E -->
+<button class="tool-chip flex items-center gap-2 px-space-sm py-2 rounded-xl border border-outline-variant bg-surface-container-low text-on-surface-variant text-left font-label-md text-label-md hover:border-outline transition-all" onclick="selectTool(this, 'dalle')" type="button">
+<span class="w-2 h-2 rounded-full bg-[#EC4899] flex-shrink-0"></span>
+<span class="truncate">DALL·E 3</span>
+</button>
+<!-- Cursor -->
+<button class="tool-chip flex items-center gap-2 px-space-sm py-2 rounded-xl border border-outline-variant bg-surface-container-low text-on-surface-variant text-left font-label-md text-label-md hover:border-outline transition-all" onclick="selectTool(this, 'cursor')" type="button">
+<span class="w-2 h-2 rounded-full bg-[#17181C] flex-shrink-0"></span>
+<span class="truncate">Cursor</span>
+</button>
+<!-- Sora -->
+<button class="tool-chip flex items-center gap-2 px-space-sm py-2 rounded-xl border border-outline-variant bg-surface-container-low text-on-surface-variant text-left font-label-md text-label-md hover:border-outline transition-all" onclick="selectTool(this, 'sora')" type="button">
+<span class="w-2 h-2 rounded-full bg-[#8B5CF6] flex-shrink-0"></span>
+<span class="truncate">Sora</span>
+</button>
+</div>
+</div>
+<!-- Action Button -->
+<div class="pt-space-xs">
+<button class="w-full h-11 px-space-lg bg-primary-container text-on-primary font-label-md text-label-md font-medium rounded-xl hover:bg-primary transition-colors flex items-center justify-between group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" onclick="triggerGenerate()" type="button">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">auto_fix_high</span>
+<span>Prompt yasash</span>
+</span>
+<span class="font-code-sm text-code-sm text-on-primary/75 tracking-wider">⌘ + Enter</span>
+</button>
+</div>
+<!-- Collapsible Quick Notes -->
+<div class="p-space-sm bg-surface-container-low rounded-xl border border-outline-variant flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[18px] mt-0.5 flex-shrink-0">info</span>
+<div class="space-y-0.5">
+<p class="font-label-sm text-label-sm text-on-surface font-medium">Standart tekshiruv</p>
+<p class="font-body-sm text-body-sm text-secondary">Hosil qilingan parametrlar tanlangan modelning (Midjourney v6.0) sintaksis qoidalariga toʻliq moslashtiriladi.</p>
+</div>
+</div>
+</div>
+<!-- RIGHT PANEL: Result Canvas with Cobalt Left Accent Rule -->
+<div class="lg:col-span-6 flex flex-col p-space-lg bg-surface-container-lowest rounded-xl border border-outline-variant border-l-[3px] border-l-primary-container relative">
+<!-- STATE 1: SUCCESS (Default) -->
+<div class="flex flex-col gap-space-md" id="state-success">
+<!-- Result Bar Header -->
+<div class="flex items-center justify-between pb-space-sm border-b border-outline-variant">
+<div class="flex items-center gap-space-xs">
+<h2 class="font-headline-md text-headline-md text-on-surface">Tayyor prompt</h2>
+<span class="px-space-xs py-0.5 rounded-lg bg-surface-container text-on-surface-variant font-code-sm text-code-sm">v6.0</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-xs py-1 rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container-low font-label-sm text-label-sm flex items-center gap-1 transition-colors border border-outline-variant" id="why-toggle-btn" onclick="toggleWhyDrawer()" type="button">
+<span class="material-symbols-outlined text-[16px]">psychology</span>
+<span>Nega shunday?</span>
+</button>
+<button class="px-space-sm py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm flex items-center gap-1.5 transition-colors border border-outline-variant" id="copy-btn" onclick="copyPromptContent()" type="button">
+<span class="material-symbols-outlined text-[16px]" id="copy-icon">content_copy</span>
+<span id="copy-text">Nusxa olish</span>
+</button>
+</div>
+</div>
+<!-- Terminal / Prompt Output Block -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<span class="font-code-sm text-code-sm text-secondary">Midjourney CLI Format</span>
+<span class="font-code-sm text-code-sm text-outline">41 soʻz</span>
+</div>
+<div class="p-space-md bg-surface-container-low rounded-xl border border-outline-variant relative group">
+<pre class="font-code-md text-code-md text-on-surface whitespace-pre-wrap break-words leading-relaxed select-all" id="prompt-output-text">/imagine prompt: Minimalist emblem logo for an authentic Uzbek restaurant, stylized geometric clay tandoor and bread motif, clean monoline vectors, negative space composition, warm terracotta and deep charcoal palette, Swiss editorial typography, flat 2D graphic design, vector aesthetic, Behance featured, white background --no photorealistic, 3d render, shadows, clutter --v 6.0 --ar 1:1</pre>
+</div>
+</div>
+<!-- "Nega shunday?" Structural Annotations Drawer -->
+<div class="space-y-space-xs pt-space-xs transition-all" id="why-drawer">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Muhandislik tahlili (Sharhlar)</span>
+<span class="font-code-sm text-code-sm text-outline">3 ta parametr</span>
+</div>
+<div class="space-y-space-xs">
+<div class="p-space-sm bg-surface-container-low rounded-lg border-l-2 border-primary-container border-t border-r border-b border-outline-variant">
+<div class="flex items-baseline gap-space-xs mb-0.5">
+<span class="font-code-sm text-code-sm text-primary-container font-medium">1. "Monoline va negative space"</span>
+<span class="font-label-sm text-label-sm text-secondary">— Shakl tuzilishi</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Midjourneyʼga chalkash bezaklardan qochib, ramzning sof geometriyasiga hamda boʻshliq muvozanatiga diqqat qaratish buyrugʻi berildi.</p>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded-lg border-l-2 border-primary-container border-t border-r border-b border-outline-variant">
+<div class="flex items-baseline gap-space-xs mb-0.5">
+<span class="font-code-sm text-code-sm text-primary-container font-medium">2. "--no photorealistic, 3d render"</span>
+<span class="font-label-sm text-label-sm text-secondary">— Salbiy filtrlar</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Hosil boʻladigan tasvir xomaki suratlarga yoki 3D maketlarga aylanib ketmasligi, balki qogʻozdagi sof bosma vektor kabi chiqishi kafolatlangan.</p>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded-lg border-l-2 border-primary-container border-t border-r border-b border-outline-variant">
+<div class="flex items-baseline gap-space-xs mb-0.5">
+<span class="font-code-sm text-code-sm text-primary-container font-medium">3. "--ar 1:1 va --v 6.0"</span>
+<span class="font-label-sm text-label-sm text-secondary">— Mashina sozlamasi</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Logotip standarti uchun mukammal kvadrat proporsiya hamda matnni idrok etishda eng sezgir 6-avlod neyrotizimi belgilandi.</p>
+</div>
+</div>
+</div>
+<!-- Clarification / Follow-up Section -->
+<div class="pt-space-xs space-y-space-xs">
+<div class="flex items-center gap-1.5 text-secondary">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider font-medium">Aniqlashtirish uchun tavsiyalar:</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<button class="w-full text-left p-space-xs px-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm text-body-sm border border-outline-variant transition-colors flex items-center justify-between group" onclick="applySuggestion('Restoran nomi yoki monogramma harfi qoʻshilsinmi?')" type="button">
+<span>Restoran nomi yoki monogramma harfi qoʻshilsinmi?</span>
+<span class="material-symbols-outlined text-[16px] text-secondary group-hover:text-primary transition-colors">add</span>
+</button>
+<button class="w-full text-left p-space-xs px-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm text-body-sm border border-outline-variant transition-colors flex items-center justify-between group" onclick="applySuggestion('Rang palitrasini faqat oltin va qora rangga oʻzgartiramizmi?')" type="button">
+<span>Rang palitrasini faqat oltin va qora rangga oʻzgartiramizmi?</span>
+<span class="material-symbols-outlined text-[16px] text-secondary group-hover:text-primary transition-colors">add</span>
+</button>
+<button class="w-full text-left p-space-xs px-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm text-body-sm border border-outline-variant transition-colors flex items-center justify-between group" onclick="applySuggestion('Brend uslubi klassikmi yoki zamonaviy-minimalist?')" type="button">
+<span>Brend uslubi klassikmi yoki zamonaviy-minimalist?</span>
+<span class="material-symbols-outlined text-[16px] text-secondary group-hover:text-primary transition-colors">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- STATE 2: LOADING SKELETON (Hidden by default) -->
+<div class="hidden flex-col gap-space-md" id="state-loading">
+<div class="flex items-center justify-between pb-space-sm border-b border-outline-variant">
+<div class="h-8 w-40 bg-surface-container rounded animate-pulse"></div>
+<div class="h-7 w-24 bg-surface-container rounded animate-pulse"></div>
+</div>
+<div class="p-space-lg bg-surface-container-low rounded-xl border border-outline-variant space-y-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined animate-spin text-primary text-[20px]">sync</span>
+<span class="font-code-sm text-code-sm text-secondary">Semantik tahlil oʻtkazilmoqda...</span>
+</div>
+<div class="space-y-2 pt-space-xs">
+<div class="h-4 bg-surface-variant rounded w-5/6 animate-pulse"></div>
+<div class="h-4 bg-surface-variant rounded w-full animate-pulse"></div>
+<div class="h-4 bg-surface-variant rounded w-3/4 animate-pulse"></div>
+<div class="h-4 bg-surface-variant rounded w-2/3 animate-pulse"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="h-4 w-32 bg-surface-container rounded animate-pulse"></div>
+<div class="h-16 bg-surface-container-low rounded-lg border border-outline-variant animate-pulse"></div>
+<div class="h-16 bg-surface-container-low rounded-lg border border-outline-variant animate-pulse"></div>
+</div>
+</div>
+<!-- STATE 3: ERROR (Hidden by default) -->
+<div class="hidden flex-col gap-space-md" id="state-error">
+<div class="flex items-center justify-between pb-space-sm border-b border-outline-variant">
+<h2 class="font-headline-md text-headline-md text-error">Aniqlik yetarli emas</h2>
+<span class="font-code-sm text-code-sm text-error">Kod: E_VAGUE_INPUT</span>
+</div>
+<div class="p-space-md bg-error-container/20 rounded-xl border border-error/30 text-on-surface space-y-space-xs">
+<div class="flex items-center gap-2 text-error">
+<span class="material-symbols-outlined text-[20px]">error_outline</span>
+<span class="font-label-md text-label-md font-medium">Aniqroq yozing</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface">Kiritilgan soʻrov haddan tashqari umumiy boʻlgani sababli sifatli prompt tuzish mushkul.</p>
+<div class="p-space-sm bg-surface-container-lowest rounded-lg border border-outline-variant font-code-sm text-code-sm text-secondary">
+            Misol: "restoran uchun logo, minimal, oltin rang, tandem pechi ramzi bilan"
+          </div>
+</div>
+<div class="pt-2">
+<button class="px-space-md py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors border border-outline-variant" onclick="switchState('success')" type="button">
+            Misolni qayta yuklash
+          </button>
+</div>
+</div>
+<!-- STATE 4: EMPTY (Hidden by default) -->
+<div class="hidden flex-col items-center justify-center py-space-3xl text-center gap-space-xs" id="state-empty">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-secondary mb-space-xs">
+<span class="material-symbols-outlined text-[24px]">ink_pen</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Ustaxona boʻsh turibdi</h3>
+<p class="font-body-md text-body-md text-secondary max-w-sm">Chap paneldan gʻoyangizni bayon qiling va "Prompt yasash" tugmasini bosing.</p>
+<div class="mt-space-sm">
+<button class="px-space-sm py-1.5 rounded-lg border border-outline-variant text-on-surface font-label-sm text-label-sm hover:bg-surface-container transition-colors" onclick="resetToSample()" type="button">
+            Namuna matnini kiritish
+          </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Editorial Footnote / Specs Bar -->
+<div class="mt-space-lg pt-space-md border-t border-outline-variant flex flex-col sm:flex-row items-center justify-between gap-space-xs text-secondary font-code-sm text-code-sm">
+<div class="flex items-center gap-space-md">
+<span>Protokol: MJ-Prompt-Arch-v6</span>
+<span>•</span>
+<span>Belgilar chegarasi: 1,000</span>
+<span>•</span>
+<span>Til qatlami: Oʻzbekcha / English CLI</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary inline-block"></span>
+<span>Sintaktik tekshirgich faol</span>
+</div>
+</div>
+</div>
+<script>
+  // State switcher for tabs
+  function switchState(targetState) {
+    const states = ['success', 'loading', 'error', 'empty'];
+    states.forEach(s => {
+      const el = document.getElementById('state-' + s);
+      const btn = document.getElementById('btn-state-' + s);
+      if (el) {
+        if (s === targetState) {
+          el.classList.remove('hidden');
+          el.classList.add('flex');
+        } else {
+          el.classList.add('hidden');
+          el.classList.remove('flex');
+        }
+      }
+      if (btn) {
+        if (s === targetState) {
+          btn.className = 'px-space-xs py-1 rounded-[6px] bg-surface-container-lowest text-on-surface font-label-sm text-label-sm border border-outline-variant shadow-none transition-all';
+        } else {
+          btn.className = 'px-space-xs py-1 rounded-[6px] text-secondary hover:text-on-surface font-label-sm text-label-sm transition-all';
+        }
+      }
+    });
+  }
+
+  // Update char counter
+  function updateCharCount(textarea) {
+    const count = textarea.value.length;
+    const counterEl = document.getElementById('char-counter');
+    if (counterEl) {
+      counterEl.textContent = count + ' belgi';
+    }
+  }
+
+  // Domain selection
+  function selectDomain(button) {
+    const group = document.getElementById('domain-chip-group');
+    const chips = group.querySelectorAll('.domain-chip');
+    chips.forEach(c => {
+      c.className = 'domain-chip px-space-sm py-1.5 rounded-lg font-label-md text-label-md border border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container transition-all select-none';
+    });
+    button.className = 'domain-chip px-space-sm py-1.5 rounded-lg font-label-md text-label-md border border-on-surface bg-on-surface text-surface-container-lowest transition-all select-none';
+  }
+
+  // Tool selection
+  function selectTool(button, toolKey) {
+    const group = document.getElementById('tool-chip-group');
+    const chips = group.querySelectorAll('.tool-chip');
+    chips.forEach(c => {
+      c.className = 'tool-chip flex items-center gap-2 px-space-sm py-2 rounded-xl border border-outline-variant bg-surface-container-low text-on-surface-variant text-left font-label-md text-label-md hover:border-outline transition-all';
+      const label = c.querySelector('span:last-child');
+      if (label) label.classList.remove('font-medium');
+    });
+    button.className = 'tool-chip flex items-center gap-2 px-space-sm py-2 rounded-xl border border-primary-container bg-surface-container-lowest text-on-surface text-left font-label-md text-label-md transition-all';
+    const activeLabel = button.querySelector('span:last-child');
+    if (activeLabel) activeLabel.classList.add('font-medium');
+  }
+
+  // Toggle "Nega shunday?"
+  function toggleWhyDrawer() {
+    const drawer = document.getElementById('why-drawer');
+    const btn = document.getElementById('why-toggle-btn');
+    if (drawer.classList.contains('hidden')) {
+      drawer.classList.remove('hidden');
+      btn.classList.add('bg-surface-container-low');
+    } else {
+      drawer.classList.add('hidden');
+      btn.classList.remove('bg-surface-container-low');
+    }
+  }
+
+  // Copy prompt
+  function copyPromptContent() {
+    const text = document.getElementById('prompt-output-text').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const copyText = document.getElementById('copy-text');
+      const copyIcon = document.getElementById('copy-icon');
+      const originalText = copyText.innerText;
+      copyText.innerText = 'Nusxalandi!';
+      copyIcon.innerText = 'check';
+      setTimeout(() => {
+        copyText.innerText = originalText;
+        copyIcon.innerText = 'content_copy';
+      }, 2000);
+    });
+  }
+
+  // Trigger simulate generate
+  function triggerGenerate() {
+    switchState('loading');
+    setTimeout(() => {
+      switchState('success');
+    }, 700);
+  }
+
+  // Apply quick suggestion to input
+  function applySuggestion(suggestionText) {
+    const textarea = document.getElementById('user-prompt-input');
+    textarea.value += ' ' + suggestionText;
+    updateCharCount(textarea);
+    textarea.focus();
+  }
+
+  // Reset to sample
+  function resetToSample() {
+    const textarea = document.getElementById('user-prompt-input');
+    textarea.value = "Milliy taomlar restorani uchun logotip konsepsiyasi kerak. Oddiy, lekin zamonaviy, tandir yoki non belgisi bilan, minimalist uslubda.";
+    updateCharCount(textarea);
+    switchState('success');
+  }
+
+  // Keyboard shortcut: Cmd/Ctrl + Enter
+  document.addEventListener('keydown', function(event) {
+    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+      event.preventDefault();
+      triggerGenerate();
+    }
+  });
+</script></div></main><footer class="w-full border-t border-outline-variant bg-surface-container-low"><div class="max-w-[1100px] mx-auto px-gutter py-space-md flex flex-col sm:flex-row items-center justify-between gap-space-xs text-secondary font-label-sm text-label-sm"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-on-surface">Promptcha</span><span class="text-outline">—</span><span>Editorial AI Workbench</span></div><div class="flex items-center gap-space-md"><a class="hover:text-on-surface transition-colors" data-path="workbench" href="#">Ustaxona</a><a class="hover:text-on-surface transition-colors" data-path="doc-archive" href="#">Arxiv</a><a class="hover:text-on-surface transition-colors" data-path="system-settings" href="#">Sozlamalar</a></div></div></footer></body></html>

@@ -1,0 +1,3 @@
+- Seedance 2.0 supports multi-shot sequences with consistent characters: you may describe 2–3 shots separated by "Shot 1:", "Shot 2:" if the user needs a mini-story.
+- Keep each shot to one action; describe the character once in detail and reuse the same description.
+- State duration per shot and the overall format (9:16 or 16:9).

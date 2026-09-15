@@ -1,0 +1,28 @@
+# /etc/systemd/system/promptcha-api.service
+[Unit]
+Description=Promptcha API (FastAPI)
+After=network.target postgresql.service
+
+[Service]
+User=promptcha
+Group=promptcha
+WorkingDirectory=/srv/promptcha/api
+EnvironmentFile=/srv/promptcha/api/.env
+# --proxy-headers: X-Forwarded-For faqat Nginx (127.0.0.1) dan ishoniladi; APP_ENV=production .env da
+ExecStart=/srv/promptcha/api/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips 127.0.0.1 --no-server-header
+Restart=always
+RestartSec=3
+
+# Qattiqlashtirish
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/promptcha/api
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

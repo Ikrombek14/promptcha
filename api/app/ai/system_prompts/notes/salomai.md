@@ -1,0 +1,3 @@
+- Salom AI is an Uzbek-language assistant available without VPN: write the WHOLE prompt in Uzbek (Latin script, ʻ apostrophe), not English.
+- Keep sections short and simple; everyday vocabulary; it is used by beginners on phones.
+- Avoid advanced formatting requests (no tables); use numbered lists.

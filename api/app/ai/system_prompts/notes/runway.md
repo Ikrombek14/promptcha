@@ -1,0 +1,3 @@
+- Runway Gen-4.5: precise camera control — use terms like "static shot", "slow pan left", "handheld", "low angle"; mention "image-to-video" if a still exists.
+- Keep motion simple and describe what changes over time in one sentence.
+- Prefer cinematic realism; 5–10 seconds.

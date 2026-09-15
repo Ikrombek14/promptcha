@@ -1,0 +1,3 @@
+- Adobe Firefly is trained on licensed content: avoid brand names, celebrities and copyrighted characters entirely.
+- Use Firefly style terms: content type (photo/art), styles (minimal, vector, watercolor), lighting, color and tone.
+- Mention the intended use (social post, print) so the composition leaves room for text added later in Adobe Express.

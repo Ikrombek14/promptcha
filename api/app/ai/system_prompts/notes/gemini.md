@@ -1,0 +1,3 @@
+- Gemini is tied to Google: mention Google Docs/Sheets/Gmail if the output should land there.
+- For images and short videos (Veo inside Gemini) use the natural-language description; Gemini supports Uzbek and Russian prompts but English descriptions give better visuals.
+- Gemini is good at long context: paste source documents and say "use only the attached text".

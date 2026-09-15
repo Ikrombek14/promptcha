@@ -1,0 +1,3 @@
+- Higgsfield hosts many models with cinematic camera presets: name the camera move explicitly (dolly in, crash zoom, orbit, crane up, FPV).
+- Supports lipsync and character consistency: if a person speaks, give the line in quotes; if the same character repeats, describe them once precisely.
+- Keep to one shot per prompt; 5–10 seconds.

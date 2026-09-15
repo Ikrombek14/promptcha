@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "title": "Promptcha — prompt workbench",
+    "description": "A ready-to-use AI prompt from plain words. For Midjourney, ChatGPT, Claude, DALL·E, Sora and Cursor."
+  },
+  "header": {
+    "brand": "Promptcha",
+    "tagline": "prompt workbench",
+    "theme": "Theme",
+    "account": "Account",
+    "login": "Sign in"
+  },
+  "locales": { "uz": "Oʻz", "ru": "Ru", "en": "En" },
+  "footer": {
+    "brand": "Promptcha",
+    "tagline": "Editorial AI Workbench",
+    "workbench": "Workbench",
+    "archive": "Archive",
+    "settings": "Settings",
+    "protocol": "Protocol: {protocol}",
+    "charLimit": "Character limit: {limit}",
+    "langLayer": "Language layer: English",
+    "checker": "Syntax checker active"
+  },
+  "app": {
+    "project": "PROJECT:",
+    "projectName": "New prompt",
+    "activeMode": "Active mode: {ai} {version}",
+    "title": "Turn your idea into a precise prompt",
+    "subtitle": "A workbench that turns rough ideas into technical instructions a professional AI understands.",
+    "inputLabel": "Describe your idea",
+    "chars": "{count} chars",
+    "placeholder": "For example: I need a logo for a national cuisine restaurant. Simple, modern, with a tandoor or bread symbol.",
+    "hint": "Tip: describe the main subject, style and mood in your own words.",
+    "kindLabel": "DIRECTION",
+    "kinds": { "image": "Image", "app": "App", "design": "Design", "video": "Video", "text": "Text" },
+    "kindAuto": "Auto",
+    "kindAutoResolved": "Auto → {kind}",
+    "kindSuggested": "This looks like “{kind}”. If that is right, generate again, otherwise pick another.",
+    "generate": "Generate prompt",
+    "regenerate": "Generate again",
+    "generating": "Generating…",
+    "shortcut": "Ctrl + Enter",
+    "stop": "Stop",
+    "checkTitle": "Standard check",
+    "checkBody": "Generated parameters are fully aligned with the syntax rules of the selected model ({ai} {version}).",
+    "guestLeft": "Free attempts left: {n}",
+    "guestExhausted": "Free attempts are used up. Sign in to continue.",
+    "loginGoogle": "Sign in with Google",
+    "reset": "Start over",
+    "textTooShort": "Write at least a few words.",
+    "connectionLost": "The connection dropped before the result arrived. Please try again."
+  },
+  "clarify": {
+    "title": "Clarification",
+    "subtitle": "One or two questions for a quality prompt. Pick an option or write your own.",
+    "custom": "Other…",
+    "customPlaceholder": "Your answer",
+    "continue": "Continue",
+    "skip": "Generate without answering"
+  },
+  "tools": {
+    "analyzing": "Picking the right tools…",
+    "bestFit": "Best fit"
+  },
+  "families": {
+    "chat": "chat",
+    "image": "image",
+    "video": "video",
+    "code": "code",
+    "search": "search",
+    "design": "design",
+    "slides": "slides",
+    "voice": "voice",
+    "avatar": "avatar video"
+  },
+  "stages": {
+    "aria": "Stages",
+    "classify": "Analysis",
+    "clarify": "Questions",
+    "generate": "Prompt",
+    "explain": "Notes"
+  },
+  "result": {
+    "title": "Ready prompt",
+    "writing": "Writing the prompt",
+    "chosenTool": "Selected tool",
+    "chosenAuto": "The site picked",
+    "toolLabel": "Tool",
+    "why": "Why this?",
+    "copy": "Copy",
+    "copied": "Copied",
+    "format": "{format} format",
+    "words": "{n} words",
+    "notesLabel": "ENGINEERING NOTES",
+    "notesCount": "{n} notes",
+    "emptyTitle": "Your result appears here",
+    "emptyBody": "Describe your idea on the left, pick an AI tool and press “Generate prompt”.",
+    "loading": "Generating the prompt…",
+    "errorTitle": "Error",
+    "retry": "Retry",
+    "answersLabel": "CLARIFIED ANSWERS"
+  }
+}

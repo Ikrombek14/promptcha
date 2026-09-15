@@ -1,0 +1,3 @@
+- Ideogram excels at readable text in images: put every word in quotes and say the font feel (bold sans-serif, elegant serif) and placement.
+- For logos: say "logo", "vector", "flat", "white background", and the exact brand name in quotes.
+- Choose a style keyword: Realistic, Design, 3D, Anime; state aspect ratio in words.

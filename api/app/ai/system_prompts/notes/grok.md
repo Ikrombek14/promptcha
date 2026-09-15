@@ -1,0 +1,3 @@
+- Grok has real-time access to X (Twitter): ask it to use recent posts or trends when relevant.
+- Grok Imagine (images and 6-second videos): natural language, one subject, state the aspect ratio in words; no --flags.
+- Tone: Grok tolerates a casual, witty style — ask for it only if the user wants humor.
