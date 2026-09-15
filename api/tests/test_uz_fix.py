@@ -7,5 +7,9 @@ def test_uz_fix_replaces_wrong_apostrophes_after_o_and_g():
     )
 
 
+def test_uz_fix_replaces_turkish_dotless_i():
+    assert uz_fix("kısa, orta, İlova") == "kisa, orta, Ilova"
+
+
 def test_uz_fix_keeps_correct_and_unrelated_apostrophes():
     assert uz_fix("oʻzbek sunʼiy ta'kid it's") == "oʻzbek sunʼiy ta'kid it's"

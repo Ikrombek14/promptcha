@@ -46,8 +46,11 @@ def unescape_unicode(text: str) -> str:
 
 
 def uz_fix(text: str) -> str:
-    """Oʻzbek lotin matnida oʻ/gʻ uchun faqat ʻ (U+02BB) ishlatiladi — modellar ‘ yoki ' qoʻyadi."""
-    return _UZ_APOSTROPHE.sub("ʻ", unescape_unicode(text))
+    """Oʻzbek lotin matnida oʻ/gʻ uchun faqat ʻ (U+02BB) ishlatiladi — modellar ‘ yoki ' qoʻyadi.
+
+    Turkcha nuqtasiz ı (modellar «kısa» deb yozadi) oʻzbek lotinida yoʻq — i ga almashtiriladi.
+    """
+    return _UZ_APOSTROPHE.sub("ʻ", unescape_unicode(text)).replace("ı", "i").replace("İ", "I")
 
 
 def _localize(text: str, locale: str) -> str:
@@ -117,6 +120,8 @@ async def clarify(
         "If the request is already clear enough, return an empty list.\n"
         f"Write questions in {locale_name(locale)}. Keep each under 12 words. "
         "Give 3–5 short chip options per question (2–4 words each), in the same language. "
+        "The user may select several options at once, so make options combinable facets "
+        "(e.g. audiences, tones) rather than one-line-only choices. "
         "id: short snake_case key in English (e.g. 'style', 'audience').\n"
         f"LANGUAGE RULE: question and options MUST be in {locale_name(locale)}; only the id is "
         "English.\n"
@@ -164,7 +169,11 @@ def _generate_user(text: str, answers: dict[str, str]) -> str:
     if not answers:
         return f"<request>\n{text}\n</request>"
     qa = "\n".join(f"- {k}: {v}" for k, v in answers.items())
-    return f"<request>\n{text}\n</request>\n<clarifications>\n{qa}\n</clarifications>"
+    return (
+        f"<request>\n{text}\n</request>\n<clarifications>\n{qa}\n"
+        "(a comma-separated value means the user chose several options — honour all of them)\n"
+        "</clarifications>"
+    )
 
 
 async def generate(

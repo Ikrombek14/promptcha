@@ -53,7 +53,7 @@
   },
   "clarify": {
     "title": "Clarification",
-    "subtitle": "One or two questions for a quality prompt. Pick an option or write your own.",
+    "subtitle": "One or two questions for a quality prompt. Pick one or more options, or write your own.",
     "custom": "Other…",
     "customPlaceholder": "Your answer",
     "continue": "Continue",
