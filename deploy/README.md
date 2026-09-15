@@ -1,5 +1,9 @@
 # Promptcha — serverga oʻrnatish (Ubuntu 24.04, bitta VPS)
 
+> **Jonli deploy (2026-09-15):** Robbit serveri `169.58.130.201`, Caddy orqali TLS, portlar 8010/3010,
+> `deploy/robbit/` fayllari, `git push origin main` → GitHub Actions → `scripts/ci-deploy.sh`.
+> Tafsilot CLAUDE.md «Deploy» boʻlimida. Quyidagi yoʻriqnoma — Nginx'li alohida server uchun umumiy variant.
+
 Xavfsizlik modeli: API (`:8000`) va Next (`:3000`) faqat `127.0.0.1` da; tashqaridan faqat Nginx (443).
 API har soʻrovda Nginx qoʻshgan maxfiy `X-Internal-Key`ni, brauzerning `Origin`ini va `X-Requested-With`ni tekshiradi;
 guest limitlari bazada (`usage_log`), daqiqalik limitlar IP boʻyicha. Sirlar faqat `.env`da (chmod 600).

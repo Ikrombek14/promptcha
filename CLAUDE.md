@@ -161,16 +161,25 @@ AI brendlari — faqat 8px nuqta chipda.
 
 Agar `design/tokens.md`'dagi qiymatlar yuqoridagidan farq qilsa — tokens.md to'g'ri.
 
-## Deploy
+## Deploy — jonli holat (2026-09-15)
 
-```
-api:  uvicorn app.main:app --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips 127.0.0.1
-web:  next build && next start -p 3000 -H 127.0.0.1
-nginx: promptcha.uz → :3000, promptcha.uz/api/ → :8000 (+ X-Internal-Key, limit_req, HSTS, /api/docs 404)
-```
+**Server:** Robbit yangi serveri `root@169.58.130.201` (SSH kalit sozlangan). Repo: `Ikrombek14/promptcha` (private).
 
-Toʻliq yoʻriqnoma: `deploy/README.md`. Har deploy: `git pull` → `alembic upgrade head` → build → `systemctl restart promptcha-api promptcha-web`.
-Deploy'dan oldin: testlar o'tdi, `.env.example` yangi, migratsiya bor.
+| Nima | Qayerda |
+|---|---|
+| Kod | `/opt/promptcha/app` (foydalanuvchi `promptcha`, deploy key bilan clone) |
+| API | systemd `promptcha-api`, port **8010** (8000 band — xonadosh), `.env` → `/opt/promptcha/app/api/.env` (600) |
+| Web | systemd `promptcha-web`, port **3010** |
+| Baza | tizim Postgres `127.0.0.1:5432`, baza/rol `promptcha`; parol `/root/.promptcha_pg` |
+| TLS/domen | Caddy (`coach-caddy-1`), blok `/opt/coach/deploy/Caddyfile` → `deploy/robbit/Caddyfile.promptcha`; `X-Internal-Key` = `/root/.promptcha_internal` |
+| Zaxira | `/opt/promptcha/backups/pre-migrate-*.sql.gz` (har deploy'da migratsiyadan oldin, 30 ta) |
+| Loglar | `journalctl -u promptcha-api -n 50 --no-pager` |
+
+**Deploy = `git push origin main`.** `.github/workflows/deploy.yml` (robbit-quiz uslubi, testsiz): ssh → `scripts/ci-deploy.sh <sha>` (zaxira → `uv sync` → `alembic upgrade head` → `npm ci && npm run build` → systemd restart) → `/api/health` dagi `commit` push qilingan sha bilan solishtiriladi, mos kelmasa yiqiladi. Secrets: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`. Heredoc tuzogʻi: skript `ssh -n` bilan argument sifatida chaqiriladi, STDIN orqali emas. Serverga `scp` bilan fayl tashlanmaydi.
+
+Boshqa (Nginx'li) server uchun umumiy yoʻriqnoma: `deploy/README.md`. Deploy'dan oldin lokalda: `uv run pytest`, `npm run lint && npm test`, `.env.example` yangi, migratsiya bor.
+
+⚠️ `promptcha.uz` DNS (Cloudflare A yozuv → 169.58.130.201, www ham) hali qoʻyilmagan — qoʻyilgach Caddy sertifikatni oʻzi oladi.
 
 ### Xavfsizlik modeli (2026-09-15)
 
@@ -211,6 +220,6 @@ Deploy'dan oldin: testlar o'tdi, `.env.example` yangi, migratsiya bor.
 - [ ] UserContext — kontekst xotirasi va settings'da ko'rsatish
 - [ ] uz/ru/en — UI matnlari va pipeline'ga locale
 - [ ] Landing
-- [ ] Deploy
+- [x] Deploy — 169.58.130.201, GitHub Actions (DNS promptcha.uz kutilmoqda)
 
 Bajarilganini `[x]` qil. Yangi qaror qabul qilinsa — shu faylga yoz.
