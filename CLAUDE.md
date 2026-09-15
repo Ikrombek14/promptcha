@@ -179,7 +179,7 @@ Agar `design/tokens.md`'dagi qiymatlar yuqoridagidan farq qilsa — tokens.md to
 
 Boshqa (Nginx'li) server uchun umumiy yoʻriqnoma: `deploy/README.md`. Deploy'dan oldin lokalda: `uv run pytest`, `npm run lint && npm test`, `.env.example` yangi, migratsiya bor.
 
-⚠️ `promptcha.uz` DNS (Cloudflare A yozuv → 169.58.130.201, www ham) hali qoʻyilmagan — qoʻyilgach Caddy sertifikatni oʻzi oladi.
+**Jonli:** https://promptcha.uz (2026-09-15 dan; DNS A → 169.58.130.201, proxysiz; `www` → 301). Caddy Docker tarmogʻida (172.18.0.0/16) turgani uchun ufw'da `8010/tcp` va `3010/tcp` faqat `172.18.0.0/16` ga ochilgan (boshqa loyihalar bilan bir xil tartib) — bu qoidasiz Caddy 502 beradi. Jonli tekshiruv: `/api/health` 200, `/api/docs` 403, sarlavhasiz `POST /api/prompts/analyze` 403, brauzer oqimi (tahlil → savol → prompt) ishlaydi; tahlil serverda ~1,2 s.
 
 ### Xavfsizlik modeli (2026-09-15)
 
@@ -220,6 +220,6 @@ Boshqa (Nginx'li) server uchun umumiy yoʻriqnoma: `deploy/README.md`. Deploy'da
 - [ ] UserContext — kontekst xotirasi va settings'da ko'rsatish
 - [ ] uz/ru/en — UI matnlari va pipeline'ga locale
 - [ ] Landing
-- [x] Deploy — 169.58.130.201, GitHub Actions (DNS promptcha.uz kutilmoqda)
+- [x] Deploy — https://promptcha.uz jonli, 169.58.130.201, GitHub Actions (`git push origin main`)
 
 Bajarilganini `[x]` qil. Yangi qaror qabul qilinsa — shu faylga yoz.
