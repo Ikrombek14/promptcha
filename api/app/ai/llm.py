@@ -241,6 +241,9 @@ def _json_system(system: str, schema: type[BaseModel]) -> str:
     )
 
 
+_DOUBLE_ESCAPED_UNICODE = re.compile(r"\\\\u([0-9a-fA-F]{4})")
+
+
 def _parse_json[T: BaseModel](schema: type[T], text: str) -> T:
     """Model javobidan JSON obyektni ajratib, sxemaga tekshiradi."""
     raw = text.strip()
@@ -249,6 +252,8 @@ def _parse_json[T: BaseModel](schema: type[T], text: str) -> T:
         start, end = raw.find("{"), raw.rfind("}")
         if start != -1 and end > start:
             raw = raw[start : end + 1]
+    # Model ʻ kabi harflarni ikki backslash bilan yozsa dekoder matn deb oʻtkazadi — bittaga tushiramiz
+    raw = _DOUBLE_ESCAPED_UNICODE.sub(r"\\u\1", raw)
     try:
         return schema.model_validate_json(raw)
     except ValidationError as e:

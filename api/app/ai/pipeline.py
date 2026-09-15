@@ -37,15 +37,21 @@ _classify_cache: dict[str, tuple[float, Classification]] = {}
 PipelineError = ProviderError
 
 _UZ_APOSTROPHE = re.compile(r"(?<=[oOgGоОгГ])[’‘'ʼ`´]")
+_UNICODE_ESCAPE = re.compile(r"\\u([0-9a-fA-F]{4})")
+
+
+def unescape_unicode(text: str) -> str:
+    """Model matn ichida qoldirgan backslash-u02bb kabi kodlarni harfga aylantiradi (JSON dekoder oʻtkazib yuborgan)."""
+    return _UNICODE_ESCAPE.sub(lambda m: chr(int(m.group(1), 16)), text)
 
 
 def uz_fix(text: str) -> str:
     """Oʻzbek lotin matnida oʻ/gʻ uchun faqat ʻ (U+02BB) ishlatiladi — modellar ‘ yoki ' qoʻyadi."""
-    return _UZ_APOSTROPHE.sub("ʻ", text)
+    return _UZ_APOSTROPHE.sub("ʻ", unescape_unicode(text))
 
 
 def _localize(text: str, locale: str) -> str:
-    return uz_fix(text) if locale == "uz" else text
+    return uz_fix(text) if locale == "uz" else unescape_unicode(text)
 
 
 # --------------------------------------------------------------------------- classify
