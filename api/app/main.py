@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.config import get_settings
 from app.rate_limit import limiter
-from app.routers import prompts
+from app.routers import admin, auth, prompts
 from app.security import SecurityMiddleware
 
 
@@ -53,6 +53,8 @@ app.add_middleware(
 app.add_middleware(SecurityMiddleware, settings=settings)
 
 app.include_router(prompts.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")
+app.include_router(admin.router, prefix="/api")
 
 
 def _commit() -> str:

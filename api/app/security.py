@@ -19,7 +19,9 @@ log = logging.getLogger(__name__)
 
 REQUESTED_WITH = "promptcha"
 MAX_BODY_BYTES = 64 * 1024
-PUBLIC_PATHS = {"/api/health"}
+# Sarlavhasiz ochiq: health, va brauzer navigatsiyasi bilan boradigan Google OAuth yoʻllari
+PUBLIC_PATHS = {"/api/health", "/api/auth/google", "/api/auth/google/callback"}
+DEV_PUBLIC_PATHS = {"/api/auth/dev-login"}
 UNSAFE_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 
 SECURITY_HEADERS = [
@@ -75,7 +77,9 @@ class SecurityMiddleware:
         headers = {k.decode().lower(): v for k, v in scope.get("headers", [])}
         if path in PUBLIC_PATHS:
             return None
-        if self.s.is_dev and path.startswith(("/api/docs", "/api/openapi.json")):
+        if self.s.is_dev and (
+            path in DEV_PUBLIC_PATHS or path.startswith(("/api/docs", "/api/openapi.json"))
+        ):
             return None
 
         # 2. Nginx maxfiy kaliti (prod'da majburiy; dev'da boʻsh boʻlsa tekshirilmaydi)

@@ -72,7 +72,13 @@ class Settings(BaseSettings):
 
     jwt_secret: str = "dev-jwt-secret"
     jwt_expire_days: int = 30
+    session_cookie_name: str = "promptcha_session"
+    # Admin — Google email roʻyxati (vergul bilan). Alohida parol yoʻq.
+    admin_emails: str = ""
+    # Faqat dev: GET /api/auth/dev-login?email=... bilan Google'siz kirish (prod'da taqiqlanadi)
+    auth_dev_login: bool = False
 
+    # Bepul limitlar — .env dagi default; admin `app_settings` orqali oʻzgartira oladi
     free_daily_generations: int = 5
     guest_total_generations: int = 3
     guest_daily_ip_generations: int = 15  # bitta IP dan kuniga (guest_id almashtirishga qarshi)
@@ -112,7 +118,15 @@ class Settings(BaseSettings):
             problems.append("FRONTEND_URL https:// bilan boshlanishi kerak")
         if "postgres:postgres@" in self.database_url or ":1899@" in self.database_url:
             problems.append("DATABASE_URL da zaif parol")
+        if self.auth_dev_login:
+            problems.append("AUTH_DEV_LOGIN prod'da yoqilmasin")
+        if self.google_client_id and not self.google_redirect_uri.startswith("https://"):
+            problems.append("GOOGLE_REDIRECT_URI https:// bilan boshlanishi kerak")
         return problems
+
+    @property
+    def admin_email_list(self) -> list[str]:
+        return [e.strip().lower() for e in self.admin_emails.split(",") if e.strip()]
 
     @property
     def cors_origin_list(self) -> list[str]:

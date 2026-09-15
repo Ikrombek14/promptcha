@@ -72,6 +72,28 @@ async function readError(res: Response): Promise<string> {
   return `HTTP ${res.status}`;
 }
 
+/** Umumiy JSON soʻrov: xavfsizlik sarlavhasi + cookie; xato → ApiError. 204/boʻsh tana → undefined. */
+export async function apiJson<T = unknown>(
+  path: string,
+  init: RequestInit & { json?: unknown } = {},
+): Promise<T> {
+  const { json, headers, ...rest } = init;
+  const res = await fetch(path, {
+    ...rest,
+    headers: {
+      ...(json !== undefined ? { "Content-Type": "application/json" } : {}),
+      ...REQUESTED_WITH,
+      ...(headers ?? {}),
+    },
+    body: json !== undefined ? JSON.stringify(json) : rest.body,
+    credentials: "include",
+  });
+  if (!res.ok) throw new ApiError(await readError(res), res.status);
+  if (res.status === 204) return undefined as T;
+  const text = await res.text();
+  return (text ? JSON.parse(text) : undefined) as T;
+}
+
 export type Analysis = { kind: Kind; confidence: number; tools: AiTool[] };
 
 /** Matn tahlili: tur + 2–3 ta eng mos vosita (yozib toʻxtagach chaqiriladi). */

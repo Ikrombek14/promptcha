@@ -46,6 +46,66 @@ def _no_db(monkeypatch):
 
 
 @pytest.fixture
+def make_user():
+    """Bazasiz User obyekti (auth dependency override uchun)."""
+    import uuid
+
+    from app.models import User
+
+    def _make(email="user@example.com", plan="free", bonus=0, pro_until=None, is_admin=False):
+        u = User(
+            id=uuid.uuid4(),
+            google_sub="sub-" + email,
+            email=email,
+            name=email.split("@")[0],
+            plan=plan,
+            bonus_generations=bonus,
+            pro_until=pro_until,
+        )
+        if is_admin:
+            os.environ["ADMIN_EMAILS"] = email
+            from app.config import get_settings
+
+            get_settings.cache_clear()
+        return u
+
+    return _make
+
+
+@pytest.fixture
+def as_user(make_user):
+    """Soʻrovlar shu foydalanuvchi nomidan (cookie/JWT shart emas). Qaytaradi: User."""
+    from app.services import auth as auth_service
+
+    user = make_user()
+
+    async def _current():
+        return user
+
+    app.dependency_overrides[auth_service.get_current_user] = _current
+    yield user
+    app.dependency_overrides.pop(auth_service.get_current_user, None)
+
+
+@pytest.fixture
+def as_admin(make_user):
+    """Soʻrovlar admin nomidan (ADMIN_EMAILS shu email). Qaytaradi: User."""
+    from app.config import get_settings
+    from app.services import auth as auth_service
+
+    user = make_user(email="admin@example.com", is_admin=True)
+
+    async def _current():
+        return user
+
+    app.dependency_overrides[auth_service.get_current_user] = _current
+    yield user
+    app.dependency_overrides.pop(auth_service.get_current_user, None)
+    os.environ.pop("ADMIN_EMAILS", None)
+    get_settings.cache_clear()
+
+
+@pytest.fixture
 async def client():
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test", headers=BROWSER_HEADERS

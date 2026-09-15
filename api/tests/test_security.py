@@ -103,8 +103,14 @@ async def test_internal_key_required_when_configured():
                 "cors_origins": "https://promptcha.uz",
                 "frontend_url": "https://promptcha.uz",
                 "database_url": "postgresql+asyncpg://promptcha:Str0ngPass@localhost/promptcha",
+                "auth_dev_login": False,  # lokal .env da true — test undan mustaqil
             },
             None,
+        ),
+        ({"auth_dev_login": True}, "AUTH_DEV_LOGIN"),
+        (
+            {"google_client_id": "x", "google_redirect_uri": "http://promptcha.uz/cb"},
+            "GOOGLE_REDIRECT_URI",
         ),
     ],
 )

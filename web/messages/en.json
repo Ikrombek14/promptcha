@@ -10,7 +10,11 @@
     "account": "Account",
     "login": "Sign in"
   },
-  "locales": { "uz": "Oʻz", "ru": "Ru", "en": "En" },
+  "locales": {
+    "uz": "Oʻz",
+    "ru": "Ru",
+    "en": "En"
+  },
   "footer": {
     "brand": "Promptcha",
     "tagline": "Editorial AI Workbench",
@@ -33,7 +37,13 @@
     "placeholder": "For example: I need a logo for a national cuisine restaurant. Simple, modern, with a tandoor or bread symbol.",
     "hint": "Tip: describe the main subject, style and mood in your own words.",
     "kindLabel": "DIRECTION",
-    "kinds": { "image": "Image", "app": "App", "design": "Design", "video": "Video", "text": "Text" },
+    "kinds": {
+      "image": "Image",
+      "app": "App",
+      "design": "Design",
+      "video": "Video",
+      "text": "Text"
+    },
     "kindAuto": "Auto",
     "kindAutoResolved": "Auto → {kind}",
     "kindSuggested": "This looks like “{kind}”. If that is right, generate again, otherwise pick another.",
@@ -100,5 +110,16 @@
     "errorTitle": "Error",
     "retry": "Retry",
     "answersLabel": "CLARIFIED ANSWERS"
+  },
+  "auth": {
+    "title": "Sign in",
+    "subtitle": "Sign in with Google — your prompt history is saved and the daily free limit unlocks.",
+    "google": "Continue with Google",
+    "logout": "Sign out",
+    "admin": "Admin panel",
+    "remainingToday": "Today: {n} left",
+    "pro": "Pro",
+    "free": "Free",
+    "loginShort": "Sign in"
   }
 }

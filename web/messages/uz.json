@@ -10,7 +10,11 @@
     "account": "Hisob",
     "login": "Kirish"
   },
-  "locales": { "uz": "Oʻz", "ru": "Ru", "en": "En" },
+  "locales": {
+    "uz": "Oʻz",
+    "ru": "Ru",
+    "en": "En"
+  },
   "footer": {
     "brand": "Promptcha",
     "tagline": "Editorial AI Workbench",
@@ -33,7 +37,13 @@
     "placeholder": "Masalan: Milliy taomlar restorani uchun logotip kerak. Oddiy, zamonaviy, tandir yoki non belgisi bilan.",
     "hint": "Maslahat: Asosiy obyekt, uslub va kayfiyatni erkin oʻzbek tilida bayon qiling.",
     "kindLabel": "YOʻNALISH",
-    "kinds": { "image": "Rasm", "app": "Ilova", "design": "Dizayn", "video": "Video", "text": "Matn" },
+    "kinds": {
+      "image": "Rasm",
+      "app": "Ilova",
+      "design": "Dizayn",
+      "video": "Video",
+      "text": "Matn"
+    },
     "kindAuto": "Avto",
     "kindAutoResolved": "Avto → {kind}",
     "kindSuggested": "Bu «{kind}» yoʻnalishiga oʻxshaydi. Toʻgʻri boʻlsa, qayta yasang yoki boshqasini tanlang.",
@@ -100,5 +110,16 @@
     "errorTitle": "Xatolik",
     "retry": "Qayta urinish",
     "answersLabel": "ANIQLASHTIRILGAN JAVOBLAR"
+  },
+  "auth": {
+    "title": "Kirish",
+    "subtitle": "Google hisobingiz bilan kiring — promptlar tarixi saqlanadi va kunlik bepul limit ochiladi.",
+    "google": "Google orqali kirish",
+    "logout": "Chiqish",
+    "admin": "Admin panel",
+    "remainingToday": "Bugun: {n} ta qoldi",
+    "pro": "Pro",
+    "free": "Bepul",
+    "loginShort": "Kirish"
   }
 }
