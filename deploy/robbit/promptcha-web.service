@@ -1,0 +1,26 @@
+# Robbit serveri varianti: /etc/systemd/system/promptcha-web.service — Next 3010 portda
+[Unit]
+Description=Promptcha Web (Next.js)
+After=network.target
+
+[Service]
+User=promptcha
+Group=promptcha
+WorkingDirectory=/opt/promptcha/app/web
+Environment=NODE_ENV=production
+Environment=PORT=3010
+ExecStart=/usr/bin/node node_modules/next/dist/bin/next start -p 3010 -H 0.0.0.0
+Restart=always
+RestartSec=3
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/promptcha/app/web
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

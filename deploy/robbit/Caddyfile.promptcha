@@ -1,0 +1,40 @@
+# Robbit serveri: /opt/coach/deploy/Caddyfile ga qoʻshiladigan blok (keyin `docker restart coach-caddy-1`).
+# TLS Caddy avtomatik (Let's Encrypt) — promptcha.uz A yozuvi 169.58.130.201 ga qarashi shart.
+# X-Internal-Key qiymati /opt/promptcha/app/api/.env dagi INTERNAL_API_KEY bilan bir xil.
+
+www.promptcha.uz {
+	redir https://promptcha.uz{uri} permanent
+}
+
+promptcha.uz {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	# Prod'da hujjatlar yopiq
+	@docs path /api/docs* /api/openapi.json /api/redoc*
+	respond @docs 404
+
+	# API — SSE uchun siqishsiz, darhol flush
+	handle /api/* {
+		reverse_proxy 169.58.130.201:8010 {
+			header_up X-Internal-Key "__INTERNAL_API_KEY__"
+			flush_interval -1
+		}
+	}
+
+	# Next.js
+	handle {
+		encode zstd gzip
+		reverse_proxy 169.58.130.201:3010
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

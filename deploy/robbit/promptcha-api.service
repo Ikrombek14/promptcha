@@ -1,0 +1,27 @@
+# Robbit serveri (169.58.130.201) varianti: /etc/systemd/system/promptcha-api.service
+# 8000 band (xonadosh) — API 8010 da. Caddy (coach konteyneri) → 169.58.130.201:8010; ufw tashqarini yopadi.
+[Unit]
+Description=Promptcha API (FastAPI)
+After=network.target postgresql.service
+
+[Service]
+User=promptcha
+Group=promptcha
+WorkingDirectory=/opt/promptcha/app/api
+EnvironmentFile=/opt/promptcha/app/api/.env
+ExecStart=/opt/promptcha/app/api/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8010 --proxy-headers --forwarded-allow-ips 169.58.130.201,127.0.0.1,172.16.0.0/12 --no-server-header
+Restart=always
+RestartSec=3
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/promptcha/app
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target
