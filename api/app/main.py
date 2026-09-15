@@ -1,5 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -54,6 +55,14 @@ app.add_middleware(SecurityMiddleware, settings=settings)
 app.include_router(prompts.router, prefix="/api")
 
 
+def _commit() -> str:
+    """Deploy skripti yozgan COMMIT fayli (repo ildizi); CI serverdagi versiyani shu bilan tekshiradi."""
+    try:
+        return (Path(__file__).resolve().parents[2] / "COMMIT").read_text().strip()[:40]
+    except OSError:
+        return "dev"
+
+
 @app.get("/api/health")
 async def health():
-    return {"status": "ok"}
+    return {"status": "ok", "commit": _commit()}

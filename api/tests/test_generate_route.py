@@ -110,4 +110,4 @@ async def test_generate_validates_body(client):
 async def test_health(client):
     r = await client.get("/api/health")
     assert r.status_code == 200
-    assert r.json() == {"status": "ok"}
+    assert r.json()["status"] == "ok"

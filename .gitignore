@@ -22,3 +22,7 @@ next-env.d.ts
 .DS_Store
 Thumbs.db
 .idea/
+
+# deploy
+COMMIT
+backups/
