@@ -108,6 +108,11 @@ class GenerateRequest(BaseModel):
     improve: ImproveRequest | None = None
 
 
+class TranslateRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=5000)
+    locale: Locale = "uz"  # qaysi tilga
+
+
 class PromptOut(BaseModel):
     id: UUID
     input_text: str

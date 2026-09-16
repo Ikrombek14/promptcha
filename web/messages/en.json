@@ -116,7 +116,12 @@
     "improve": "Improve",
     "improving": "Improving…",
     "improveHint": "The review found weak spots — one click rewrites the prompt.",
-    "criteriaLabel": "REVIEW"
+    "criteriaLabel": "REVIEW",
+    "translate": "Translate",
+    "translating": "Translating…",
+    "translated": "TRANSLATION",
+    "translateHint": "The translation is for reading only — copying gives you the English prompt.",
+    "translateError": "Could not translate."
   },
   "auth": {
     "title": "Sign in",

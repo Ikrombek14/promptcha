@@ -116,7 +116,12 @@
     "improve": "Yaxshilash",
     "improving": "Yaxshilanmoqda…",
     "improveHint": "Tekshiruvda kamchilik topildi — bir bosishda qayta yoziladi.",
-    "criteriaLabel": "TEKSHIRUV"
+    "criteriaLabel": "TEKSHIRUV",
+    "translate": "Oʻzbekcha",
+    "translating": "Tarjima qilinmoqda…",
+    "translated": "OʻZBEKCHA TARJIMA",
+    "translateHint": "Tarjima faqat tushunish uchun — nusxa olganda inglizcha matn koʻchiriladi (AI'lar unga yaxshiroq javob beradi).",
+    "translateError": "Tarjima qilib boʻlmadi."
   },
   "auth": {
     "title": "Kirish",

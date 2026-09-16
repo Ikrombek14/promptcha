@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   AnimatePresence,
   LayoutGroup,
@@ -12,6 +12,7 @@ import {
   Check,
   Copy,
   HelpCircle,
+  Languages,
   SlidersHorizontal,
   Wand2,
 } from "lucide-react";
@@ -22,10 +23,15 @@ import {
   AI_META,
   type AiTool,
   type Kind,
+  type Locale,
   familyFor,
   wordCount,
 } from "@/lib/ai-tools";
-import type { ClarifyQuestion, ReviewCriterion } from "@/lib/api";
+import {
+  type ClarifyQuestion,
+  type ReviewCriterion,
+  translatePrompt,
+} from "@/lib/api";
 import type { Stage } from "@/lib/draft";
 import { fadeUp, springPop, stagger } from "@/lib/motion";
 import { cn } from "@/lib/utils";
@@ -83,11 +89,38 @@ export function Step5Result({
 }: Props) {
   const t = useTranslations("result");
   const tf = useTranslations("families");
+  const locale = useLocale() as Locale;
   const reduce = useReducedMotion();
   const [copied, setCopied] = useState(false);
   const [showNotes, setShowNotes] = useState(true);
   const [revealing, setRevealing] = useState(reveal && !reduce);
+  // Tarjima: prompt inglizcha qoladi (AI'lar shunga yaxshi javob beradi), tarjima faqat oʻqish uchun
+  const [translation, setTranslation] = useState<{
+    text: string;
+    forPrompt: string;
+  } | null>(null);
+  const [translating, setTranslating] = useState(false);
+  const [translateError, setTranslateError] = useState<string | null>(null);
   const meta = AI_META[ai];
+  const showTranslation =
+    translation !== null && translation.forPrompt === prompt;
+
+  const toggleTranslation = async () => {
+    if (showTranslation) {
+      setTranslation(null);
+      return;
+    }
+    setTranslateError(null);
+    setTranslating(true);
+    try {
+      const text = await translatePrompt(prompt, locale);
+      setTranslation({ text, forPrompt: prompt });
+    } catch {
+      setTranslateError(t("translateError"));
+    } finally {
+      setTranslating(false);
+    }
+  };
 
   useEffect(() => {
     if (!revealing) return;
@@ -216,6 +249,16 @@ export function Step5Result({
                   {t("why")}
                 </Button>
                 <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-pressed={showTranslation}
+                  disabled={streaming || !prompt || translating}
+                  onClick={() => void toggleTranslation()}
+                >
+                  <Languages size={16} />
+                  {translating ? t("translating") : t("translate")}
+                </Button>
+                <Button
                   variant="secondary"
                   size="sm"
                   disabled={streaming || !prompt}
@@ -258,6 +301,38 @@ export function Step5Result({
                 )}
               </pre>
             </motion.div>
+
+            <AnimatePresence initial={false}>
+              {showTranslation && (
+                <motion.div
+                  key="translation"
+                  className="flex flex-col gap-2"
+                  initial={reduce ? false : { opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="flex items-center justify-between">
+                    <Label>{t("translated")}</Label>
+                    <span className="font-mono text-code-sm text-muted">
+                      {tf(familyFor(ai, kind))}
+                    </span>
+                  </div>
+                  <p className="whitespace-pre-wrap break-words rounded-[var(--radius)] border border-border border-l-2 border-l-accent bg-surface p-4 text-body-md text-text">
+                    {translation.text}
+                  </p>
+                  <p className="text-body-sm text-muted">
+                    {t("translateHint")}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {translateError && (
+              <p role="alert" className="text-body-sm text-error">
+                {translateError}
+              </p>
+            )}
 
             {notes.length > 0 && showNotes && (
               <motion.section

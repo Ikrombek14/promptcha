@@ -22,9 +22,10 @@ from sse_starlette.sse import EventSourceResponse
 from app.ai import pipeline
 from app.db import get_session
 from app.rate_limit import limiter
-from app.schemas import AnalyzeRequest, GenerateRequest
+from app.schemas import AnalyzeRequest, GenerateRequest, TranslateRequest
 from app.security import client_ip
 from app.services import jobs, usage
+from app.services import translate as translate_service
 from app.services.auth import CurrentUser
 
 router = APIRouter(prefix="/prompts", tags=["prompts"])
@@ -50,6 +51,14 @@ async def analyze(request: Request, body: AnalyzeRequest):
         "tools": c.tools,
         "archetype": c.archetype,
     }
+
+
+@router.post("/translate")
+@limiter.limit("20/minute")
+async def translate(request: Request, body: TranslateRequest):
+    """Tayyor promptni foydalanuvchi tiliga oʻgiradi (talab boʻyicha — har belgi pullik)."""
+    text = await translate_service.translate(body.text, body.locale)
+    return {"text": pipeline.uz_fix(text) if body.locale == "uz" else text}
 
 
 @router.post("/generate")

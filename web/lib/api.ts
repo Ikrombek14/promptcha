@@ -117,6 +117,18 @@ export async function apiJson<T = unknown>(
 
 export type Analysis = { kind: Kind; confidence: number; tools: AiTool[] };
 
+/** Tayyor promptni foydalanuvchi tiliga oʻgirish (talab boʻyicha — har belgi pullik). */
+export async function translatePrompt(
+  text: string,
+  locale: Locale,
+): Promise<string> {
+  const r = await apiJson<{ text: string }>("/api/prompts/translate", {
+    method: "POST",
+    json: { text, locale },
+  });
+  return r.text;
+}
+
 /** Matn tahlili: tur + 2–3 ta eng mos vosita (yozib toʻxtagach chaqiriladi). */
 export async function analyze(
   body: { text: string; locale: Locale },

@@ -79,6 +79,11 @@ class Settings(BaseSettings):
     # Faqat «Yaxshilash» uchun: sifat tezlikdan ustun (foydalanuvchi ataylab kutadi)
     anthropic_quality_model: str = "claude-sonnet-5"
 
+    # Tarjima (Tahrirchi Tilmoch) — tayyor promptni foydalanuvchi tiliga oʻgirish, talab boʻyicha
+    tahrirchi_api_key: str = ""
+    tahrirchi_url: str = "https://websocket.tahrirchi.uz/translate-v2"
+    tahrirchi_model: str = "tilmoch"  # tilmoch (tez, 0.2 soʻm/belgi) | sayqalchi (sekin, 0.35)
+
     google_client_id: str = ""
     google_client_secret: str = ""
     google_redirect_uri: str = "http://localhost:8000/api/auth/google/callback"
