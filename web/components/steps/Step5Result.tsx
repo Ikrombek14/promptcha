@@ -8,7 +8,13 @@ import {
   motion,
   useReducedMotion,
 } from "motion/react";
-import { Check, Copy, HelpCircle, SlidersHorizontal } from "lucide-react";
+import {
+  Check,
+  Copy,
+  HelpCircle,
+  SlidersHorizontal,
+  Wand2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/callout";
 import { StageIndicator } from "@/components/stage-indicator";
@@ -19,11 +25,20 @@ import {
   familyFor,
   wordCount,
 } from "@/lib/ai-tools";
-import type { ClarifyQuestion } from "@/lib/api";
+import type { ClarifyQuestion, ReviewCriterion } from "@/lib/api";
 import type { Stage } from "@/lib/draft";
 import { fadeUp, springPop, stagger } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 
 const REVEAL_MS = 1100;
+/** Shu baldan past boʻlsa «Yaxshilash» taklif qilinadi */
+const IMPROVE_BELOW = 75;
+
+function scoreTone(score: number): string {
+  if (score >= 80) return "border-accent text-accent";
+  if (score >= 60) return "border-border text-text";
+  return "border-error text-error";
+}
 
 type Props = {
   ai: AiTool;
@@ -38,6 +53,11 @@ type Props = {
   reveal: boolean;
   questions: ClarifyQuestion[];
   answers: Record<string, string>;
+  /** Tekshiruv bali (0–100); null — hali kelmagan */
+  score: number | null;
+  criteria: ReviewCriterion[];
+  /** «Yaxshilash» — berilmasa tugma chiqmaydi (yasalmoqda, limit tugagan) */
+  onImprove?: () => void;
 };
 
 /** "«...» — sabab" koʻrinishidagi izohni sarlavha va tanaga ajratadi. */
@@ -57,6 +77,9 @@ export function Step5Result({
   reveal,
   questions,
   answers,
+  score,
+  criteria,
+  onImprove,
 }: Props) {
   const t = useTranslations("result");
   const tf = useTranslations("families");
@@ -164,6 +187,22 @@ export function Step5Result({
                   <span className="text-text">{meta.name}</span>
                   {meta.version && <span>{meta.version}</span>}
                 </motion.div>
+                {score !== null && !streaming && (
+                  <motion.span
+                    key={score}
+                    role="status"
+                    aria-label={t("scoreAria")}
+                    className={cn(
+                      "inline-flex items-center rounded-[var(--radius-sm)] border bg-surface px-2 py-0.5 font-mono text-code-sm tabular-nums",
+                      scoreTone(score),
+                    )}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {t("score", { n: score })}
+                  </motion.span>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <Button
@@ -253,6 +292,33 @@ export function Step5Result({
                 })}
               </motion.section>
             )}
+
+            {score !== null &&
+              score < IMPROVE_BELOW &&
+              !streaming &&
+              onImprove && (
+                <motion.div
+                  variants={fadeUp}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-sm)] border border-border bg-surface-2 p-3"
+                >
+                  <div className="flex flex-col gap-1">
+                    <p className="text-body-md text-text">{t("improveHint")}</p>
+                    {criteria.some((c) => !c.ok && c.note) && (
+                      <ul className="flex flex-col gap-0.5 text-body-sm text-muted">
+                        {criteria
+                          .filter((c) => !c.ok && c.note)
+                          .map((c) => (
+                            <li key={c.name}>· {c.note}</li>
+                          ))}
+                      </ul>
+                    )}
+                  </div>
+                  <Button variant="secondary" size="sm" onClick={onImprove}>
+                    <Wand2 size={16} />
+                    {t("improve")}
+                  </Button>
+                </motion.div>
+              )}
 
             {answered.length > 0 && (
               <motion.section

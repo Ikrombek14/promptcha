@@ -127,17 +127,26 @@ async def record_usage(
         log.exception("usage_log yozib boʻlmadi")
 
 
-async def record_llm_calls(meter: "Meter", job: "Job") -> None:
-    """Job ichidagi har LLM chaqiruvi → `llm_calls` (ok ham, xato ham). Boʻsh boʻlsa hech narsa."""
+async def record_llm_calls(
+    meter: "Meter",
+    job: "Job | None" = None,
+    *,
+    user_id: uuid.UUID | None = None,
+    guest_id: str | None = None,
+    job_id: str | None = None,
+) -> None:
+    """Har LLM chaqiruvi → `llm_calls` (ok ham, xato ham). Job boʻlmasa (prefetch) id'lar alohida."""
     if not meter.calls:
         return
+    if job is not None:
+        user_id, guest_id, job_id = job.user_id, job.body.guest_id, job.id
     try:
         async with SessionLocal() as session:
             session.add_all(
                 LlmCall(
-                    user_id=job.user_id,
-                    guest_id=job.body.guest_id,
-                    job_id=job.id,
+                    user_id=user_id,
+                    guest_id=guest_id,
+                    job_id=job_id,
                     stage=c.stage,
                     provider=c.provider,
                     model=c.model[:80],
@@ -151,7 +160,7 @@ async def record_llm_calls(meter: "Meter", job: "Job") -> None:
             )
             await session.commit()
     except Exception:
-        log.exception("llm_calls yozib boʻlmadi (job %s)", job.id)
+        log.exception("llm_calls yozib boʻlmadi (job %s)", job_id)
 
 
 async def consume_bonus_if_needed(user_id: uuid.UUID) -> None:

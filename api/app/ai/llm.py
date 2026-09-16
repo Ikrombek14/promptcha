@@ -354,12 +354,15 @@ def _parse_json[T: BaseModel](schema: type[T], text: str) -> T:
 
 
 async def _openai_parse[T: BaseModel](
-    name: str, system: str, user: str, schema: type[T], max_tokens: int
+    name: str, system: str, user: str, schema: type[T], max_tokens: int, light: bool = False
 ) -> T:
     import openai
 
     s = get_settings()
     _, _, models = _openai_settings(name, s)
+    if light and name == "groq" and s.groq_light_model:
+        # Yengil model birinchi; u ham band boʻlsa odatdagi zanjir
+        models = [s.groq_light_model, *[m for m in models if m != s.groq_light_model]]
     client = _openai_client(name)
     messages = [
         {"role": "system", "content": _json_system(system, schema)},
@@ -658,7 +661,11 @@ def providers() -> list[str]:
     return out
 
 
-async def parse[T: BaseModel](system: str, user: str, schema: type[T], max_tokens: int = 600) -> T:
+async def parse[T: BaseModel](
+    system: str, user: str, schema: type[T], max_tokens: int = 600, *, light: bool = False
+) -> T:
+    """Structured output. `light=True` — yengil bosqich (tahlil/reja): Groq'da alohida limitli
+    tezroq model ishlatiladi; boshqa provayderlarda farq yoʻq."""
     last: _Retryable | None = None
     for name in providers():
         try:
@@ -666,7 +673,7 @@ async def parse[T: BaseModel](system: str, user: str, schema: type[T], max_token
                 return await _gemini_parse(system, user, schema, max_tokens)
             if name == "anthropic":
                 return await _anthropic_parse(system, user, schema, max_tokens)
-            return await _openai_parse(name, system, user, schema, max_tokens)
+            return await _openai_parse(name, system, user, schema, max_tokens, light=light)
         except _Retryable as r:
             log.warning("%s band — keyingi provayder", name)
             last = r

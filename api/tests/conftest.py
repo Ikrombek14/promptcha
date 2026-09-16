@@ -19,12 +19,18 @@ REAL_CHECK_GUEST_QUOTA = usage.check_guest_quota
 
 
 @pytest.fixture(autouse=True)
-def _clear_classify_cache():
+def _clear_pipeline_caches(monkeypatch):
     from app.ai import pipeline
 
-    pipeline._classify_cache.clear()
+    pipeline.reset_caches_for_tests()
+
+    async def _no_prefetch(*a, **k):
+        return None
+
+    # analyze fonda reja tayyorlaydi — testlarda haqiqiy LLM chaqirilmasin
+    monkeypatch.setattr(pipeline, "prefetch_plan", _no_prefetch)
     yield
-    pipeline._classify_cache.clear()
+    pipeline.reset_caches_for_tests()
 
 
 @pytest.fixture(autouse=True)

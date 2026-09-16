@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     groq_model: str = "openai/gpt-oss-120b"
     groq_fallback_models: str = "openai/gpt-oss-20b,qwen/qwen3.8-27b"
+    # Yengil bosqichlar (tahlil, reja) uchun tezroq model — Groq'da har model alohida token limitiga
+    # ega, shuning uchun yuk ikkiga boʻlinadi. Boʻsh boʻlsa asosiy model.
+    groq_light_model: str = "openai/gpt-oss-20b"
 
     mistral_api_key: str = ""
     mistral_model: str = "mistral-small-latest"

@@ -28,7 +28,7 @@ def test_catalog_shape():
     ],
 )
 async def test_classify_filters_tools_by_kind(monkeypatch, raw, kind, expected):
-    async def fake_parse(system, user, schema, max_tokens=600):
+    async def fake_parse(system, user, schema, max_tokens=600, light=False):
         return Classification(kind=kind, confidence=0.9, tools=raw[:3])
 
     monkeypatch.setattr(llm, "parse", fake_parse)

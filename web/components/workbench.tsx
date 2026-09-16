@@ -26,6 +26,7 @@ import { Step5Result } from "@/components/steps/Step5Result";
 import { type Kind, type Locale } from "@/lib/ai-tools";
 import {
   ApiError,
+  type ImproveBody,
   analyze,
   cancelJob,
   jobEvents,
@@ -213,6 +214,8 @@ export function Workbench() {
         stage: null,
         prompt: "",
         notes: [],
+        score: null,
+        criteria: [],
         error: null,
       });
 
@@ -244,7 +247,11 @@ export function Workbench() {
               break;
             case "explain":
               finalNotes = ev.data.notes;
-              patch({ notes: finalNotes });
+              patch({
+                notes: finalNotes,
+                score: typeof ev.data.score === "number" ? ev.data.score : null,
+                criteria: ev.data.criteria ?? [],
+              });
               break;
             case "done":
               finished = true;
@@ -304,7 +311,11 @@ export function Workbench() {
   );
 
   const run = useCallback(
-    async (withAnswers: Record<string, string>, forcedKind: Kind | null) => {
+    async (
+      withAnswers: Record<string, string>,
+      forcedKind: Kind | null,
+      improve: ImproveBody | null = null,
+    ) => {
       const cur = stateRef.current;
       if (cur.text.trim().length < 3) {
         patch({ error: t("textTooShort"), phase: "error" });
@@ -315,6 +326,8 @@ export function Workbench() {
         phase: "loading",
         prompt: "",
         notes: [],
+        score: null,
+        criteria: [],
         error: null,
         jobId: null,
       });
@@ -333,6 +346,7 @@ export function Workbench() {
           locale,
           output_language: "en",
           guest_id: readGuest().id,
+          improve,
         });
         await attach(jobId);
       } catch (e) {
@@ -663,6 +677,19 @@ export function Workbench() {
                 }
                 questions={s.questions}
                 answers={s.answers}
+                score={s.score}
+                criteria={s.criteria}
+                onImprove={
+                  s.phase === "done" && s.prompt && !busy && !exhausted
+                    ? () =>
+                        void run(s.answers, s.kind ?? s.suggestedKind, {
+                          previous_prompt: s.prompt,
+                          feedback: s.criteria
+                            .filter((c) => !c.ok && c.note)
+                            .map((c) => c.note),
+                        })
+                    : undefined
+                }
               />
             )}
 

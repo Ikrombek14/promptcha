@@ -24,6 +24,8 @@ class Classification(BaseModel):
     confidence: float = Field(ge=0, le=1)
     # Eng mos 2–3 vosita, birinchisi eng yaxshisi (foydalanuvchiga shular koʻrsatiladi)
     tools: list[AiTool] = Field(default_factory=lambda: ["chatgpt"], min_length=1, max_length=3)
+    # Vazifa arxetipi (playbook): post, logo, plan ... — kind roʻyxatida boʻlmasa `general`
+    archetype: str = "general"
     reason: str = ""
 
     @property
@@ -37,11 +39,40 @@ class ClarifyQuestion(BaseModel):
     options: list[str] = Field(default_factory=list, max_length=5)
 
 
-class ClarifyResult(BaseModel):
+class Brief(BaseModel):
+    """Reja (spec): prompt shu brif asosida yoziladi — taxmin oʻrniga aniq faktlar."""
+
+    goal: str = ""
+    deliverable: str = ""
+    audience: str = ""
+    tone: str = ""
+    answer_language: str = ""
+    constraints: list[str] = Field(default_factory=list, max_length=12)
+    facts: dict[str, str] = Field(default_factory=dict)  # foydalanuvchi bergan: nom, raqam, joy
+    missing: list[str] = Field(default_factory=list, max_length=12)  # playbook fact id'lari
+    success_criteria: list[str] = Field(default_factory=list, max_length=8)
+    framework: str = ""
+    tool_params: dict[str, str] = Field(default_factory=dict)
+
+
+class PlanResult(BaseModel):
+    """Bitta chaqiruv: brif + (faqat yetishmayotgan hal qiluvchi faktlar uchun) ≤2 savol."""
+
+    brief: Brief = Field(default_factory=Brief)
     questions: list[ClarifyQuestion] = Field(default_factory=list, max_length=2)
 
 
-class ExplainResult(BaseModel):
+class ReviewCriterion(BaseModel):
+    name: str
+    ok: bool = True
+    note: str = ""
+
+
+class ReviewResult(BaseModel):
+    """Tayyor promptni rubrika boʻyicha tekshirish: ball + izohlar («qoida — nega»)."""
+
+    score: int = Field(default=0, ge=0, le=100)
+    criteria: list[ReviewCriterion] = Field(default_factory=list, max_length=6)
     notes: list[str] = Field(default_factory=list, max_length=4)
 
 
@@ -59,6 +90,13 @@ class AnalyzeRequest(BaseModel):
     locale: Locale = "uz"
 
 
+class ImproveRequest(BaseModel):
+    """«Yaxshilash»: avvalgi prompt + tekshiruv izohlari asosida qayta yozish (savollarsiz)."""
+
+    previous_prompt: str = Field(min_length=1, max_length=20000)
+    feedback: list[str] = Field(default_factory=list, max_length=8)
+
+
 class GenerateRequest(BaseModel):
     text: str = Field(min_length=3, max_length=2000)
     ai: AiTool | None = None  # None → sayt oʻzi tanlaydi (classify)
@@ -67,6 +105,7 @@ class GenerateRequest(BaseModel):
     locale: Locale = "uz"
     output_language: Locale = "en"
     guest_id: str | None = Field(default=None, max_length=64)
+    improve: ImproveRequest | None = None
 
 
 class PromptOut(BaseModel):

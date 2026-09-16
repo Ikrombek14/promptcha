@@ -22,6 +22,7 @@ async def test_analyze_returns_kind_and_tools(client, monkeypatch):
         "kind": "image",
         "confidence": 0.93,
         "tools": ["midjourney", "ideogram", "chatgpt"],
+        "archetype": "general",
     }
 
 

@@ -7,7 +7,7 @@ from google.genai import errors as gerrors
 
 from app.ai import llm, pipeline
 from app.config import get_settings
-from app.schemas import ClarifyResult, ExplainResult, GenerateRequest
+from app.schemas import Classification, GenerateRequest, PlanResult, ReviewResult
 
 
 class FlakyGemini:
@@ -59,11 +59,13 @@ async def test_stream_raises_midstream_error_after_first_chunk(flaky):
 
 
 async def test_pipeline_resets_and_retries_generate(flaky, monkeypatch):
-    async def fake_parse(system, user, schema, max_tokens=600):
-        if schema is ClarifyResult:
-            return ClarifyResult(questions=[])
-        if schema is ExplainResult:
-            return ExplainResult(notes=["x — y"])
+    async def fake_parse(system, user, schema, max_tokens=600, light=False):
+        if schema is Classification:  # arxetip uchun har doim (keshdan) chaqiriladi
+            return Classification(kind="image", confidence=0.9, tools=["midjourney"])
+        if schema is PlanResult:
+            return PlanResult()
+        if schema is ReviewResult:
+            return ReviewResult(score=80, notes=["x — y"])
         raise AssertionError(schema)
 
     monkeypatch.setattr(llm, "parse", fake_parse)

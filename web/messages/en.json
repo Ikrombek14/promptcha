@@ -110,7 +110,13 @@
     "loading": "Generating the prompt…",
     "errorTitle": "Error",
     "retry": "Retry",
-    "answersLabel": "CLARIFIED ANSWERS"
+    "answersLabel": "CLARIFIED ANSWERS",
+    "score": "Quality: {n}/100",
+    "scoreAria": "Prompt quality score",
+    "improve": "Improve",
+    "improving": "Improving…",
+    "improveHint": "The review found weak spots — one click rewrites the prompt.",
+    "criteriaLabel": "REVIEW"
   },
   "auth": {
     "title": "Sign in",

@@ -2,7 +2,7 @@
 // foydalanuvchi boʻlgan joyidan davom etadi; yasalayotgan ishga (jobId) qayta ulanadi.
 
 import { type AiTool, type Kind, isAiTool } from "@/lib/ai-tools";
-import type { ClarifyQuestion } from "@/lib/api";
+import type { ClarifyQuestion, ReviewCriterion } from "@/lib/api";
 
 export const DRAFT_KEY = "promptcha_draft";
 
@@ -34,6 +34,9 @@ export type Draft = {
   suggestedKind: Kind | null;
   prompt: string;
   notes: string[];
+  /** Tekshiruv bali 0–100 (explain hodisasi), null — hali yoʻq */
+  score: number | null;
+  criteria: ReviewCriterion[];
   error: string | null;
   jobId: string | null;
   /** Bu ishning natijasi guest tarixiga yozilgan boʻlsa — qayta yozilmasin (replay) */
@@ -57,6 +60,8 @@ export const EMPTY_DRAFT: Draft = {
   suggestedKind: null,
   prompt: "",
   notes: [],
+  score: null,
+  criteria: [],
   error: null,
   jobId: null,
   savedJobId: null,

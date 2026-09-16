@@ -5,7 +5,7 @@ from app.ai.prompts import system_prompt
 
 
 def test_generate_system_has_facts_rule():
-    system = pipeline._generate_system("ideogram", "image", "en", None)
+    system = pipeline._generate_system("ideogram", "image", "logo", "en", None, None)
     assert "FACTS RULE" in system
     assert "Never replace a given name" in system
 

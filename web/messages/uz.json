@@ -110,7 +110,13 @@
     "loading": "Prompt yasalmoqda…",
     "errorTitle": "Xatolik",
     "retry": "Qayta urinish",
-    "answersLabel": "ANIQLASHTIRILGAN JAVOBLAR"
+    "answersLabel": "ANIQLASHTIRILGAN JAVOBLAR",
+    "score": "Sifat: {n}/100",
+    "scoreAria": "Prompt sifati bali",
+    "improve": "Yaxshilash",
+    "improving": "Yaxshilanmoqda…",
+    "improveHint": "Tekshiruvda kamchilik topildi — bir bosishda qayta yoziladi.",
+    "criteriaLabel": "TEKSHIRUV"
   },
   "auth": {
     "title": "Kirish",

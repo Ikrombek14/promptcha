@@ -11,6 +11,7 @@ Limitlar (`services/usage.check_quota`, qiymatlar admin sozlamalaridan yoki .env
   `guest_daily_ip_generations`; kirgan bepul kuniga `free_daily_generations` (+ bonus); Pro cheksiz.
 """
 
+import asyncio
 import json
 from typing import Annotated
 
@@ -41,7 +42,14 @@ async def analyze(request: Request, body: AnalyzeRequest):
         c = await pipeline.classify(body.text)
     except pipeline.PipelineError as e:
         raise HTTPException(status_code=503, detail=str(e)) from e
-    return {"kind": c.kind, "confidence": round(c.confidence, 2), "tools": c.tools}
+    # Fonda reja (brif + savollar) tayyorlanadi — «Prompt yasash» bosilganda savollar 0 s da chiqadi
+    asyncio.create_task(pipeline.prefetch_plan(body.text, c.kind, c.ai, body.locale))
+    return {
+        "kind": c.kind,
+        "confidence": round(c.confidence, 2),
+        "tools": c.tools,
+        "archetype": c.archetype,
+    }
 
 
 @router.post("/generate")

@@ -12,6 +12,9 @@ export type ClarifyQuestion = {
   options: string[];
 };
 
+/** «Yaxshilash»: avvalgi prompt + tekshiruv izohlari bilan qayta yozish (savollarsiz). */
+export type ImproveBody = { previous_prompt: string; feedback: string[] };
+
 export type GenerateBody = {
   text: string;
   ai?: AiTool | null; // null → sayt oʻzi tanlaydi
@@ -20,7 +23,11 @@ export type GenerateBody = {
   locale: Locale;
   output_language?: Locale;
   guest_id?: string | null;
+  improve?: ImproveBody | null;
 };
+
+/** Tekshiruv mezoni (server rubrikasi): name — task_clear | facts_kept | measurable | audience_tone | constraints | no_filler */
+export type ReviewCriterion = { name: string; ok: boolean; note: string };
 
 export type SseEvent =
   | {
@@ -40,7 +47,10 @@ export type SseEvent =
   | { event: "clarify"; data: { questions: ClarifyQuestion[] } }
   | { event: "delta"; data: { text: string } }
   | { event: "reset"; data: Record<string, never> } // provayder uzildi — prompt boshidan
-  | { event: "explain"; data: { notes: string[] } }
+  | {
+      event: "explain";
+      data: { notes: string[]; score?: number; criteria?: ReviewCriterion[] };
+    }
   | {
       event: "done";
       data: {
