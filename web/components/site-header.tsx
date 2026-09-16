@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { LogoMark } from "@/components/logo-mark";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 
@@ -9,7 +10,11 @@ export function SiteHeader() {
   return (
     <header className="border-b border-border">
       <div className="mx-auto flex h-14 max-w-[1312px] items-center justify-between px-4 md:px-6">
-        <Link href="/app" className="font-serif text-headline-md text-text">
+        <Link
+          href="/app"
+          className="flex items-center gap-2.5 font-serif text-headline-md text-text"
+        >
+          <LogoMark size={26} />
           {t("brand")}
         </Link>
         <div className="flex items-center gap-3">
