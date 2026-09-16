@@ -1,0 +1,20 @@
+{"id": "post-kafe", "text": "Samarqanddagi Navroʻz kafesi uchun Instagram post kerak, yangi lagʻmon menyusi 35 ming soʻmdan", "expect_kind": "text", "expect_archetype": "post", "must_contain": ["Navroʻz", "35"]}
+{"id": "post-salon", "text": "Toshkentdagi Bahor goʻzallik saloni uchun Telegram post, sochga 30% chegirma shu hafta", "expect_kind": "text", "expect_archetype": "post", "must_contain": ["Bahor", "30"]}
+{"id": "message-shikoyat", "text": "Mijoz buyurtma kech kelgani uchun shikoyat qildi, unga javob xati yozib ber", "expect_kind": "text", "expect_archetype": "message", "must_contain": []}
+{"id": "message-taklif", "text": "Maktabga robototexnika toʻgaragi ochish uchun direktorga taklif xati, Robbit nomidan", "expect_kind": "text", "expect_archetype": "message", "must_contain": ["Robbit"]}
+{"id": "plan-tort", "text": "Uyda tort pishirib sotmoqchiman, Buxoroda, 2 million soʻm bilan boshlash rejasi kerak", "expect_kind": "text", "expect_archetype": "plan", "must_contain": ["Buxoro", "2"]}
+{"id": "analysis-goya", "text": "Toshkentda elektr skuter ijarasi biznesini boshlash gʻoyasi yaxshimi? Tahlil qilib ber", "expect_kind": "text", "expect_archetype": "analysis", "must_contain": ["Toshkent"]}
+{"id": "article-seo", "text": "Ingliz tilini oʻrganish boʻyicha blog maqola, IELTS ga tayyorlanuvchilar uchun", "expect_kind": "text", "expect_archetype": "article", "must_contain": ["IELTS"]}
+{"id": "script-video", "text": "Stomatologiya klinikasi uchun 30 soniyalik reklama video ssenariysi, tish oqartirish xizmati", "expect_kind": "text", "expect_archetype": "script", "must_contain": []}
+{"id": "learn-python", "text": "Menga Python dasturlash tilida for sikli nima ekanini tushuntirib ber, men yangi boshlovchiman", "expect_kind": "text", "expect_archetype": "learn", "must_contain": ["Python"]}
+{"id": "logo-urfon", "text": "Urfon oʻquv markazi uchun logo kerak, bolalar uchun robototexnika kursi", "expect_kind": "image", "expect_archetype": "logo", "must_contain": ["Urfon"]}
+{"id": "logo-kafe", "text": "Osh markazi uchun logotip, nomi Oshxona 24, issiq va milliy uslubda", "expect_kind": "image", "expect_archetype": "logo", "must_contain": ["Oshxona 24"]}
+{"id": "poster-chegirma", "text": "Kiyim doʻkoni uchun 50% chegirma posteri, qora juma, Instagram uchun", "expect_kind": "image", "expect_archetype": "poster", "must_contain": ["50"]}
+{"id": "product-asal", "text": "Asal bankasi uchun mahsulot fotosi, tabiiy va yorugʻ fon", "expect_kind": "image", "expect_archetype": "product", "must_contain": []}
+{"id": "portrait-avatar", "text": "Telegram uchun avatar rasm, multfilm uslubida, koʻzoynakli yigit", "expect_kind": "image", "expect_archetype": "portrait", "must_contain": []}
+{"id": "scene-bolalar", "text": "Bolalar kitobi uchun illyustratsiya, Samarqand koʻchasida mushuk sarguzashti", "expect_kind": "image", "expect_archetype": "scene", "must_contain": ["Samarqand"]}
+{"id": "video-ad", "text": "Bolalar bogʻchasi uchun 15 soniyalik reklama video, Yulduzcha bogʻchasi", "expect_kind": "video", "expect_archetype": "ad", "must_contain": ["Yulduzcha"]}
+{"id": "video-reel", "text": "Kofe tayyorlash jarayonini koʻrsatadigan qisqa reels, tez montaj", "expect_kind": "video", "expect_archetype": "reel", "must_contain": []}
+{"id": "app-mvp", "text": "Ustozlar uchun dars jadvali ilovasi, Telegram bot orqali ishlasin", "expect_kind": "app", "expect_archetype": "mvp", "must_contain": []}
+{"id": "design-slides", "text": "Investorlarga 10 slaydli taqdimot, EduTech startap, 50 ming dollar soʻraymiz", "expect_kind": "design", "expect_archetype": "slides", "must_contain": ["50"]}
+{"id": "design-print", "text": "Kafe uchun menyu dizayni, A4, 12 ta taom, milliy naqsh", "expect_kind": "design", "expect_archetype": "print", "must_contain": ["12"]}
