@@ -50,7 +50,6 @@
     "generate": "Generate prompt",
     "regenerate": "Generate again",
     "generating": "Generating…",
-    "shortcut": "Ctrl + Enter",
     "stop": "Stop",
     "checkTitle": "Standard check",
     "checkBody": "Generated parameters are fully aligned with the syntax rules of the selected model ({ai} {version}).",

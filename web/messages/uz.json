@@ -50,7 +50,6 @@
     "generate": "Prompt yasash",
     "regenerate": "Qayta yasash",
     "generating": "Yasalmoqda…",
-    "shortcut": "Ctrl + Enter",
     "stop": "Toʻxtatish",
     "checkTitle": "Standart tekshiruv",
     "checkBody": "Hosil qilingan parametrlar tanlangan modelning ({ai} {version}) sintaksis qoidalariga toʻliq moslashtiriladi.",

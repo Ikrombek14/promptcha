@@ -486,17 +486,12 @@ export function Workbench() {
                       <Button
                         variant="primary"
                         size="lg"
-                        className="w-full justify-between"
+                        className="w-full"
                         disabled={s.phase === "clarify" || exhausted}
                         onClick={start}
                       >
-                        <span className="inline-flex items-center gap-2">
-                          <Wand2 size={16} />
-                          {s.phase === "done" ? t("regenerate") : t("generate")}
-                        </span>
-                        <span className="hidden font-mono text-code-sm opacity-80 sm:inline">
-                          {t("shortcut")}
-                        </span>
+                        <Wand2 size={16} />
+                        {s.phase === "done" ? t("regenerate") : t("generate")}
                       </Button>
                     )}
                   </motion.div>
