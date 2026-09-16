@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     # AI — provayderlar zanjiri va umumiy limitlar (CLAUDE.md: max_tokens ≤ 1500, temperature 0.4)
     # Tartib muhim: birinchisi asosiy, kvota tugasa keyingisi. Kaliti yoʻqlar tashlab ketiladi.
     ai_providers: str = "gemini"  # gemini | groq | mistral | openrouter | custom | anthropic
+    # Yengil bosqichlar (tahlil, reja) uchun alohida tartib — tezlik muhim; boʻsh boʻlsa ai_providers
+    ai_providers_light: str = ""
     ai_max_tokens: int = 1500
     ai_temperature: float = 0.4
 
@@ -67,7 +69,8 @@ class Settings(BaseSettings):
     custom_fallback_models: str = ""
 
     anthropic_api_key: str = ""
-    anthropic_model: str = "claude-sonnet-4-6"
+    anthropic_model: str = "claude-sonnet-5"  # prompt va tekshiruv
+    anthropic_light_model: str = "claude-haiku-4-5-20251001"  # tahlil va reja (light=True)
 
     google_client_id: str = ""
     google_client_secret: str = ""

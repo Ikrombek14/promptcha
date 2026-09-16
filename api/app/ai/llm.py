@@ -532,11 +532,11 @@ def _anthropic_retryable(e: Exception) -> bool:
 
 
 async def _anthropic_parse[T: BaseModel](
-    system: str, user: str, schema: type[T], max_tokens: int
+    system: str, user: str, schema: type[T], max_tokens: int, light: bool = False
 ) -> T:
     from app.ai.client import get_client, request_kwargs
 
-    kw = request_kwargs(max_tokens=max_tokens)
+    kw = request_kwargs(max_tokens=max_tokens, light=light)
     model = kw["model"]
     prompt_text = system + user
     t0 = time.monotonic()
@@ -643,12 +643,16 @@ def _has_key(name: str, s: Settings) -> bool:
     return bool(getattr(s, f"{name}_api_key", ""))
 
 
-def providers() -> list[str]:
-    """AI_PROVIDERS tartibida, faqat sozlangan (kaliti bor) va tanish provayderlar."""
+def providers(light: bool = False) -> list[str]:
+    """AI_PROVIDERS tartibida, faqat sozlangan (kaliti bor) va tanish provayderlar.
+
+    `light=True` — yengil bosqichlar uchun AI_PROVIDERS_LIGHT (boʻsh boʻlsa asosiy tartib).
+    """
     s = get_settings()
     known = {"gemini", "anthropic", *_OPENAI_COMPAT}
     out: list[str] = []
-    for name in s.ai_providers.split(","):
+    order = (s.ai_providers_light if light else "") or s.ai_providers
+    for name in order.split(","):
         name = name.strip().lower()
         if not name or name in out:
             continue
@@ -667,12 +671,12 @@ async def parse[T: BaseModel](
     """Structured output. `light=True` — yengil bosqich (tahlil/reja): Groq'da alohida limitli
     tezroq model ishlatiladi; boshqa provayderlarda farq yoʻq."""
     last: _Retryable | None = None
-    for name in providers():
+    for name in providers(light=light):
         try:
             if name == "gemini":
                 return await _gemini_parse(system, user, schema, max_tokens)
             if name == "anthropic":
-                return await _anthropic_parse(system, user, schema, max_tokens)
+                return await _anthropic_parse(system, user, schema, max_tokens, light=light)
             return await _openai_parse(name, system, user, schema, max_tokens, light=light)
         except _Retryable as r:
             log.warning("%s band — keyingi provayder", name)

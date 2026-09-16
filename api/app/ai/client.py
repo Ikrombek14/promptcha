@@ -18,13 +18,18 @@ def get_client() -> anthropic.AsyncAnthropic:
     )
 
 
-def request_kwargs(*, max_tokens: int | None = None) -> dict:
-    """Har bir chaqiruv uchun umumiy parametrlar: model, max_tokens (≤ limit), temperature."""
+def request_kwargs(*, max_tokens: int | None = None, light: bool = False) -> dict:
+    """Har bir chaqiruv uchun umumiy parametrlar: model, max_tokens (≤ limit), temperature.
+
+    `light=True` — yengil model (tahlil/reja). Sonnet 5 va yangi oilalar `temperature`ni rad etadi
+    (400 «deprecated»), shuning uchun u faqat 4.6/4.5 modellariga yuboriladi.
+    """
     s = get_settings()
+    model = (s.anthropic_light_model if light else "") or s.anthropic_model
     kwargs: dict = {
-        "model": s.anthropic_model,
+        "model": model,
         "max_tokens": min(max_tokens or s.ai_max_tokens, s.ai_max_tokens),
     }
-    if any(tag in s.anthropic_model for tag in _TEMPERATURE_MODELS):
+    if any(tag in model for tag in _TEMPERATURE_MODELS):
         kwargs["extra_body"] = {"temperature": s.ai_temperature}
     return kwargs

@@ -211,3 +211,41 @@ async def test_openai_auth_error_is_not_retried(env):
     with pytest.raises(llm.ProviderError, match="kalit"):
         await llm.parse("s", "u", Classification, 100)
     assert env.gemini.calls == []
+
+
+def test_light_provider_order_is_separate(monkeypatch):
+    from app.config import get_settings
+
+    monkeypatch.setenv("AI_PROVIDERS", "anthropic,groq")
+    monkeypatch.setenv("AI_PROVIDERS_LIGHT", "groq,anthropic")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
+    monkeypatch.setenv("GROQ_API_KEY", "k")
+    get_settings.cache_clear()
+    try:
+        assert llm.providers() == ["anthropic", "groq"]
+        assert llm.providers(light=True) == ["groq", "anthropic"]
+        monkeypatch.setenv("AI_PROVIDERS_LIGHT", "")
+        get_settings.cache_clear()
+        assert llm.providers(light=True) == ["anthropic", "groq"]
+    finally:
+        get_settings.cache_clear()
+
+
+def test_anthropic_light_model_and_temperature_rule(monkeypatch):
+    from app.ai import client
+    from app.config import get_settings
+
+    monkeypatch.setenv("ANTHROPIC_MODEL", "claude-sonnet-5")
+    monkeypatch.setenv("ANTHROPIC_LIGHT_MODEL", "claude-haiku-4-5-20251001")
+    get_settings.cache_clear()
+    try:
+        heavy = client.request_kwargs(max_tokens=300)
+        light = client.request_kwargs(max_tokens=300, light=True)
+        assert (
+            heavy["model"] == "claude-sonnet-5" and "extra_body" not in heavy
+        )  # 5-oila temperature rad etadi
+        assert light["model"] == "claude-haiku-4-5-20251001" and light["extra_body"] == {
+            "temperature": 0.4
+        }
+    finally:
+        get_settings.cache_clear()
