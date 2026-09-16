@@ -267,6 +267,7 @@ async def _gemini_stream(system: str, user: str, max_tokens: int) -> AsyncIterat
 # Groq, Mistral, OpenRouter va istalgan boshqa /v1/chat/completions server (custom).
 
 _OPENAI_COMPAT: dict[str, str] = {
+    "openai": "https://api.openai.com/v1",
     "groq": "https://api.groq.com/openai/v1",
     "mistral": "https://api.mistral.ai/v1",
     "openrouter": "https://openrouter.ai/api/v1",
@@ -354,15 +355,16 @@ def _parse_json[T: BaseModel](schema: type[T], text: str) -> T:
 
 
 async def _openai_parse[T: BaseModel](
-    name: str, system: str, user: str, schema: type[T], max_tokens: int, light: bool = False
+    name: str, system: str, user: str, schema: type[T], max_tokens: int, tiny: bool = False
 ) -> T:
     import openai
 
     s = get_settings()
     _, _, models = _openai_settings(name, s)
-    if light and name == "groq" and s.groq_light_model:
+    light_model = getattr(s, f"{name}_light_model", "") if tiny else ""
+    if light_model:
         # Yengil model birinchi; u ham band boʻlsa odatdagi zanjir
-        models = [s.groq_light_model, *[m for m in models if m != s.groq_light_model]]
+        models = [light_model, *[m for m in models if m != light_model]]
     client = _openai_client(name)
     messages = [
         {"role": "system", "content": _json_system(system, schema)},
@@ -532,18 +534,18 @@ def _anthropic_retryable(e: Exception) -> bool:
 
 
 async def _anthropic_parse[T: BaseModel](
-    system: str, user: str, schema: type[T], max_tokens: int, light: bool = False
+    system: str, user: str, schema: type[T], max_tokens: int, quality: bool = False
 ) -> T:
-    from app.ai.client import get_client, request_kwargs
+    from app.ai.client import cached_system, get_client, request_kwargs
 
-    kw = request_kwargs(max_tokens=max_tokens, light=light)
+    kw = request_kwargs(max_tokens=max_tokens, quality=quality)
     model = kw["model"]
     prompt_text = system + user
     t0 = time.monotonic()
     try:
         resp = await get_client().messages.parse(
             **kw,
-            system=system,
+            system=cached_system(system),
             messages=[{"role": "user", "content": user}],
             output_format=schema,
         )
@@ -583,10 +585,12 @@ def _anthropic_text(msg) -> str:
     return "".join(getattr(b, "text", "") or "" for b in (getattr(msg, "content", None) or []))
 
 
-async def _anthropic_stream(system: str, user: str, max_tokens: int) -> AsyncIterator[str]:
-    from app.ai.client import get_client, request_kwargs
+async def _anthropic_stream(
+    system: str, user: str, max_tokens: int, quality: bool = False
+) -> AsyncIterator[str]:
+    from app.ai.client import cached_system, get_client, request_kwargs
 
-    kw = request_kwargs(max_tokens=max_tokens)
+    kw = request_kwargs(max_tokens=max_tokens, quality=quality)
     model = kw["model"]
     prompt_text = system + user
     yielded = False
@@ -595,7 +599,7 @@ async def _anthropic_stream(system: str, user: str, max_tokens: int) -> AsyncIte
     try:
         async with get_client().messages.stream(
             **kw,
-            system=system,
+            system=cached_system(system),
             messages=[{"role": "user", "content": user}],
         ) as st:
             async for chunk in st.text_stream:
@@ -643,15 +647,15 @@ def _has_key(name: str, s: Settings) -> bool:
     return bool(getattr(s, f"{name}_api_key", ""))
 
 
-def providers(light: bool = False) -> list[str]:
+def providers(fast: bool = False) -> list[str]:
     """AI_PROVIDERS tartibida, faqat sozlangan (kaliti bor) va tanish provayderlar.
 
-    `light=True` — yengil bosqichlar uchun AI_PROVIDERS_LIGHT (boʻsh boʻlsa asosiy tartib).
+    `fast=True` — yengil bosqichlar uchun AI_PROVIDERS_LIGHT (boʻsh boʻlsa asosiy tartib).
     """
     s = get_settings()
     known = {"gemini", "anthropic", *_OPENAI_COMPAT}
     out: list[str] = []
-    order = (s.ai_providers_light if light else "") or s.ai_providers
+    order = (s.ai_providers_light if fast else "") or s.ai_providers
     for name in order.split(","):
         name = name.strip().lower()
         if not name or name in out:
@@ -666,18 +670,22 @@ def providers(light: bool = False) -> list[str]:
 
 
 async def parse[T: BaseModel](
-    system: str, user: str, schema: type[T], max_tokens: int = 600, *, light: bool = False
+    system: str, user: str, schema: type[T], max_tokens: int = 600, *, tier: str = "quality"
 ) -> T:
-    """Structured output. `light=True` — yengil bosqich (tahlil/reja): Groq'da alohida limitli
-    tezroq model ishlatiladi; boshqa provayderlarda farq yoʻq."""
+    """Structured output. `tier`:
+
+    - "quality" — asosiy zanjir (AI_PROVIDERS) va asosiy modellar;
+    - "fast"    — yengil zanjir (AI_PROVIDERS_LIGHT), asosiy modellar (reja, tekshiruv);
+    - "tiny"    — yengil zanjir + `*_LIGHT_MODEL` (tahlil kabi kichik vazifalar).
+    """
     last: _Retryable | None = None
-    for name in providers(light=light):
+    for name in providers(fast=tier in ("fast", "tiny")):
         try:
             if name == "gemini":
                 return await _gemini_parse(system, user, schema, max_tokens)
             if name == "anthropic":
-                return await _anthropic_parse(system, user, schema, max_tokens, light=light)
-            return await _openai_parse(name, system, user, schema, max_tokens, light=light)
+                return await _anthropic_parse(system, user, schema, max_tokens)
+            return await _openai_parse(name, system, user, schema, max_tokens, tiny=tier == "tiny")
         except _Retryable as r:
             log.warning("%s band — keyingi provayder", name)
             last = r
@@ -686,14 +694,17 @@ async def parse[T: BaseModel](
     raise ProviderError("AI provayder sozlanmagan (API kalit yoʻq).")
 
 
-async def stream(system: str, user: str, max_tokens: int | None = None) -> AsyncIterator[str]:
+async def stream(
+    system: str, user: str, max_tokens: int | None = None, *, quality: bool = False
+) -> AsyncIterator[str]:
+    """`quality=True` — «Yaxshilash»: Anthropic'da kuchliroq model (sekinroq, lekin sifatliroq)."""
     mt = max_tokens or get_settings().ai_max_tokens
     last: _Retryable | None = None
     for name in providers():
         if name == "gemini":
             gen = _gemini_stream(system, user, mt)
         elif name == "anthropic":
-            gen = _anthropic_stream(system, user, mt)
+            gen = _anthropic_stream(system, user, mt, quality=quality)
         else:
             gen = _openai_stream(name, system, user, mt)
         try:

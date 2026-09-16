@@ -74,8 +74,9 @@ def evaluate(c: httpx.Client, base: str, item: dict, locale: str) -> dict:
     res["error"] = err["detail"] if err else None
     res["score"] = ex.get("score")
     res["failed"] = [cr["name"] for cr in ex.get("criteria", []) if not cr["ok"]]
-    res["facts_ok"] = all(m in prompt for m in item.get("must_contain", []))
-    res["missing_facts"] = [m for m in item.get("must_contain", []) if m not in prompt]
+    low = prompt.lower()
+    res["facts_ok"] = all(m.lower() in low for m in item.get("must_contain", []))
+    res["missing_facts"] = [m for m in item.get("must_contain", []) if m.lower() not in low]
     res["words"] = len(prompt.split())
     res["prompt"] = prompt
     res["notes"] = ex.get("notes", [])

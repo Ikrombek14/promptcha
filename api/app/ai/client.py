@@ -18,14 +18,14 @@ def get_client() -> anthropic.AsyncAnthropic:
     )
 
 
-def request_kwargs(*, max_tokens: int | None = None, light: bool = False) -> dict:
+def request_kwargs(*, max_tokens: int | None = None, quality: bool = False) -> dict:
     """Har bir chaqiruv uchun umumiy parametrlar: model, max_tokens (≤ limit), temperature.
 
-    `light=True` — yengil model (tahlil/reja). Sonnet 5 va yangi oilalar `temperature`ni rad etadi
-    (400 «deprecated»), shuning uchun u faqat 4.6/4.5 modellariga yuboriladi.
+    `quality=True` — «Yaxshilash» uchun kuchliroq model. Sonnet 5 va yangi oilalar `temperature`ni
+    rad etadi (400 «deprecated»), shuning uchun u faqat 4.6/4.5 modellariga yuboriladi.
     """
     s = get_settings()
-    model = (s.anthropic_light_model if light else "") or s.anthropic_model
+    model = (s.anthropic_quality_model if quality else "") or s.anthropic_model
     kwargs: dict = {
         "model": model,
         "max_tokens": min(max_tokens or s.ai_max_tokens, s.ai_max_tokens),
@@ -33,3 +33,8 @@ def request_kwargs(*, max_tokens: int | None = None, light: bool = False) -> dic
     if any(tag in model for tag in _TEMPERATURE_MODELS):
         kwargs["extra_body"] = {"temperature": s.ai_temperature}
     return kwargs
+
+
+def cached_system(system: str) -> list[dict]:
+    """System prompt keshlanadigan blok sifatida — playbook/namunalar koʻp soʻrovda bir xil."""
+    return [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}]

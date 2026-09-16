@@ -24,13 +24,13 @@ class FakeLLM:
         self.parse_calls: list[dict] = []
         self.stream_calls: list[dict] = []
 
-    async def parse(self, system, user, schema, max_tokens=600, light=False):
+    async def parse(self, system, user, schema, max_tokens=600, tier="quality"):
         self.parse_calls.append(
             {"system": system, "user": user, "schema": schema, "max_tokens": max_tokens}
         )
         return self.parsed_by_type[schema].model_copy(deep=True)
 
-    async def stream(self, system, user, max_tokens=None):
+    async def stream(self, system, user, max_tokens=None, *, quality=False):
         self.stream_calls.append({"system": system, "user": user, "max_tokens": max_tokens})
         for c in self.chunks:
             yield c
@@ -254,3 +254,26 @@ async def test_plan_drops_question_when_an_option_is_already_in_the_text(fake):
     assert [q.id for q in p.questions] == ["colors"]
     assert p.brief.facts["brand_name"] == "Urfon"
     assert p.brief.missing == ["colors"]
+
+
+async def test_improve_uses_quality_model(fake, monkeypatch):
+    """«Yaxshilash» — kuchliroq model (quality=True) bilan qayta yoziladi."""
+    seen: dict = {}
+
+    async def stream(system, user, max_tokens=None, *, quality=False):
+        seen["quality"] = quality
+        for c in ["ok"]:
+            yield c
+
+    monkeypatch.setattr(llm, "stream", stream)
+    body = GenerateRequest(text="logo kerak", ai="midjourney", kind="image", answers={"style": "a"})
+    await _collect(body)
+    assert seen["quality"] is False
+    body = GenerateRequest(
+        text="logo kerak",
+        ai="midjourney",
+        kind="image",
+        improve={"previous_prompt": "old", "feedback": ["x"]},
+    )
+    await _collect(body)
+    assert seen["quality"] is True

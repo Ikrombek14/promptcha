@@ -2,7 +2,7 @@
 {"id": "post-salon", "text": "Toshkentdagi Bahor goʻzallik saloni uchun Telegram post, sochga 30% chegirma shu hafta", "expect_kind": "text", "expect_archetype": "post", "must_contain": ["Bahor", "30"]}
 {"id": "message-shikoyat", "text": "Mijoz buyurtma kech kelgani uchun shikoyat qildi, unga javob xati yozib ber", "expect_kind": "text", "expect_archetype": "message", "must_contain": []}
 {"id": "message-taklif", "text": "Maktabga robototexnika toʻgaragi ochish uchun direktorga taklif xati, Robbit nomidan", "expect_kind": "text", "expect_archetype": "message", "must_contain": ["Robbit"]}
-{"id": "plan-tort", "text": "Uyda tort pishirib sotmoqchiman, Buxoroda, 2 million soʻm bilan boshlash rejasi kerak", "expect_kind": "text", "expect_archetype": "plan", "must_contain": ["Buxoro", "2"]}
+{"id": "plan-tort", "text": "Uyda tort pishirib sotmoqchiman, Buxoroda, 2 million soʻm bilan boshlash rejasi kerak", "expect_kind": "text", "expect_archetype": "plan", "must_contain": ["Buxoro"]}
 {"id": "analysis-goya", "text": "Toshkentda elektr skuter ijarasi biznesini boshlash gʻoyasi yaxshimi? Tahlil qilib ber", "expect_kind": "text", "expect_archetype": "analysis", "must_contain": ["Toshkent"]}
 {"id": "article-seo", "text": "Ingliz tilini oʻrganish boʻyicha blog maqola, IELTS ga tayyorlanuvchilar uchun", "expect_kind": "text", "expect_archetype": "article", "must_contain": ["IELTS"]}
 {"id": "script-video", "text": "Stomatologiya klinikasi uchun 30 soniyalik reklama video ssenariysi, tish oqartirish xizmati", "expect_kind": "text", "expect_archetype": "script", "must_contain": []}

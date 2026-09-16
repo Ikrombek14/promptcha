@@ -59,7 +59,7 @@ async def test_stream_raises_midstream_error_after_first_chunk(flaky):
 
 
 async def test_pipeline_resets_and_retries_generate(flaky, monkeypatch):
-    async def fake_parse(system, user, schema, max_tokens=600, light=False):
+    async def fake_parse(system, user, schema, max_tokens=600, tier="quality"):
         if schema is Classification:  # arxetip uchun har doim (keshdan) chaqiriladi
             return Classification(kind="image", confidence=0.9, tools=["midjourney"])
         if schema is PlanResult:

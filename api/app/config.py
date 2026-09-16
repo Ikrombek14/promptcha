@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     gemini_thinking_level: str = "low"  # minimal | low | medium | high | "" (oʻchirilgan)
     gemini_fallback_models: str = ""  # 429/503 boʻlsa navbat bilan (vergul bilan)
 
+    openai_api_key: str = ""
+    openai_model: str = "gpt-5.1"
+    openai_light_model: str = "gpt-5-mini"
+    openai_fallback_models: str = "gpt-5-mini,gpt-4.1"
+
     groq_api_key: str = ""
     groq_model: str = "openai/gpt-oss-120b"
     groq_fallback_models: str = "openai/gpt-oss-20b,qwen/qwen3.8-27b"
@@ -69,8 +74,10 @@ class Settings(BaseSettings):
     custom_fallback_models: str = ""
 
     anthropic_api_key: str = ""
-    anthropic_model: str = "claude-sonnet-5"  # prompt va tekshiruv
-    anthropic_light_model: str = "claude-haiku-4-5-20251001"  # tahlil va reja (light=True)
+    # Odatiy model: prompt, tekshiruv, tahlil — playbook'ni toʻliq bajaradi va tez yozadi
+    anthropic_model: str = "claude-haiku-4-5"
+    # Faqat «Yaxshilash» uchun: sifat tezlikdan ustun (foydalanuvchi ataylab kutadi)
+    anthropic_quality_model: str = "claude-sonnet-5"
 
     google_client_id: str = ""
     google_client_secret: str = ""

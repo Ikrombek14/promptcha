@@ -223,29 +223,30 @@ def test_light_provider_order_is_separate(monkeypatch):
     get_settings.cache_clear()
     try:
         assert llm.providers() == ["anthropic", "groq"]
-        assert llm.providers(light=True) == ["groq", "anthropic"]
+        assert llm.providers(fast=True) == ["groq", "anthropic"]
         monkeypatch.setenv("AI_PROVIDERS_LIGHT", "")
         get_settings.cache_clear()
-        assert llm.providers(light=True) == ["anthropic", "groq"]
+        assert llm.providers(fast=True) == ["anthropic", "groq"]
     finally:
         get_settings.cache_clear()
 
 
-def test_anthropic_light_model_and_temperature_rule(monkeypatch):
+def test_anthropic_models_caching_and_temperature_rule(monkeypatch):
     from app.ai import client
     from app.config import get_settings
 
-    monkeypatch.setenv("ANTHROPIC_MODEL", "claude-sonnet-5")
-    monkeypatch.setenv("ANTHROPIC_LIGHT_MODEL", "claude-haiku-4-5-20251001")
+    monkeypatch.setenv("ANTHROPIC_MODEL", "claude-haiku-4-5")
+    monkeypatch.setenv("ANTHROPIC_QUALITY_MODEL", "claude-sonnet-5")
     get_settings.cache_clear()
     try:
-        heavy = client.request_kwargs(max_tokens=300)
-        light = client.request_kwargs(max_tokens=300, light=True)
-        assert (
-            heavy["model"] == "claude-sonnet-5" and "extra_body" not in heavy
-        )  # 5-oila temperature rad etadi
-        assert light["model"] == "claude-haiku-4-5-20251001" and light["extra_body"] == {
-            "temperature": 0.4
-        }
+        normal = client.request_kwargs(max_tokens=300)
+        quality = client.request_kwargs(max_tokens=300, quality=True)
+        # Haiku 4.5 temperature qabul qiladi, Sonnet 5 esa rad etadi (400 «deprecated»)
+        assert normal["model"] == "claude-haiku-4-5"
+        assert normal["extra_body"] == {"temperature": 0.4}
+        assert quality["model"] == "claude-sonnet-5" and "extra_body" not in quality
+        assert client.cached_system("SYSTEM") == [
+            {"type": "text", "text": "SYSTEM", "cache_control": {"type": "ephemeral"}}
+        ]
     finally:
         get_settings.cache_clear()

@@ -108,8 +108,11 @@ async def classify(text: str) -> Classification:
         f"Tool catalog (id, name, supported kinds, popularity, strengths):\n{classifier_guide()}\n"
         "tools: return 2 or 3 tool ids, BEST FIRST. Pick only tools whose supported kinds include "
         "the chosen kind. Prefer the best fit for the concrete task; among equally good tools "
-        "prefer the more popular one. Give at most one niche tool. Rules of thumb: a flyer/poster/"
-        "logo/banner the user wants to SEE as a picture → kind=image (Midjourney, Ideogram for "
+        "prefer the more popular one. Give at most one niche tool.\n"
+        "Rules of thumb: a social-media POST (Instagram/Telegram/Facebook post, eʼlon, caption) is "
+        "kind=text — the words to publish — unless the user explicitly asks for a picture, banner, "
+        "poster, story image or design (rasm, surat, banner, poster, dizayn, kreativ). A flyer/"
+        "poster/logo/banner the user wants to SEE as a picture → kind=image (Midjourney, Ideogram for "
         "readable text, ChatGPT, Canva for editable layouts); a brief for a human designer → "
         "kind=design (Claude/ChatGPT); a spoken/narrated video with a presenter → heygen; voice-over "
         "only → elevenlabs; research with sources/prices/comparisons → perplexity; slide deck → gamma; "
@@ -121,7 +124,7 @@ async def classify(text: str) -> Classification:
     cached = _cache_get(_classify_cache, key)
     if cached:
         return cached.model_copy(deep=True)
-    result = await llm.parse(system, text, Classification, max_tokens=400, light=True)
+    result = await llm.parse(system, text, Classification, max_tokens=400, tier="fast")
     # Katalogga mos kelmaydigan yoki turga toʻgʻri kelmaydigan vositalarni tozalash
     ok = [t for t in dict.fromkeys(result.tools) if result.kind in TOOLS[t].kinds]
     if not ok:
@@ -191,7 +194,7 @@ async def plan(
         text,
         PlanResult,
         max_tokens=900,
-        light=True,
+        tier="fast",
     )
     questions = []
     for q in result.questions[:2]:
@@ -274,11 +277,16 @@ def _generate_system(
             "with proper capitalization, wherever a name is needed (logo text, headline, title). "
             "Never replace a given name with generic words like BRAND, COMPANY, NAME or a "
             "[placeholder]. Use [placeholders] only for facts the user did NOT give (phone, address, "
-            "price). The 'no brands' rule in the tool guide is about OTHER companies' brands and "
-            "artists used as style references — it never applies to the user's own name. "
+            "price). Place names keep the user's spelling (Toshkent, Samarqand, Buxoro) — do not "
+            "translate them to English forms. The 'no brands' rule in the tool guide is about "
+            "OTHER companies' brands and artists used as style references — it never applies to "
+            "the user's own name. "
             "This rule wins over the brief: a name written in <request> is never a placeholder "
             "even if the brief lists that id under `missing`. Copy names character by character, "
             "including the ʻ apostrophe (oʻ, gʻ).\n"
+            f"LENGTH: the finished prompt is {'60–150' if kind in ('image', 'video') else '150–350'} "
+            "words — long enough to be precise, short enough for a beginner to read and edit. "
+            "Cut anything that repeats or that the tool already does by default.\n"
             "SELF-CHECK before you answer: walk through the rubric; if a criterion fails, fix the "
             "prompt, then output it. Keep the playbook's must-include items and quality rules; "
             "do not add sections the task does not need.\n</task>"
@@ -327,6 +335,7 @@ async def generate(
     async for chunk in llm.stream(
         _generate_system(ai, kind, archetype, output_language, brief, context),
         _generate_user(text, answers, improve),
+        quality=improve is not None,
     ):
         yield chunk
 
@@ -358,7 +367,8 @@ async def review(
         + (f"<brief>\n{brief.model_dump_json(exclude_defaults=True)}\n</brief>\n" if brief else "")
         + f"<prompt>\n{prompt}\n</prompt>"
     )
-    result = await llm.parse(system, user, ReviewResult, max_tokens=700)
+    # Tekshiruv foydalanuvchi promptni oʻqiyotganda boʻladi — tez zanjir yetarli
+    result = await llm.parse(system, user, ReviewResult, max_tokens=700, tier="fast")
     result.notes = [_localize(n, locale) for n in result.notes[:4]]
     for c in result.criteria:
         c.note = _localize(c.note, locale)
