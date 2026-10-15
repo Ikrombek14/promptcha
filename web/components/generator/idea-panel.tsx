@@ -552,13 +552,14 @@ function ModelCard({
             style={{ background: dot }}
           />
           <span className="truncate">{name}</span>
-          {version && (
-            <span className="shrink-0 font-mono text-label-sm font-medium text-subtle">
-              {version}
-            </span>
-          )}
         </span>
-        <span className="text-body-sm font-medium text-muted">{sub}</span>
+        {/* Versiya tavsif qatorida — uzun nom bilan birga sigʻsin */}
+        <span className="min-w-0 text-body-sm font-medium text-muted">
+          {version && (
+            <span className="font-mono text-label-sm text-subtle">{version} · </span>
+          )}
+          {sub}
+        </span>
       </span>
       {on && (
         <span
