@@ -20,6 +20,7 @@ from fastapi import HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import get_settings
 from app.db import SessionLocal
 from app.models import LlmCall, Prompt, UsageLog, User
 from app.schemas import GenerateRequest
@@ -131,6 +132,8 @@ async def check_action_quota(
     base = ACTION_DAILY_LIMITS.get(action)
     if base is None:
         return
+    if get_settings().app_env != "production":
+        base *= 50  # lokal sinov va eval chegaraga urilmasin
     if user is not None and user.is_pro:
         return
     # Hisob egasi boʻyicha: kirganda uch barobar, mehmonda asosiy chegara

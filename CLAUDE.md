@@ -203,7 +203,7 @@ Boshqa (Nginx'li) server uchun umumiy yoʻriqnoma: `deploy/README.md`. Deploy'da
 - **Oqim:** classify (tur + **arxetip** + vositalar; kesh) → **plan** (brif + ≤2 savol, bitta chaqiruv; kesh, `/analyze` fonda oldindan tayyorlaydi — «Prompt yasash» bosilganda savollar 0 s) → generate (stream) → **review** (ball 0–100, 6 mezon, izohlar «qoida — nega»). LLM chaqiruvlar soni avvalgidek 3 ta. SSE hodisa nomlari oʻzgarmagan; `explain` ga `score`, `criteria` qoʻshildi; `classify` ga `archetype`.
 - **Playbook'lar** `system_prompts/playbooks/<kind>/<archetype>.md` (27 ta; text: post/message/article/plan/analysis/script/learn/general; image: logo/poster/product/portrait/scene/general; video: ad/reel/story/talking/general; app: mvp/feature/general; design: brand/ui/slides/print/general). Format qatʼiy: `# Title` + `## Required facts` (`- id: what | ask: … | default: …`) + `## Must include` + `## Quality rules` + `## Avoid`; `tests/test_playbooks.py` tekshiradi. Loader `ai/prompts.py` (`playbook`, `archetypes`, `normalize_archetype`). P57 qoidalari oʻz soʻzimizda shu fayllarda.
 - **Brif** (`schemas.Brief`): goal, deliverable, audience, tone, answer_language, constraints, facts (foydalanuvchi bergan), missing, success_criteria, framework, tool_params. Javoblar brifga LLM'siz qoʻshiladi (`apply_answers`). Savol filtri: variantlardan biri foydalanuvchi matnida boʻlsa savol berilmaydi, fakt avtomatik olinadi (`_option_said_in_text`). FACTS RULE brifdan ustun: matndagi nom hech qachon placeholder boʻlmaydi.
-- **Rubrika** (`prompts.RUBRIC`, 6 mezon) generate'da oʻz-oʻzini tekshirish va review'da baholash uchun bir xil. Ball < 75 → frontend «Yaxshilash» tugmasi: `GenerateRequest.improve{previous_prompt, feedback}` — savolsiz qayta yozish (bitta generatsiya sarflanadi).
+- **Rubrika** (`prompts.RUBRIC`, **7 mezon**) generate'da oʻz-oʻzini tekshirish va review'da baholash uchun bir xil. 7-mezon `consistent` (2026-10-15): takror boʻlim/qator, qarama-qarshilik, playbook talab qilgan blokning yoʻqligi, qavssiz joʻrik, vosita bajara olmaydigan vaʼda. Har mezon **0–10 ball** (`ok` ball ≥ 7 dan hisoblanadi). Ball < 75 → frontend «Yaxshilash» tugmasi: `GenerateRequest.improve{previous_prompt, feedback}` — savolsiz qayta yozish (bitta generatsiya sarflanadi).
 - **Provayder taqsimoti (2026-09-16, oʻlchangan):** `llm.parse(..., tier=...)` uch daraja — `quality` (`AI_PROVIDERS`: anthropic,groq,gemini…), `fast` (`AI_PROVIDERS_LIGHT`: groq,anthropic,gemini — asosiy modellar), `tiny` (yengil zanjir + `*_LIGHT_MODEL`). Bosqichlar: **generate → Anthropic Claude Haiku 4.5** (playbook'ni toʻliq bajaradi; oʻlchov: analysis promptida gpt-oss faqat SWOT+risk bergan, Haiku qarshi argument, ssenariy, taxminlar, muxolif nuqtai nazarni ham bergan), **classify/plan/review/facts → Groq gpt-oss-120b** (tez; 429 boʻlsa Anthropic zaxira, sekin Gemini'ga tushmaydi), **«Yaxshilash» → Claude Sonnet 5** (`llm.stream(..., quality=True)`; sifat tezlikdan ustun, ~18 s). Anthropic system prompti `cache_control` bilan keshlanadi. Oʻlchangan tezlik (prod): tahlil ~1–6 s (keshlansa 0), savollar keshdan ~0,1 s, prompt 5–9 s (birinchi harf ~1–4 s), jami 7–10 s.
 - **Narx (Anthropic, 2026-09):** Haiku 4.5 $1/$5 per 1M token, Sonnet 5 $2/$10. Bitta generatsiya ≈ 2,6k kirish + 0,4k chiqish → **~0,5 sent**; «Yaxshilash» ~1,5 sent. Groq tekin tarifi zaxira boʻlib qoladi (6k TPM har model uchun alohida). OpenAI ham provayder sifatida ulangan (`OPENAI_API_KEY`, `gpt-5.1`/`gpt-5-mini`) — hisobga kredit qoʻshilsa `AI_PROVIDERS` ga qoʻshiladi.
 - `uz_fix` faqat harf oldidagi apostrofni tuzatadi (qoʻshtirnoq ’ soʻz oxirida tegilmaydi).
@@ -239,12 +239,57 @@ fayllar koʻriladi**.
   rangli boʻlib qoladi (avval «hammasi yoki hech nima» edi). Boʻshliqlar farq qilsa `\s+` bilan
   topiladi; natija baribir harfma-harf asl prompt boʻladi.
 - **Nisbat** (`ratio`: 1:1, 4:5, 16:9, 9:16) faqat rasm/video turlarida koʻrsatiladi va soʻrovga qoʻshiladi.
-- **«Gʻoyani boyitish»** — `POST /api/prompts/enrich`; **ovoz bilan aytish** — brauzerning Web Speech API'si
-  (qoʻllab-quvvatlamasa tugma koʻrinmaydi).
-- **«Tez oʻzgartirish»** chiplari (`lib/quick-edits.ts`) — mavjud `improve` oqimi orqali: yorliq foydalanuvchi
-  tilida, modelga ketadigan koʻrsatma inglizcha. Bitta bosish = bitta generatsiya.
+- **Olib tashlangan (2026-10-15, egasi qarori «ortiqchasini olib tashla»):** «Ovoz bilan aytish» tugmasi
+  (brauzer Web Speech API'si oʻzbekchani tanimaydi — C.2 da haqiqiy xizmat bilan qaytadi), «Gʻoyani boyitish»
+  tugmasi (endpoint `POST /api/prompts/enrich` qoladi), «Tez oʻzgartirish» chiplari (B.1 dagi «90+ ga yetkazish»
+  oʻrnini bosadi), tanlovdagi ✦ belgisi, anatomiya kartasidagi parcha, chapdagi ikkinchi kunlik hisoblagich.
+- **Joʻriklar koʻrinadi:** prompt ostida «Toʻldirish kerak: [RESTORAN NOMI] [NARX]» — nimani almashtirish
+  kerakligi darhol bilinadi (`result-panel.tsx`, `PLACEHOLDER_RE`).
 - **Kutubxona:** `POST /api/prompts/{id}/save` — tugma faqat kirgan foydalanuvchida (`done` hodisasidagi
   `prompt_id` boʻlsa).
+
+### Sifat qoidalari (2026-10-15) — «100% aniqlik» ishi
+
+Sabab: egasi yuborgan menyu promptida «Biznes nomi» haqiqiy nom kabi yozilgan, «Ichimliklar» ikki marta
+takrorlangan, tuzilma yoʻq edi — ball esa 82 edi. Yaʼni rubrika bu nuqsonlarni koʻrmasdi.
+
+- **`PLACEHOLDER_RULE`** (`ai/prompts.py`): nomaʼlum fakt faqat `[KATTA HARF, QAVSDA]`, bir fakt — bitta token,
+  oʻylab topilgan nom/narx/sana/manzil taqiqlangan. Generate'ga ham, review'ga ham beriladi.
+- **`STRUCTURE`**: playbook'ning `Must include` roʻyxati — skelet; uchtadan ortiq blok boʻlsa prompt sarlavhali
+  bloklar bilan yoziladi, bitta uzun xatboshi bilan emas.
+- **`facts_kept`**: brifdagi `missing` roʻyxati joʻrik talabi emas — oqilona tanlangan standart (A4, uslub)
+  kamchilik hisoblanmaydi; joʻrik faqat tayyor ishda koʻrinadigan narsa uchun (nom, narx, telefon, rasm).
+- **Rangli boʻlaklar 4–6 ta va iborali** — avval butun prompt boʻyalib, rang maʼnosini yoʻqotardi.
+- **`ReviewResult.criteria`** chegarasi 8 (7-mezon sigʻishi uchun).
+- **Eval** (`api/evals/`): 20 ta haqiqiy soʻrov → `run.py` + **`checks.py`** (determinal, LLM'siz):
+  qavssiz joʻrik («Biznes nomi»), takror boʻlim/qator, joʻrik shakli, bir faktga ikki token, yoʻqolgan fakt,
+  uzunlik. Oʻtish sharti: tekshiruvlar + tur toʻgʻri + ball ≥ 80 + `consistent` ≥ 8.
+  Ishlatish: `uv run python evals/run.py --base http://127.0.0.1:8001 --pause 8`.
+
+Oʻlchangan farq (bir xil gʻoya «restoran uchun menyu», savolga javobsiz): avval 82 ball, «Biznes nomi» ochiq
+matn, takror boʻlim; keyin **92 ball**, `[RESTORAN NOMI]`/`[NARX]`, takror yoʻq, 6–8 band, 14/11 pt, CMYK.
+
+### Mahsulot hodisalari (2026-10-15) — A.1, `docs/promptcha-redesign/TASKS.md`
+
+- `events` jadvali (migratsiya 0005) + `prompts.criteria/feedback/feedback_note`.
+- Serverdan: `type_detected`, `prompt_generated` (ball va 6 mezon balli), `limit_reached`.
+  Brauzerdan (`lib/events.ts`, `POST /api/events`): `idea_submitted`, `questions_answered`,
+  `prompt_copied`, `prompt_feedback`.
+- **Ishonch chegarasi:** brauzer faqat `CLIENT_EVENT_NAMES` dagi hodisalarni yubora oladi — `prompt_generated`
+  kabi server hodisalari rad etiladi (aks holda voronka raqamlarini toʻqib boʻlardi); egalik serverdan olinadi.
+- Admin → **Voronka**: gʻoya → prompt → nusxa → «ishladi», tur kesimi, oʻrtacha ball (`/api/admin/funnel`).
+- «Prompt ishladimi?»: `GET /api/prompts/feedback/pending` (6 soatdan eski, javobsiz), `POST /{id}/feedback`.
+
+### Xavfsizlik qoʻshimchalari (2026-10-15)
+
+- `analyze`, `enrich`, `translate` — generate limitidan tashqarida edi, endi **kunlik chegara**
+  (`ACTION_DAILY_LIMITS`: 60/20/30; kirganga 3×, Pro cheklovsiz) + **IP shifti** (`ACTION_IP_CEILING = 4×`,
+  tekin hisob ochib kattalashtirib boʻlmasin). Dev'da chegara 50× (eval uchun).
+- Hisob **egasi boʻyicha**: kirganda `user_id`, mehmonda IP. Baza xatosi → 503 (fail-closed).
+- `client_ip` endi `X-Forwarded-For` ning **oxirgi** qiymatini oladi (proxy qoʻshgani). Birinchisi mijoz
+  yozgani — u bilan limitni aylanib oʻtish yoki begonaning hisobini yoqish mumkin edi. `X-Real-IP`
+  ishlatilmaydi. Caddyfile shablonida ham `header_up X-Forwarded-For {remote_host}` (serverda qoʻlda qoʻllanadi).
+- Daqiqalik: generate 10, analyze 20, enrich/translate 10, events 60.
 
 ## Qabul qilingan qarorlar (2026-09-14)
 
@@ -273,11 +318,12 @@ fayllar koʻriladi**.
 - [x] Generator sahifasi — redizayn v2 (`components/generator/*`), jonli
 - [x] Google auth + guest → user ko'chirish (`/login`, header menyu; Google kalitlari serverga qoʻyilishi kerak)
 - [x] Admin panel `/admin` — statistika (faol foydalanuvchilar, tokenlar vosita/provayder/bosqich/foydalanuvchi kesimida), foydalanuvchilar (Pro/bonus), qoʻlda toʻlov, limitlar
-- [ ] Onlayn toʻlov (Payme/Click) — `payments` jadvali tayyor
+- [ ] Onlayn toʻlov (Payme/Click) — **2026-10-15 da toʻxtatildi** (egasi: «hozircha toʻlov kerak emas»); `payments` jadvali va qoʻlda toʻlov tayyor, shartnoma kelganda ulanadi
 - [x] Tarix va Kutubxona sahifalari (`/history`, `/library`) — saqlash, qidiruv, holatlar
 - [ ] UserContext — kontekst xotirasi va settings'da ko'rsatish
 - [ ] uz/ru/en — UI matnlari va pipeline'ga locale
 - [ ] Landing
+- [x] Hodisalar jurnali + admin voronkasi, «Prompt ishladimi?», sifat qoidalari va eval
 - [x] Deploy — https://promptcha.uz jonli, 169.58.130.201, GitHub Actions (`git push origin main`)
 
 Bajarilganini `[x]` qil. Yangi qaror qabul qilinsa — shu faylga yoz.

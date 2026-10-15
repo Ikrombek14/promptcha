@@ -16,7 +16,12 @@ from pathlib import Path
 
 import httpx
 
+from checks import run_checks
+
 HERE = Path(__file__).parent
+import sys
+
+sys.path.insert(0, str(HERE))
 HEADERS = {"X-Requested-With": "promptcha", "Origin": "http://localhost:3000"}
 
 
@@ -80,23 +85,43 @@ def evaluate(c: httpx.Client, base: str, item: dict, locale: str) -> dict:
     res["words"] = len(prompt.split())
     res["prompt"] = prompt
     res["notes"] = ex.get("notes", [])
+
+    # Determinal tekshiruvlar — ball LLM'dan, bular matnning oʻzidan
+    crit = {c["name"]: c.get("score") for c in ex.get("criteria", [])}
+    res["consistent"] = crit.get("consistent")
+    checks = run_checks(prompt, res["kind"], item.get("must_contain", []))
+    res["checks_ok"] = checks["ok"]
+    res["problems"] = checks["problems"]
+    res["pass"] = bool(
+        checks["ok"]
+        and res["kind_ok"]
+        and (res["score"] or 0) >= 80
+        and (res["consistent"] or 0) >= 8
+        and not res["error"]
+    )
     return res
 
 
 def to_markdown(rows: list[dict]) -> str:
     lines = [
-        "| id | tur | arxetip | savollar | ball | kamchilik | faktlar | tahlil s | prompt s |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "| id | oʻtdi | tur | ball | consistent | nuqsonlar | prompt s |",
+        "|---|---|---|---|---|---|---|",
     ]
     for r in rows:
+        probs = "; ".join(
+            f"{k}: {', '.join(str(x) for x in v)}" for k, v in (r.get("problems") or {}).items()
+        )
         lines.append(
-            f"| {r['id']} | {'✓' if r['kind_ok'] else '✗ ' + r['kind']} | "
-            f"{'✓' if r['archetype_ok'] else '✗ ' + str(r['archetype'])} | "
-            f"{', '.join(r['questions']) or '—'} | {r['score'] if r['score'] is not None else 'xato'} | "
-            f"{', '.join(r['failed']) or '—'} | {'✓' if r['facts_ok'] else '✗ ' + ', '.join(r['missing_facts'])} | "
-            f"{r['analyze_s']} | {r['generate_s']} |"
+            f"| {r['id']} | {'✅' if r.get('pass') else '❌'} | "
+            f"{'✓' if r['kind_ok'] else '✗ ' + r['kind']} | "
+            f"{r['score'] if r['score'] is not None else 'xato'} | "
+            f"{r.get('consistent') if r.get('consistent') is not None else '—'} | "
+            f"{probs or (r.get('error') or '—')} | {r['generate_s']} |"
         )
     scores = [r["score"] for r in rows if r["score"] is not None]
+    passed = sum(1 for r in rows if r.get("pass"))
+    lines.append("")
+    lines.append(f"**Oʻtdi: {passed}/{len(rows)}**")
     if scores:
         lines.append("")
         lines.append(
@@ -159,8 +184,13 @@ def main() -> None:
                     "notes": [],
                 }
             rows.append(r)
+            probs = "; ".join(
+                f"{k}={v}" for k, v in (r.get("problems") or {}).items()
+            )
             print(
-                f"{r['id']:16} kind={'ok' if r['kind_ok'] else r['kind']} arch={'ok' if r['archetype_ok'] else r['archetype']} q={r['questions']} score={r['score']} facts={'ok' if r['facts_ok'] else r['missing_facts']} t={r['generate_s']}s {('ERR ' + str(r['error'])) if r.get('error') else ''}"
+                f"{'OK ' if r.get('pass') else 'XATO'} {r['id']:16} kind={'ok' if r['kind_ok'] else r['kind']} "
+                f"score={r['score']} consistent={r.get('consistent')} t={r['generate_s']}s "
+                f"{probs} {('ERR ' + str(r['error'])) if r.get('error') else ''}"
             )
 
     out_dir = HERE / "results"

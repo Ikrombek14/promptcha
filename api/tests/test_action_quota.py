@@ -15,6 +15,18 @@ pytestmark = pytest.mark.anyio
 check = usage.check_action_quota
 
 
+@pytest.fixture(autouse=True)
+def _as_production(monkeypatch):
+    """Chegara prod qiymatlari bilan tekshiriladi (dev'da u ataylab 50× kengaytirilgan)."""
+    from app.config import get_settings
+
+    monkeypatch.setenv("APP_ENV", "production")
+    get_settings.cache_clear()
+    yield
+    monkeypatch.delenv("APP_ENV", raising=False)
+    get_settings.cache_clear()
+
+
 class _Session:
     """count() → `used` qaytaradi (ikkala soʻrov uchun ham: egasi va IP shifti)."""
 
