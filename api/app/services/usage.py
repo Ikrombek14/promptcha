@@ -117,7 +117,14 @@ async def check_action_quota(
 
     Bu endpointlar generate limitiga kirmaydi, lekin har biri pul turadi (LLM yoki
     tarjima xizmati). Chegara boʻlmasa, saytni ochmasdan ham skript bilan hisobni
-    boʻshatib yuborish mumkin edi. Baza ishlamasa — oʻtkazamiz (bu asosiy oqim emas).
+    boʻshatib yuborish mumkin edi.
+
+    Hisob **kim uchun berilgan boʻlsa, oʻsha boʻyicha** yuritiladi: kirgan foydalanuvchida
+    `user_id`, mehmonda IP. Aks holda kirgan odam IP almashtirib chegarani yangilardi,
+    bitta IP ortidagi begona mehmonlar esa bir-birining hisobini yeyardi.
+
+    Baza ishlamasa — 503 (fail-closed), xuddi generate limiti kabi: oʻlchab boʻlmaydigan
+    chaqiruv pul sarflamasligi kerak.
     """
     limit = ACTION_DAILY_LIMITS.get(action)
     if limit is None:
@@ -126,19 +133,16 @@ async def check_action_quota(
         if user.is_pro:
             return
         limit *= 3
+    owner = UsageLog.user_id == user.id if user is not None else UsageLog.ip == ip
     try:
         used = await session.scalar(
             select(func.count())
             .select_from(UsageLog)
-            .where(
-                UsageLog.action == action,
-                UsageLog.ip == ip,
-                UsageLog.created_at >= _since(),
-            )
+            .where(UsageLog.action == action, owner, UsageLog.created_at >= _since())
         )
     except Exception:
-        log.warning("action limitini oʻqib boʻlmadi: %s", action, exc_info=True)
-        return
+        log.exception("action limitini oʻqib boʻlmadi: %s", action)
+        raise HTTPException(status_code=503, detail=DB_DOWN) from None
     if (used or 0) >= limit:
         events.record(
             "limit_reached",

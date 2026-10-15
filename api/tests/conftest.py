@@ -42,6 +42,9 @@ def _no_db(monkeypatch):
 
     monkeypatch.setattr(usage, "check_quota", _ok)
     monkeypatch.setattr(usage, "check_guest_quota", _ok)
+    # Yordamchi chaqiruvlar chegarasi bazaga qaraydi — testlarda baza yoʻq
+    monkeypatch.setattr(usage, "check_action_quota", _ok)
+    monkeypatch.setattr(usage, "record_action", _ok)
     # jobs.py `from app.services import usage` qiladi — jobs.usage oʻsha modul, shu orqali patch
     monkeypatch.setattr(jobs.usage, "record_usage", _ok)
     monkeypatch.setattr(jobs.usage, "record_llm_calls", _ok)
