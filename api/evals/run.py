@@ -16,7 +16,7 @@ from pathlib import Path
 
 import httpx
 
-from checks import run_checks
+from app.ai import quality
 
 HERE = Path(__file__).parent
 import sys
@@ -89,9 +89,17 @@ def evaluate(c: httpx.Client, base: str, item: dict, locale: str) -> dict:
     # Determinal tekshiruvlar — ball LLM'dan, bular matnning oʻzidan
     crit = {c["name"]: c.get("score") for c in ex.get("criteria", [])}
     res["consistent"] = crit.get("consistent")
-    checks = run_checks(prompt, res["kind"], item.get("must_contain", []))
-    res["checks_ok"] = checks["ok"]
-    res["problems"] = checks["problems"]
+    lo, hi = (50, 170) if res["kind"] in ("image", "video") else (120, 420)
+    problems: dict[str, list] = {}
+    found = quality.defects(prompt, item["text"])
+    if found:
+        problems["nuqson"] = found
+    if res["missing_facts"]:
+        problems["yoʻqolgan fakt"] = res["missing_facts"]
+    if not (lo <= res["words"] <= hi):
+        problems["uzunlik"] = [f"{res['words']} soʻz ({lo}–{hi})"]
+    res["checks_ok"] = not problems
+    res["problems"] = problems
     res["pass"] = bool(
         checks["ok"]
         and res["kind_ok"]

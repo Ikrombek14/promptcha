@@ -79,8 +79,13 @@ def bad_placeholders(prompt: str) -> list[str]:
     return out
 
 
-def duplicates(prompt: str) -> list[str]:
-    """Takrorlangan boʻlim nomi yoki uzun qator."""
+def duplicates(prompt: str, user_text: str = "") -> list[str]:
+    """Takrorlangan boʻlim nomi yoki uzun qator.
+
+    Foydalanuvchi oʻzi yozgan nom (brend, joy) takrorlansa — bu nuqson emas: logotip
+    brifida nom bir necha marta kelishi tabiiy.
+    """
+    said = user_text.lower()
     out: list[str] = []
 
     seen: dict[str, int] = {}
@@ -88,7 +93,7 @@ def duplicates(prompt: str) -> list[str]:
     for q in QUOTED_RE.findall(prompt):
         text = q.strip()
         key = text.lower()
-        if len(key) >= 3:
+        if len(key) >= 3 and (not said or key not in said):
             seen[key] = seen.get(key, 0) + 1
             original.setdefault(key, text)
     out += [f'takroriy boʻlim: "{original[k]}" ×{v}' for k, v in seen.items() if v > 1]
@@ -113,7 +118,7 @@ def inconsistent_tokens(prompt: str) -> list[str]:
     return out
 
 
-def defects(prompt: str) -> list[str]:
+def defects(prompt: str, user_text: str = "") -> list[str]:
     """Topilgan nuqsonlar roʻyxati (boʻsh boʻlsa — prompt toza).
 
     Faqat **bahssiz** narsalar: joʻrik oʻrnidagi oddiy soʻz, takror, notoʻgʻri joʻrik shakli.
@@ -126,7 +131,7 @@ def defects(prompt: str) -> list[str]:
         )
     for bad in bad_placeholders(prompt):
         out.append(f"[{bad}] — joʻrik qisqa va KATTA HARFDA boʻlishi kerak")
-    out += duplicates(prompt)
+    out += duplicates(prompt, user_text)
     out += inconsistent_tokens(prompt)
     return out
 
@@ -192,7 +197,7 @@ def _drop_repeated_lines(prompt: str) -> str:
     return chr(10).join(out)
 
 
-def repair(prompt: str) -> tuple[str, list[str]]:
+def repair(prompt: str, user_text: str = "") -> tuple[str, list[str]]:
     """Mexanik tuzatib boʻladiganini tuzatadi; qolgan nuqsonlarni qaytaradi.
 
     Qaytgan roʻyxat boʻsh boʻlmasa — modeldan qayta yozish soʻraladi (`pipeline`).
@@ -201,4 +206,4 @@ def repair(prompt: str) -> tuple[str, list[str]]:
     fixed = _drop_repeated_lines(
         _fix_token_groups(_fix_placeholder_case(_fix_fake_values(prompt)))
     )
-    return fixed, defects(fixed)
+    return fixed, defects(fixed, user_text)

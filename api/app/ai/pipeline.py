@@ -307,9 +307,17 @@ def _generate_system(
             "words — long enough to be precise, short enough for a beginner to read and edit. "
             "Cut anything that repeats or that the tool already does by default.\n"
             f"{ratio_line(ratio, kind)}"
-            "SELF-CHECK before you answer: walk through the rubric; if a criterion fails, fix the "
-            "prompt, then output it. Keep the playbook's must-include items and quality rules; "
-            "do not add sections the task does not need.\n</task>"
+            "STRUCTURE: the playbook's `Must include` list is the skeleton — every item that "
+            "applies must appear, in that order. When the piece has more than three such blocks "
+            "(a layout brief, a spec, a plan), write them as short labelled blocks with a heading "
+            "line each, in the user's language, instead of one long paragraph.\n"
+            "SELF-CHECK before you answer, and fix what fails: (1) every rubric criterion; "
+            "(2) no sentence repeated and no section name used twice; (3) every unknown fact is a "
+            "bracketed ALL-CAPS placeholder and one fact always uses the same token; (4) nothing "
+            "promised that the target tool cannot do — write the export or setting in that tool's "
+            "own words; (5) every proper name, place and number written in <request> appears in "
+            "the prompt — copy them, never summarise them away. Keep the playbook's must-include "
+            "items and quality rules; do not add sections the task does not need.\n</task>"
         ),
         brief_block(brief.model_dump_json(exclude_defaults=True)) if brief else "",
         context_block(context),
@@ -462,6 +470,15 @@ async def review(
         "constraints, no_filler, consistent. Each gets score = 0-10 (10 = a professional would not touch it, "
         "7 = acceptable, 4 = clearly weak, 0 = missing). note = what exactly is missing, only when "
         f"score < 8 (short, concrete, in {locale_name(locale)}); otherwise an empty note. "
+        "`measurable` and `audience_tone` mean different things per kind — judge by what the "
+        "tool actually needs. Image/video: measurable = aspect ratio, shot type, number of key "
+        "elements, duration; audience_tone = where it will be used (marketplace, Instagram, a "
+        "book page) and the mood. Text/app/design: measurable = word or section counts, number "
+        "of screens or features, acceptance criteria; audience_tone = who reads it and the "
+        "language and tone. If the prompt already states it in the tool's own idiom "
+        "(`--ar 1:1`, `--v 7`, a stated duration, 'marketplace listing', a numbered feature "
+        "list), the criterion is satisfied — do not demand a prose restatement of what is "
+        "already there.\n"
         "For `facts_kept`, judge THE PROMPT, not the brief: a fact the prompt decided sensibly "
         "(page size, style, colour, printing method, tone) is NOT missing — a prompt that picks a "
         "reasonable default is better than one full of placeholders. Never ask for a placeholder "
@@ -651,7 +668,7 @@ async def run(
     # Determinal tekshiruv: joʻrik oʻrnidagi oddiy soʻz, takror, notoʻgʻri joʻrik shakli.
     # Mexanik tuzatiladiganini oʻzimiz tuzatamiz; qolgani (masalan takrorlangan boʻlim)
     # uchun modeldan **bir marta** qayta yozish soʻraymiz. Ikkalasi ham kamdan-kam boʻladi.
-    prompt, remaining = quality.repair(prompt)
+    prompt, remaining = quality.repair(prompt, body.text)
     if remaining:
         log.info("sifat nuqsonlari: %s", "; ".join(remaining))
         yield "reset", {}
@@ -673,7 +690,7 @@ async def run(
                 yield "delta", {"text": chunk}
             retry = "".join(fixed_parts).strip()
             if retry:
-                prompt, _ = quality.repair(retry)
+                prompt, _ = quality.repair(retry, body.text)
         except llm.MidStreamError:  # pragma: no cover — qayta yozish ham uzildi
             yield "reset", {}
             yield "delta", {"text": prompt}

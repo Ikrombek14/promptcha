@@ -298,8 +298,10 @@ def _openai_client(name: str):
         if name == "openrouter"
         else None
     )
+    # `max_retries=0`: 429 da SDK `Retry-After` ni hurmat qilib 50+ soniya kutardi —
+    # bizda esa oʻz zanjirimiz bor (keyingi model → keyingi provayder), u ancha tez.
     return openai.AsyncOpenAI(
-        base_url=base, api_key=key, max_retries=1, timeout=60.0, default_headers=headers
+        base_url=base, api_key=key, max_retries=0, timeout=60.0, default_headers=headers
     )
 
 
