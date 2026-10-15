@@ -59,7 +59,7 @@ export function LoginCard({ error, next }: Props) {
         animate="show"
         className="w-full max-w-[440px] rounded-[var(--radius)] border border-border bg-surface p-6 md:p-8"
       >
-        <h1 className="font-serif text-headline-lg text-text">{t("title")}</h1>
+        <h1 className="text-headline-lg font-extrabold tracking-tight text-text">{t("title")}</h1>
         <p className="mt-2 text-body-md text-muted">{t("subtitle")}</p>
 
         {error === "google" && (

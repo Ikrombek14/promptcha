@@ -8,28 +8,30 @@ import {
   useSyncExternalStore,
 } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { AnimatePresence, MotionConfig, motion } from "motion/react";
-import { LogIn, RotateCcw, Wand2 } from "lucide-react";
-import { Link } from "@/i18n/navigation";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Callout } from "@/components/ui/callout";
-import { StageIndicator } from "@/components/stage-indicator";
-import { AI_META } from "@/lib/ai-tools";
-import { DUR, EASE_OUT, fadeUp, springPop, swap } from "@/lib/motion";
-import type { Variants } from "motion/react";
-import { cn } from "@/lib/utils";
-import { Step1Input } from "@/components/steps/Step1Input";
-import { Step2Type } from "@/components/steps/Step2Type";
-import { Step3Ai } from "@/components/steps/Step3Ai";
-import { Step4Clarify } from "@/components/steps/Step4Clarify";
-import { Step5Result } from "@/components/steps/Step5Result";
-import { type Kind, type Locale } from "@/lib/ai-tools";
+import { AnimatePresence, MotionConfig } from "motion/react";
+import { Check, Copy, Pencil, RotateCcw, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { IdeaPanel } from "@/components/generator/idea-panel";
+import { ResultPanel } from "@/components/generator/result-panel";
+import {
+  ClarifyWaiting,
+  EmptyResult,
+  ErrorResult,
+  LoadingResult,
+} from "@/components/generator/result-states";
+import {
+  type Pick as ClarifyPick,
+  toAnswers,
+} from "@/components/generator/clarify-fields";
+import { AI_META, type Kind, type Locale } from "@/lib/ai-tools";
+import { type Ratio, RATIO_KINDS } from "@/lib/segments";
 import {
   ApiError,
   type ImproveBody,
   analyze,
   cancelJob,
   jobEvents,
+  savePrompt,
   startGenerate,
 } from "@/lib/api";
 import { type Draft, EMPTY_DRAFT, loadDraft, saveDraft } from "@/lib/draft";
@@ -48,13 +50,6 @@ import {
 } from "@/lib/auth";
 
 const getServerRemaining = () => null;
-
-// Boshqaruvlar guruhi: Yoʻnalish → AI → tugma → hisob, 80 ms qadam bilan; yashirinishi tez
-const controlsGroup: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
-  exit: { opacity: 0, y: 4, transition: { duration: 0.15 } },
-};
 
 export function Workbench() {
   const t = useTranslations("app");
@@ -96,11 +91,15 @@ export function Workbench() {
       ? t("guestLeft", { n: remaining })
       : null;
   const abortRef = useRef<AbortController | null>(null);
-  // Ish shu sessiyada jonli tugagan boʻlsa — vosita «ochilish» animatsiyasi (reload'da emas)
-  const [liveDoneJobId, setLiveDoneJobId] = useState<string | null>(null);
 
   const busy = s.phase === "loading" || s.phase === "streaming";
   const exhausted = remaining !== null && remaining <= 0;
+
+  // Savol javoblari (chapdagi chiplar) — ish tugagach tozalanadi
+  const [picks, setPicks] = useState<Record<string, ClarifyPick>>({});
+  // Mobil: natija chiqqach gʻoya paneli yigʻiladi, «Tahrirlash» bilan ochiladi
+  const [editing, setEditing] = useState(false);
+  const [copiedBar, setCopiedBar] = useState(false);
 
   // Kirgach guest promptlar hisobga koʻchiriladi (bir marta, xato boʻlsa joyida qoladi)
   const userId = user?.id ?? null;
@@ -158,7 +157,7 @@ export function Workbench() {
           "TimeoutError";
       // Yangi tahlil boshlangani uchun bekor qilingan boʻlsa — hech narsa qilmaymiz
       if (ctrl.signal.aborted && !timedOut) return;
-      // Tahlil boʻlmasa (xato yoki 8 s kechikish) ish davom etadi: mashhur uchlik, backend oʻzi aniqlaydi
+      // Tahlil boʻlmasa (xato yoki 8 s kechikish) ish davom etadi: mashhur uchlik
       patch({
         tools: ["chatgpt", "claude", "gemini"],
         analyzedText: text,
@@ -172,22 +171,16 @@ export function Workbench() {
     }
   }, [locale, patch]);
 
-  // Yozish paytida boshqaruvlar yashirin; 800 ms pauza yoki maydondan chiqish — koʻrsatiladi
-  const [typing, setTyping] = useState(false);
+  // Yozishdan 800 ms keyin (yoki maydondan chiqqanda) tahlil
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const settle = () => {
-    setTyping(false);
-    void maybeAnalyze();
-  };
   const onTextChange = (text: string) => {
     patch({ text });
-    setTyping(true);
     if (typingTimer.current) clearTimeout(typingTimer.current);
-    typingTimer.current = setTimeout(settle, 800);
+    typingTimer.current = setTimeout(() => void maybeAnalyze(), 800);
   };
   const onTextBlur = () => {
     if (typingTimer.current) clearTimeout(typingTimer.current);
-    settle();
+    void maybeAnalyze();
   };
   useEffect(
     () => () => {
@@ -195,8 +188,6 @@ export function Workbench() {
     },
     [],
   );
-  const showControls =
-    s.phase !== "idle" || (s.text.trim().length >= 6 && !typing);
 
   /** Ish hodisalariga ulanish: birinchi marta ham, yangilanishdan keyin ham shu. */
   const attach = useCallback(
@@ -216,6 +207,10 @@ export function Workbench() {
         notes: [],
         score: null,
         criteria: [],
+        segments: [],
+        parts: [],
+        promptId: null,
+        saved: false,
         error: null,
       });
 
@@ -251,6 +246,8 @@ export function Workbench() {
                 notes: finalNotes,
                 score: typeof ev.data.score === "number" ? ev.data.score : null,
                 criteria: ev.data.criteria ?? [],
+                segments: ev.data.segments ?? [],
+                parts: ev.data.parts ?? [],
               });
               break;
             case "done":
@@ -276,14 +273,16 @@ export function Workbench() {
                     locale,
                   });
                 }
-                setLiveDoneJobId(jobId);
                 patch({
                   prompt: finalPrompt,
                   phase: "done",
                   stage: "done",
                   savedJobId: jobId,
                   resolvedAi: ev.data.ai,
+                  promptId: ev.data.prompt_id ?? null,
+                  questions: [],
                 });
+                setPicks({});
               }
               break;
             case "error":
@@ -328,8 +327,13 @@ export function Workbench() {
         notes: [],
         score: null,
         criteria: [],
+        segments: [],
+        parts: [],
+        promptId: null,
+        saved: false,
         error: null,
         jobId: null,
+        answers: withAnswers,
       });
       try {
         // Tahlil turga ishonchli boʻlsa (≥ 0.7) — serverda qayta tasniflanmaydi
@@ -338,10 +342,12 @@ export function Workbench() {
           (cur.kindConfidence >= 0.7 && cur.analyzedText === cur.text.trim()
             ? cur.suggestedKind
             : null);
+        const useRatio = kind !== null && RATIO_KINDS.includes(kind);
         const jobId = await startGenerate({
           text: cur.text,
           ai: cur.ai,
           kind,
+          ratio: useRatio ? cur.ratio : null,
           answers: withAnswers,
           locale,
           output_language: "en",
@@ -379,30 +385,44 @@ export function Workbench() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * Yagona asosiy harakat. Savollar boʻlsa — belgilangan javoblar bilan,
+   * javob berilmaganlari «koʻrsatilmagan» boʻlib ketadi (savol ixtiyoriy).
+   */
   const start = () => {
     if (busy || exhausted) return;
+    setEditing(false);
+    if (s.questions.length) {
+      const picked = toAnswers(s.questions, picks);
+      const answers = Object.fromEntries(
+        s.questions.map((q) => [q.id, picked[q.id] ?? "(not specified)"]),
+      );
+      void run(answers, s.kind ?? s.suggestedKind);
+      return;
+    }
     patch({ answers: {}, questions: [], resolvedAi: null });
+    setPicks({});
     void run({}, s.kind);
   };
 
-  const continueWithAnswers = (a: Record<string, string>) => {
-    patch({ answers: a });
-    void run(a, s.kind ?? s.suggestedKind);
-  };
-
-  const skipClarify = () => {
-    const a = Object.fromEntries(
-      s.questions.map((q) => [q.id, "(not specified)"]),
-    );
-    patch({ answers: {} });
-    void run(a, s.kind ?? s.suggestedKind);
+  /** «Yaxshilash» va «Tez oʻzgartirish» — savolsiz qayta yozish. */
+  const improve = (feedback: string[]) => {
+    if (busy || exhausted || !s.prompt) return;
+    const fb = feedback.length
+      ? feedback
+      : s.criteria.filter((c) => !c.ok && c.note).map((c) => c.note);
+    void run(s.answers, s.kind ?? s.suggestedKind, {
+      previous_prompt: s.prompt,
+      feedback: fb,
+    });
   };
 
   /** Boshidan: matn, tanlovlar va natija tozalanadi (guest hisobi saqlanadi). */
   const resetAll = () => {
     abortRef.current?.abort();
     if (s.jobId && busy) void cancelJob(s.jobId);
-    setLiveDoneJobId(null);
+    setPicks({});
+    setEditing(false);
     setS({ ...EMPTY_DRAFT });
   };
 
@@ -412,300 +432,212 @@ export function Workbench() {
     patch({ phase: s.prompt ? "done" : "idle", jobId: null });
   };
 
+  const onSave = (saved: boolean) => {
+    if (!s.promptId) return;
+    patch({ saved });
+    savePrompt(s.promptId, saved).catch(() => patch({ saved: !saved }));
+  };
+
+  const copyBar = async () => {
+    try {
+      await navigator.clipboard.writeText(s.prompt);
+      setCopiedBar(true);
+      setTimeout(() => setCopiedBar(false), 1600);
+    } catch {
+      /* clipboard yoʻq */
+    }
+  };
+
   const showResult = s.phase === "streaming" || s.phase === "done";
   const resultAi = s.resolvedAi ?? s.ai ?? "chatgpt";
-  const loadingAi = s.resolvedAi ?? s.ai;
+  const hasResult = showResult && s.prompt.length > 0;
+  const kindForResult = s.kind ?? s.suggestedKind;
+  const collapsedOnMobile = hasResult && !editing;
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-0 flex-1 lg:overflow-hidden">
-        <div className="mx-auto grid min-w-0 max-w-[1312px] gap-4 px-4 py-4 md:px-6 lg:h-full lg:grid-cols-2">
-          {/* chap: kirish */}
-          <section className="flex min-h-0 min-w-0 flex-col gap-4 overflow-y-auto rounded-[var(--radius)] border border-border bg-surface p-4 md:p-5">
-            <h1 className="font-serif text-headline-md text-text">
-              {t("title")}
-            </h1>
-
-            <Step1Input
-              value={s.text}
-              onChange={onTextChange}
-              onBlur={onTextBlur}
-              onSubmit={start}
-              tall={!showControls}
-              disabled={busy}
-            />
-
-            <AnimatePresence initial={false}>
-              {showControls && (
-                <motion.div
-                  key="controls"
-                  className="flex flex-col gap-4"
-                  variants={controlsGroup}
-                  initial="hidden"
-                  animate="show"
-                  exit="exit"
-                >
-                  <motion.div variants={fadeUp}>
-                    <Step2Type
-                      value={s.kind}
-                      onChange={(kind) => patch({ kind })}
-                      suggested={s.suggestedKind}
-                      disabled={busy}
-                    />
-                  </motion.div>
-                  <motion.div variants={fadeUp}>
-                    <Step3Ai
-                      tools={s.tools}
-                      kind={s.kind ?? s.suggestedKind}
-                      value={s.ai}
-                      onChange={(ai) =>
-                        patch({ ai, aiPicked: true, resolvedAi: null })
-                      }
-                      analyzing={analyzing}
-                      disabled={busy}
-                    />
-                  </motion.div>
-
-                  <motion.div variants={fadeUp}>
-                    {busy ? (
-                      <Button
-                        variant="secondary"
-                        size="lg"
-                        className="w-full justify-between"
-                        onClick={stop}
-                      >
-                        <span className="inline-flex items-center gap-2">
-                          <Wand2 size={16} />
-                          {t("generating")}
-                        </span>
-                        <span className="hidden font-mono text-code-sm text-muted sm:inline">
-                          {t("stop")}
-                        </span>
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="primary"
-                        size="lg"
-                        className="w-full"
-                        disabled={s.phase === "clarify" || exhausted}
-                        onClick={start}
-                      >
-                        <Wand2 size={16} />
-                        {s.phase === "done" ? t("regenerate") : t("generate")}
-                      </Button>
-                    )}
-                  </motion.div>
-
-                  <motion.div variants={fadeUp}>
-                    <AnimatePresence mode="wait" initial={false}>
-                      {exhausted ? (
-                        <motion.div
-                          key="exhausted"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 6 }}
-                          transition={{ duration: DUR.slow, ease: EASE_OUT }}
-                        >
-                          <Callout
-                            tone="error"
-                            className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-                          >
-                            <motion.span
-                              initial={{ opacity: 0 }}
-                              animate={{
-                                opacity: 1,
-                                transition: { delay: 0.15 },
-                              }}
-                            >
-                              {user ? t("userExhausted") : t("guestExhausted")}
-                            </motion.span>
-                            {!user && (
-                              <motion.span
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{
-                                  opacity: 1,
-                                  scale: 1,
-                                  transition: { ...springPop, delay: 0.3 },
-                                }}
-                                className="shrink-0"
-                              >
-                                <Link
-                                  href="/login"
-                                  className={cn(
-                                    buttonVariants({
-                                      variant: "secondary",
-                                      size: "sm",
-                                    }),
-                                  )}
-                                >
-                                  <LogIn size={16} />
-                                  {t("loginGoogle")}
-                                </Link>
-                              </motion.span>
-                            )}
-                          </Callout>
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key={`left-${remainingLabel ?? "none"}`}
-                          {...swap}
-                          className="flex min-h-9 items-center justify-between gap-3"
-                        >
-                          <p
-                            className={cn(
-                              "font-mono text-code-sm",
-                              remaining === 1 ? "text-text" : "text-muted",
-                            )}
-                          >
-                            {remainingLabel}
-                          </p>
-                          {(s.text || s.phase !== "idle") && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={resetAll}
-                            >
-                              <RotateCcw size={14} />
-                              {t("reset")}
-                            </Button>
-                          )}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </section>
-
-          {/* oʻng: natija */}
-          <section className="relative flex min-h-[320px] min-w-0 flex-col overflow-y-auto rounded-[var(--radius)] border border-border bg-surface p-4 md:p-5">
-            {showResult && (
-              <motion.span
-                aria-hidden
-                initial={{ scaleY: 0, opacity: 0 }}
-                animate={{ scaleY: 1, opacity: 1 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-                className="absolute inset-y-0 left-0 w-0.5 origin-top rounded-l-[var(--radius)] bg-accent"
-              />
-            )}
-
-            {s.phase === "idle" && (
-              <motion.div
-                className="flex flex-1 flex-col items-center justify-center text-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
+      <div className="mx-auto w-full max-w-[1280px] px-4 pb-28 pt-6 md:px-8 md:pb-16 md:pt-10">
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,4fr)_minmax(0,6fr)] lg:gap-6">
+          {/* chap: gʻoya va boshqaruvlar */}
+          <div className="min-w-0">
+            {/* mobilda natija chiqqach — qisqa xulosa */}
+            {collapsedOnMobile && (
+              <section
+                aria-label={t("ideaSummary")}
+                className="flex flex-col gap-3 rounded-[var(--radius-xl)] border border-border bg-surface p-4 lg:hidden"
               >
-                <p className="font-serif text-headline-sm text-text">
-                  {tr("emptyTitle")}
-                </p>
-                <p className="mt-2 max-w-sm text-body-md text-muted">
-                  {tr("emptyBody")}
-                </p>
-              </motion.div>
-            )}
-
-            {s.phase === "loading" && (
-              <div
-                className="flex flex-1 flex-col items-center justify-center gap-6 text-center"
-                aria-busy
-              >
-                <StageIndicator stage={s.stage} />
-                <div className="flex min-h-10 items-center">
-                  <AnimatePresence mode="wait" initial={false}>
-                    {loadingAi ? (
-                      <motion.span
-                        key={loadingAi}
-                        {...swap}
-                        className="inline-flex items-center gap-2 rounded-[var(--radius-sm)] border border-border bg-surface-2 px-3 py-1.5 font-mono text-code-sm text-muted"
-                      >
-                        <span
-                          aria-hidden
-                          className="h-2 w-2 rounded-full"
-                          style={{ background: AI_META[loadingAi].dot }}
-                        />
-                        <span className="text-text">
-                          {AI_META[loadingAi].name}
-                        </span>
-                        {AI_META[loadingAi].version && (
-                          <span>{AI_META[loadingAi].version}</span>
-                        )}
-                      </motion.span>
-                    ) : (
-                      <motion.span
-                        key="wait"
-                        {...swap}
-                        className="font-mono text-code-sm text-muted"
-                      >
-                        {tr("loading")}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-            )}
-
-            {s.phase === "clarify" && (
-              <Step4Clarify
-                key={s.jobId ?? "clarify"}
-                questions={s.questions}
-                onSubmit={continueWithAnswers}
-                onSkip={skipClarify}
-              />
-            )}
-
-            {showResult && (
-              <Step5Result
-                key={`${s.jobId ?? "job"}-${s.phase === "done" ? "done" : "stream"}`}
-                ai={resultAi}
-                kind={s.kind ?? s.suggestedKind}
-                auto={!s.aiPicked}
-                prompt={s.prompt}
-                notes={s.notes}
-                streaming={s.phase === "streaming"}
-                stage={s.stage}
-                reveal={
-                  s.phase === "done" &&
-                  liveDoneJobId !== null &&
-                  liveDoneJobId === s.jobId
-                }
-                questions={s.questions}
-                answers={s.answers}
-                score={s.score}
-                criteria={s.criteria}
-                onImprove={
-                  s.phase === "done" && s.prompt && !busy && !exhausted
-                    ? () =>
-                        void run(s.answers, s.kind ?? s.suggestedKind, {
-                          previous_prompt: s.prompt,
-                          feedback: s.criteria
-                            .filter((c) => !c.ok && c.note)
-                            .map((c) => c.note),
-                        })
-                    : undefined
-                }
-              />
-            )}
-
-            {s.phase === "error" && (
-              <Callout tone="error" className="flex flex-col gap-3">
-                <p className="font-medium">{tr("errorTitle")}</p>
-                <p>{s.error}</p>
-                <div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-body-sm font-bold text-muted">
+                    {t("ideaSummary")}
+                  </span>
                   <Button
-                    variant="secondary"
+                    variant="ghost"
                     size="sm"
-                    onClick={() => void run(s.answers, s.kind)}
+                    className="h-9 gap-2 text-accent"
+                    onClick={() => setEditing(true)}
                   >
-                    {tr("retry")}
+                    <Pencil size={14} />
+                    {t("editIdea")}
                   </Button>
                 </div>
-              </Callout>
+                <p className="text-body-md text-text">{s.text}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {kindForResult && (
+                    <Badge>{t(`kinds.${kindForResult}`)}</Badge>
+                  )}
+                  <Badge>
+                    {AI_META[resultAi].name}
+                    {AI_META[resultAi].version
+                      ? ` ${AI_META[resultAi].version}`
+                      : ""}
+                  </Badge>
+                  {kindForResult && RATIO_KINDS.includes(kindForResult) && (
+                    <Badge mono>{s.ratio}</Badge>
+                  )}
+                </div>
+              </section>
             )}
-          </section>
+
+            <div className={collapsedOnMobile ? "hidden lg:block" : undefined}>
+              <IdeaPanel
+                text={s.text}
+                onTextChange={onTextChange}
+                onTextBlur={onTextBlur}
+                onSubmit={start}
+                kind={s.kind}
+                onKind={(kind) => patch({ kind })}
+                suggestedKind={s.suggestedKind}
+                tools={s.tools}
+                ai={s.ai}
+                onAi={(ai) => patch({ ai, aiPicked: true, resolvedAi: null })}
+                analyzing={analyzing}
+                ratio={s.ratio}
+                onRatio={(ratio: Ratio) => patch({ ratio })}
+                questions={s.questions}
+                picks={picks}
+                onPicks={setPicks}
+                busy={busy}
+                hasResult={hasResult}
+                exhausted={exhausted}
+                isUser={Boolean(user)}
+                remainingLabel={remainingLabel}
+                onStop={stop}
+                onReset={resetAll}
+              />
+            </div>
+          </div>
+
+          {/* oʻng: natija */}
+          <div className="min-w-0">
+            <AnimatePresence mode="wait" initial={false}>
+              {s.phase === "error" ? (
+                <ErrorResult
+                  key="error"
+                  message={s.error ?? ""}
+                  onRetry={() => void run(s.answers, s.kind)}
+                />
+              ) : showResult ? (
+                <ResultPanel
+                  key="result"
+                  ai={resultAi}
+                  kind={kindForResult}
+                  prompt={s.prompt}
+                  segments={s.segments}
+                  parts={s.parts}
+                  notes={s.notes}
+                  score={s.score}
+                  streaming={s.phase === "streaming"}
+                  promptId={s.promptId}
+                  saved={s.saved}
+                  onSave={onSave}
+                  onImprove={
+                    s.phase === "done" && !busy && !exhausted
+                      ? improve
+                      : undefined
+                  }
+                />
+              ) : s.phase === "loading" ? (
+                <LoadingResult
+                  key="loading"
+                  stage={s.stage}
+                  ai={s.resolvedAi ?? s.ai}
+                />
+              ) : s.phase === "clarify" ? (
+                <ClarifyWaiting key="clarify" />
+              ) : (
+                <EmptyResult
+                  key="empty"
+                  onExample={onTextChange}
+                />
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
+
+      {/* mobil: pastdagi yopishqoq panel */}
+      <div className="fixed inset-x-0 bottom-0 z-20 flex gap-2.5 border-t border-border bg-bg/92 px-4 pb-7 pt-3 backdrop-blur-xl lg:hidden">
+        {hasResult ? (
+          <>
+            <Button
+              variant="secondary"
+              aria-label={t("regenerate")}
+              className="h-13 w-13 shrink-0 justify-center rounded-[14px] p-0"
+              disabled={busy || exhausted}
+              onClick={start}
+            >
+              <RotateCcw size={20} />
+            </Button>
+            <Button
+              variant="primary"
+              className="h-13 flex-1 justify-center gap-2.5 rounded-[14px] text-body-md font-bold"
+              onClick={() => void copyBar()}
+            >
+              {copiedBar ? (
+                <Check size={18} strokeWidth={2.4} />
+              ) : (
+                <Copy size={18} />
+              )}
+              <span aria-live="polite">
+                {copiedBar ? tr("copied") : tr("copy")}
+              </span>
+            </Button>
+          </>
+        ) : (
+          <Button
+            variant="primary"
+            className="h-13 flex-1 justify-center gap-2.5 rounded-[14px] text-body-md font-bold"
+            disabled={busy || exhausted || s.text.trim().length < 3}
+            onClick={start}
+          >
+            <Sparkles size={18} />
+            {busy
+              ? t("generating")
+              : s.questions.length
+                ? t("continueAnswers")
+                : t("generate")}
+          </Button>
+        )}
+      </div>
     </MotionConfig>
+  );
+}
+
+function Badge({
+  children,
+  mono,
+}: {
+  children: React.ReactNode;
+  mono?: boolean;
+}) {
+  return (
+    <span
+      className={
+        "inline-flex h-6.5 items-center rounded-full border border-border bg-surface-2 px-2.5 text-label-sm font-semibold text-text-2" +
+        (mono ? " font-mono" : "")
+      }
+    >
+      {children}
+    </span>
   );
 }

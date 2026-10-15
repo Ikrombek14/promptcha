@@ -15,7 +15,7 @@ Oddiy so'zdan tayyor AI prompt yasaydigan platforma. Auditoriya: O'zbekistondagi
 - Tailwind CSS v4 (CSS-first `@theme`), shadcn/ui, lucide-react
 - motion — maqsadli animatsiyalar: natija paneli chizigʻi, bosqich koʻrsatkichi, AI vositasi «ochilish» momenti (layoutId morph), izoh/savol stagger. Faqat transform/opacity, ≤300 ms (ochilish momenti 1.1 s — atayin), `useReducedMotion` hurmat qilinadi. Ambient loop'lar CSS keyframes (`globals.css`). Variantlar `lib/motion.ts` da
 - next-intl — `/uz`, `/ru`, `/en`; default `uz`
-- next/font — Instrument Serif, Inter, JetBrains Mono
+- next/font — Manrope (400–800), JetBrains Mono. Instrument Serif va Inter olib tashlangan (redizayn v2)
 
 **Infra** — PostgreSQL 16 (shu VPS), Nginx + Certbot, systemd (PM2 emas), Cloudflare DNS. Docker yo'q, Redis yo'q.
 
@@ -51,7 +51,7 @@ promptcha/
       pricing/page.tsx
       settings/page.tsx
     components/
-      steps/                      Step1Input, Step2Type, Step3Ai, Step4Clarify, Step5Result
+      generator/                  idea-panel, result-panel, result-states, clarify-fields, score-ring
       ui/                         shadcn
     lib/api.ts                    fetch wrapper, SSE reader
     messages/uz.json, ru.json, en.json
@@ -209,6 +209,34 @@ Boshqa (Nginx'li) server uchun umumiy yoʻriqnoma: `deploy/README.md`. Deploy'da
 - `uz_fix` faqat harf oldidagi apostrofni tuzatadi (qoʻshtirnoq ’ soʻz oxirida tegilmaydi).
 - **Tarjima (2026-09-16):** prompt AI vositasiga **inglizcha** ketadi (shu qoida saqlanadi), lekin foydalanuvchi «Oʻzbekcha» tugmasi bilan tarjimani oʻqiy oladi. `POST /api/prompts/translate` → Tahrirchi **Tilmoch** (`services/translate.py`; `TAHRIRCHI_API_KEY`, 0,2 soʻm/belgi, 5000 belgi, 50/daqiqa). Talab boʻyicha chaqiriladi (har belgi pullik), 30 daqiqa keshlanadi, javobga `uz_fix`. Sayqalchi modeli sinaldi — 11 s va markdown'ni buzadi, shuning uchun tilmoch. Nusxa olganda inglizcha matn koʻchiriladi.
 
+### Redizayn v2 (2026-10-15) — manba: `promptcha-redesign/`
+
+Dizayn fayllari `promptcha-redesign/design/reference/*.dc.html` (Main, Empty, Loading, Mobile, Logo)
+va `design/tokens.css`. Eski `design/` papkasi oʻrnini shu egalladi — **frontend ishidan oldin shu
+fayllar koʻriladi**.
+
+- **Quyuq tema asosiy** (`bg #0B0C10`, `surface #13151B`, `accent #3A63F0`), yorugʻ juftlik ham bor;
+  `data-theme` default `dark`. Tokenlar `app/globals.css` (`@theme inline`).
+- **Logotip — faqat matn:** «Prompt» + «cha» (`--logo-cha`), Manrope 800, `letter-spacing -0.04em`
+  (`components/logo.tsx`). Saytga kirganda **nafas animatsiyasi** (`.v-breathe`, 2.8 s, harf kechikishi
+  `calc(var(--i) * 110ms)`), yasash paytida `.v-loading`, tugaganda `.v-done`. `prefers-reduced-motion`
+  hurmat qilinadi. Favicon — `#171A22` ustida «P».
+- **Generator ikki panel:** chapda gʻoya (4fr), oʻngda natija (6fr); `lg` dan past — bitta ustun va
+  pastda yopishqoq panel. Natija chiqqach mobilda chap panel qisqa xulosaga yigʻiladi («Tahrirlash»).
+- **Aniqlashtiruvchi savollar ixtiyoriy** (egasi qarori): natijani bloklamaydi, gʻoya maydoni ostida
+  chip boʻlib chiqadi; javobsiz bosilsa javoblar `(not specified)` boʻlib ketadi va prompt yasaladi.
+- **Rangli prompt:** `explain` hodisasidagi `segments` (`{type,text}`) va `parts` (`{type,excerpt,why}`).
+  Toifalar kind boʻyicha: rasm/video — object|composition|light|params; matn/dizayn —
+  role|task|requirements|format; ilova — goal|stack|features|acceptance (+`plain`). Frontend ularni
+  toʻrtta rang uyasiga solishtiradi (`lib/segments.ts`, `.sg-*` klasslari).
+- **Nisbat** (`ratio`: 1:1, 4:5, 16:9, 9:16) faqat rasm/video turlarida koʻrsatiladi va soʻrovga qoʻshiladi.
+- **«Gʻoyani boyitish»** — `POST /api/prompts/enrich`; **ovoz bilan aytish** — brauzerning Web Speech API'si
+  (qoʻllab-quvvatlamasa tugma koʻrinmaydi).
+- **«Tez oʻzgartirish»** chiplari (`lib/quick-edits.ts`) — mavjud `improve` oqimi orqali: yorliq foydalanuvchi
+  tilida, modelga ketadigan koʻrsatma inglizcha. Bitta bosish = bitta generatsiya.
+- **Kutubxona:** `POST /api/prompts/{id}/save` — tugma faqat kirgan foydalanuvchida (`done` hodisasidagi
+  `prompt_id` boʻlsa).
+
 ## Qabul qilingan qarorlar (2026-09-14)
 
 - **Next.js 16** (create-next-app shuni beradi; 15 eskirgan). Farqlar: `middleware.ts` → `proxy.ts`, `params` async. Dev'da `/api/*` → FastAPI `next.config.ts` rewrites orqali (prod'da Nginx).
@@ -218,7 +246,7 @@ Boshqa (Nginx'li) server uchun umumiy yoʻriqnoma: `deploy/README.md`. Deploy'da
 - Structured output: `client.messages.parse(output_format=PydanticModel)` (classify/clarify/explain). Generate — `messages.stream`.
 - SSE hodisalari: `classify`, `clarify`, `delta`, `explain`, `done{status: ok|needs_kind|needs_clarification}`, `error`. Aniqlashtirish kerak bo'lsa oqim `done` bilan to'xtaydi, frontend javoblar bilan qayta chaqiradi.
 - **Generate = job** (`services/jobs.py`, xotirada, Redis yo'q): `POST /generate → {job_id}`, `GET /jobs/{id}` SSE (avval replay, keyin jonli), `POST /jobs/{id}/cancel`. Ish brauzerdan mustaqil yuradi. Frontend butun vosita holatini `localStorage("promptcha_draft")`da saqlaydi; sahifa yangilansa yoki til almashsa holat tiklanadi va yasalayotgan ishga qayta ulanadi. Shu sabab Workbench `next/dynamic` `ssr:false` bilan chiziladi (hydration farqi bo'lmasin). Tugagan ish 15 daqiqa saqlanadi.
-- **Bir ekran (2026-09-15, egasi qarori):** `/app` desktopda skrollsiz bitta ekranga sigʻadi (body `h-full`, ikki ustun ichida skroll). Dizayndagi header tagline, sarlavha osti izoh, "Maslahat", "Standart tekshiruv" callout, pastki meta qatori va footer olib tashlangan — ortiqcha matn kerak emas. Footer keyinroq qaytishi mumkin.
+- **Bir ekran (2026-09-15):** ~~`/app` skrollsiz bitta ekranga sigʻadi~~ — redizayn v2 da bekor qilindi, sahifa oddiy skroll qiladi.
 - **AI katalogi va tavsiya (2026-09-15, egasi qarori):** 22 ta vosita `ai/catalog.py`da (ChatGPT GPT-6 Astra, Claude Fable 5.1, Gemini 3.8 Flash, Grok 4.6, DeepSeek V4-Pro, Perplexity, Salom AI, Midjourney v7, Flux, Ideogram, Adobe Firefly, Higgsfield, Veo 3.1, Kling 3.0, Seedance 2.0, Runway Gen-4.5, Pika, HeyGen, Canva AI, Gamma, ElevenLabs, Cursor/Claude Code). Sora olib tashlangan. Foydalanuvchiga toʻliq roʻyxat koʻrsatilmaydi: `POST /api/prompts/analyze` (yozib toʻxtagach) tur + **2–3 ta eng mos va mashhur vosita** qaytaradi, birinchisi tanlangan; "AI VOSITASI" yorligʻi va "Avto" chipi yoʻq. Prompt uslubi **oilalar** boʻyicha: `system_prompts/{chat,image,video,code,search,design,slides,voice,avatar}.md` + `notes/<tool>.md` izohi; maxsus fayli borlar (`midjourney.md`, `claude.md`) oʻzinikini oladi. Namunalar `examples/<tool>/` → `examples/<family>/`. `Classification.tools` (1–3), `classify` hodisasida `tools` ham keladi. Frontend `AI_META` katalog bilan bir xil boʻlishi shart.
 - **Oqim oʻrtasida uzilish:** provayder matn chiqa boshlagach 503/429 bersa `llm.MidStreamError` → pipeline `reset` hodisasi beradi va generate'ni bir marta qaytadan boshlaydi; frontend promptni tozalaydi.
 - Yo'nalish chiplari: dizayndagi 4 ta (Rasm, Ilova, Dizayn, Ssenariy) o'rniga pipeline'dagi 5 ta tur (Rasm, Ilova, Dizayn, Video, Matn) + "Avto" (classify). Uslub dizayndagidek.

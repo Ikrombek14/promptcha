@@ -69,9 +69,10 @@ class UserContext(Base):
 
 
 class Prompt(Base):
-    """Har bir yasalgan prompt — tarix."""
+    """Har bir yasalgan prompt — tarix (`is_saved=true` boʻlsa kutubxonada ham koʻrinadi)."""
 
     __tablename__ = "prompts"
+    __table_args__ = (Index("ix_prompts_user_created", "user_id", "created_at"),)
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
     user_id: Mapped[uuid.UUID | None] = mapped_column(
@@ -85,10 +86,14 @@ class Prompt(Base):
     clarifications: Mapped[dict | None] = mapped_column(JSON)  # {question_id: answer}
     result: Mapped[str] = mapped_column(Text)
     explanations: Mapped[list | None] = mapped_column(JSON)  # ["...", "..."]
+    # Tekshiruv balli (review, 0–100) — tarixda koʻrinadi; eski qatorlarda null
+    score: Mapped[int | None] = mapped_column(nullable=True)
     locale: Mapped[str] = mapped_column(String(5), default="uz")
     output_language: Mapped[str] = mapped_column(String(5), default="en")
     share_slug: Mapped[str | None] = mapped_column(String(32), unique=True, index=True)
     is_public: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Foydalanuvchi «Kutubxonaga saqlash» bosgan (tarix — hammasi, kutubxona — faqat shular)
+    is_saved: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), index=True
     )

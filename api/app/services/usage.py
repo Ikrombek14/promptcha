@@ -184,8 +184,9 @@ async def save_prompt(
     body: GenerateRequest,
     done: dict,
     notes: list[str] | None,
+    score: int | None = None,
 ) -> Prompt | None:
-    """Kirgan foydalanuvchi uchun tarix: `prompts` qatori (avto-saqlash)."""
+    """Kirgan foydalanuvchi uchun tarix: `prompts` qatori (avto-saqlash). `score` — review balli."""
     try:
         async with SessionLocal() as session:
             row = Prompt(
@@ -196,6 +197,7 @@ async def save_prompt(
                 clarifications=dict(body.answers) or None,
                 result=str(done.get("prompt") or ""),
                 explanations=list(notes) if notes else None,
+                score=score,
                 locale=body.locale,
                 output_language=body.output_language,
             )

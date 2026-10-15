@@ -1,0 +1,50 @@
+{
+  "pages": {
+    "history": {
+      "title": "History",
+      "subtitle": "Every prompt you have made — newest first.",
+      "emptyTitle": "No prompts yet",
+      "emptyBody": "Make your first prompt in the generator — it will be kept here."
+    },
+    "library": {
+      "title": "Library",
+      "subtitle": "Saved prompts — ready to reuse when you need them.",
+      "emptyTitle": "Library is empty",
+      "emptyBody": "Mark a prompt in your history with “Save” and it will show up here."
+    },
+    "kinds": {
+      "image": "Image",
+      "app": "App",
+      "design": "Design",
+      "video": "Video",
+      "text": "Text"
+    },
+    "common": {
+      "count": "{total} prompts",
+      "idea": "Idea",
+      "prompt": "Prompt",
+      "scoreLabel": "Quality score: {score} / 100",
+      "copy": "Copy",
+      "copied": "Copied",
+      "copyFailed": "Could not copy — select the text manually.",
+      "save": "Save",
+      "saved": "Saved",
+      "unsave": "Remove from saved",
+      "delete": "Delete",
+      "deleteAsk": "Delete it?",
+      "deleteYes": "Yes, delete",
+      "deleteNo": "Cancel",
+      "goGenerator": "Go to the generator",
+      "retry": "Try again",
+      "errorTitle": "Could not load the data",
+      "loading": "Loading",
+      "pagination": "Pages",
+      "range": "{from}–{to} / {total}",
+      "prev": "Previous",
+      "next": "Next",
+      "signInTitle": "Sign in required",
+      "signInBody": "History and library live in your account only. Sign in with Google — your earlier prompts move over too.",
+      "signInAction": "Sign in with Google"
+    }
+  }
+}

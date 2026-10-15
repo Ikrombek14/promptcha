@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="uz">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Promptcha logo harakati</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: kirish sahnasi + vaqt chizigʻi, ikki holat kartasi, qoidalar jadvali, kod paneli */
+:root{
+  --bg:#0B0C10; --surface:#13151B; --surface-2:#171A21; --sunk:#0E1015;
+  --line:#22262F; --line-2:#2A2F3A;
+  --fg:#EDEEF2; --muted:#9AA1B2; --subtle:#7A8294; --cha:#8C93A4;
+  --accent:#3A63F0;
+  --font-ui:'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-ui);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:20px;padding-block:40px 72px;display:flex;flex-direction:column;gap:40px}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+
+.intro-head{display:flex;flex-direction:column;gap:8px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-size:clamp(28px,4vw,40px);line-height:1.1;font-weight:800;letter-spacing:-.03em;text-wrap:balance}
+.lede{margin:0;max-width:62ch;color:var(--muted);font-size:16px}
+
+.stage{border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--surface)}
+.stage-body{min-height:300px;display:flex;align-items:center;justify-content:center;padding:48px 24px;overflow:hidden;background:var(--sunk)}
+.stage-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-top:1px solid var(--line)}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.tag{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line-2);display:inline-flex;align-items:center;font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+.btn{height:40px;padding:0 16px;border-radius:10px;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;transition:background .15s,transform .1s}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-quiet{border:1px solid var(--line-2);background:var(--surface-2);color:var(--fg)}
+@media (hover:hover){.btn-primary:hover{background:#2F55DB}.btn-quiet:hover{background:#1F232C}}
+
+.timeline{padding:20px;border-top:1px solid var(--line);display:grid;grid-template-columns:96px minmax(0,1fr);row-gap:10px;column-gap:16px;align-items:center}
+.tl-label{font-size:13px;font-weight:600;color:var(--muted)}
+.tl-track{position:relative;height:10px;border-radius:999px;background:#1A1D25}
+.tl-bar{position:absolute;top:0;bottom:0;border-radius:999px}
+.tl-scale{grid-column:2;display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px;color:var(--subtle);font-variant-numeric:tabular-nums}
+.tl-tracks{grid-column:2;grid-row:1 / span 2;position:relative;display:flex;flex-direction:column;gap:10px;align-self:stretch;justify-content:space-around}
+.playhead{position:absolute;top:-6px;bottom:-6px;width:2px;left:0;background:var(--fg);border-radius:2px;opacity:0}
+.playhead.run{animation:ph 1.6s linear forwards}
+@keyframes ph{0%{left:0;opacity:1}99%{opacity:1}100%{left:100%;opacity:0}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.card{border:1px solid var(--line);border-radius:20px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.card-stage{height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:var(--sunk);border-bottom:1px solid var(--line);overflow:hidden}
+.card-body{padding:20px;display:flex;flex-direction:column;gap:12px;flex:1}
+h2{margin:0;font-size:20px;font-weight:800;letter-spacing:-.02em}
+.card p{margin:0;color:var(--muted);font-size:15px}
+.card-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-top:auto;padding-top:4px}
+.status{font-size:14px;font-weight:600;color:var(--muted);min-height:22px}
+.fakebar{width:min(320px,86%);height:56px;border-radius:14px;border:1px solid var(--line-2);background:var(--surface);display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.fakebar i{display:block;width:64px;height:8px;border-radius:999px;background:var(--line-2)}
+.hint{font-size:13px;color:var(--subtle)}
+
+.table-box{border:1px solid var(--line);border-radius:16px;overflow-x:auto;background:var(--surface)}
+table{width:100%;border-collapse:collapse;min-width:620px;font-size:15px}
+th{text-align:left;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:14px 18px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+td{padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:top;color:#C9CEDA}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:700;color:var(--fg);white-space:nowrap}
+td.mono{font-family:var(--font-mono);font-size:13px;color:var(--muted);white-space:nowrap}
+
+.code{border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden;min-width:0}
+.code-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px 10px 10px;border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:2px;padding:3px;border-radius:10px;border:1px solid var(--line);background:var(--sunk)}
+.tab{height:34px;padding:0 14px;border-radius:7px;font-size:13px;font-weight:700;color:var(--muted)}
+.tab[aria-selected="true"]{background:#232733;color:var(--fg)}
+pre{margin:0;padding:18px 20px;max-height:440px;overflow:auto;font-family:var(--font-mono);font-size:13px;line-height:1.65;color:#C9CEDA;tab-size:2}
+.section-head{display:flex;flex-direction:column;gap:6px}
+.section-head p{margin:0;color:var(--muted);max-width:62ch}
+
+@media (max-width:560px){
+  .timeline{grid-template-columns:72px minmax(0,1fr)}
+  .stage-body{min-height:200px}
+}
+@media (prefers-reduced-motion:reduce){.playhead{display:none}}
+</style>
+
+<!-- ===== Logo animatsiyasi CSS (saytingizga shu blokni koʻchiring) ===== -->
+<style id="pc-css">
+/* Promptcha logo — harakat. Shrift: Manrope 800. Faqat ikki rang. Oʻlchamni font-size beradi. */
+.pc-logo{
+  --pc-fg:#EDEEF2; --pc-muted:#8C93A4;
+  --pc-out:cubic-bezier(.16,1,.3,1); --pc-spring:cubic-bezier(.34,1.56,.64,1);
+  display:inline-block; white-space:nowrap;
+  font:800 1em/1 'Manrope', system-ui, sans-serif; letter-spacing:-.04em;
+  color:var(--pc-fg);
+  clip-path:inset(-.05em -.3em -.28em -.3em); /* niqob: harflar shu chiziq ostidan chiqadi */
+}
+.pc-l{display:inline-block; --c:var(--pc-fg); color:var(--c); transition:color .35s ease}
+.pc-l.pc-c{--c:var(--pc-muted)}
+
+/* 1. Kirish: harflar niqobdan koʻtariladi, "cha" oqdan kulrangga oʻtadi (≈1.6 s) */
+.pc-logo.is-intro .pc-l{animation:pc-rise .7s var(--pc-out) backwards;
+  animation-delay:calc(var(--i) * 55ms)}
+.pc-logo.is-intro .pc-c{animation:pc-rise .7s var(--pc-out) backwards, pc-tint .6s ease-in-out backwards;
+  animation-delay:calc(var(--i) * 55ms), 1s}
+
+/* 2. Yuklanish: shaffoflik toʻlqini */
+.pc-logo.is-loading .pc-l{animation:pc-breathe 1.6s ease-in-out infinite;
+  animation-delay:calc(var(--i) * 90ms)}
+
+/* 3. Tayyor: harflar bir marta toʻlqindek sakraydi */
+.pc-logo.is-done .pc-l{animation:pc-bump .6s var(--pc-spring) backwards;
+  animation-delay:calc(var(--i) * 35ms)}
+
+/* 4. Hover: sakrash + "cha" oqaradi */
+@media (hover:hover){
+  .pc-logo.is-interactive:hover .pc-l{animation:pc-bump .6s var(--pc-spring) backwards;
+    animation-delay:calc(var(--i) * 35ms)}
+  .pc-logo.is-interactive:hover .pc-c{--c:var(--pc-fg)}
+}
+.pc-logo.is-hover .pc-l{animation:pc-bump .6s var(--pc-spring) backwards;
+  animation-delay:calc(var(--i) * 35ms)}
+.pc-logo.is-hover .pc-c{--c:var(--pc-fg)}
+
+@keyframes pc-rise{from{transform:translateY(1.2em)}to{transform:none}}
+@keyframes pc-tint{from{color:var(--pc-fg)}to{color:var(--pc-muted)}}
+@keyframes pc-breathe{0%,60%,100%{opacity:1}25%{opacity:.3}}
+@keyframes pc-bump{0%,100%{transform:none}40%{transform:translateY(-.1em)}}
+
+@media (prefers-reduced-motion:reduce){
+  .pc-logo *{animation:none !important; transition:none !important}
+}
+</style>
+
+<!-- ===== Logo HTML (shablon) ===== -->
+<template id="pc-svg"><span class="pc-logo is-interactive" role="img" aria-label="Promptcha"><span aria-hidden="true"><span class="pc-l" style="--i:0">P</span><span class="pc-l" style="--i:1">r</span><span class="pc-l" style="--i:2">o</span><span class="pc-l" style="--i:3">m</span><span class="pc-l" style="--i:4">p</span><span class="pc-l" style="--i:5">t</span><span class="pc-l pc-c" style="--i:6">c</span><span class="pc-l pc-c" style="--i:7">h</span><span class="pc-l pc-c" style="--i:8">a</span></span></span></template>
+
+<div class="wrap">
+  <header class="intro-head">
+    <span class="eyebrow">Promptcha · brend harakati</span>
+    <h1>Logo animatsiyasi</h1>
+    <p class="lede">Shrift va ikki rang oʻzgarmagan. Harflar koʻrinmas chiziq ostidan koʻtariladi, "cha" oqdan kulrangga oʻtadi. Hammasi CSS bilan, kutubxonasiz.</p>
+  </header>
+
+  <section class="stage" aria-label="Kirish animatsiyasi">
+    <div class="stage-body">
+      <div id="hero-slot" style="font-size:clamp(52px,10vw,112px)"></div>
+    </div>
+    <div class="timeline" aria-label="Kirish animatsiyasi vaqt chizigʻi">
+      <span class="tl-label">Harflar</span>
+      <div class="tl-tracks">
+        <div class="tl-track"><span class="tl-bar" style="left:0;width:71%;background:var(--fg)"></span></div>
+        <div class="tl-track"><span class="tl-bar" style="left:62.5%;width:37.5%;background:linear-gradient(90deg,var(--fg),var(--cha))"></span></div>
+        <span class="playhead" id="playhead"></span>
+      </div>
+      <span class="tl-label">"cha" rangi</span>
+      <div class="tl-scale"><span>0 s</span><span>0.4</span><span>0.8</span><span>1.2</span><span>1.6 s</span></div>
+    </div>
+    <div class="stage-foot">
+      <div class="meta"><span class="tag">≈1.6 s</span><span class="tag">bir martalik</span><span class="tag">is-intro</span></div>
+      <button type="button" class="btn btn-primary" id="replay-hero">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Qayta ijro etish
+      </button>
+    </div>
+  </section>
+
+  <div class="cards">
+    <article class="card">
+      <div class="card-stage">
+        <div id="load-slot" style="font-size:52px"></div>
+        <span class="status" id="load-status" role="status" aria-live="polite">Prompt yaratilmoqda…</span>
+      </div>
+      <div class="card-body">
+        <h2>Yuklanish va tayyor</h2>
+        <p>Kutishda harflar boʻylab shaffoflik toʻlqini oʻtadi. Natija kelganda harflar bir marta toʻlqindek sakraydi.</p>
+        <div class="card-actions">
+          <div class="meta"><span class="tag">is-loading</span><span class="tag">is-done</span></div>
+          <button type="button" class="btn btn-quiet" id="toggle-load">Natijani koʻrsatish</button>
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card-stage">
+        <div class="fakebar"><div id="hover-slot" style="font-size:24px"></div><i></i></div>
+        <span class="hint" id="hover-hint">Sichqonchani logo ustiga olib keling</span>
+      </div>
+      <div class="card-body">
+        <h2>Hover</h2>
+        <p>Header logosi uchun: harflar yengil sakraydi, "cha" oqarib "Prompt" bilan qoʻshiladi.</p>
+        <div class="card-actions">
+          <div class="meta"><span class="tag">0.6 s</span><span class="tag">faqat sichqoncha</span></div>
+          <button type="button" class="btn btn-quiet" id="play-hover">Hover effektini koʻrsatish</button>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <section class="section-head" aria-labelledby="rules-h">
+    <h2 id="rules-h">Saytda qayerda ishlatiladi</h2>
+    <p>Har bir animatsiya bitta holat uchun.</p>
+  </section>
+  <div class="table-box">
+    <table>
+      <thead><tr><th>Animatsiya</th><th>Qayerda</th><th>Qoida</th><th>Klass</th></tr></thead>
+      <tbody>
+        <tr><td>Kirish</td><td>Bosh sahifa, birinchi ochilish</td><td>Sessiyada bir marta, keyin statik logo</td><td class="mono">is-intro</td></tr>
+        <tr><td>Yuklanish</td><td>"Promptni yaratish" bosilgach, natija panelida</td><td>Javob 300 ms dan tez kelsa koʻrsatmang</td><td class="mono">is-loading</td></tr>
+        <tr><td>Tayyor</td><td>Natija chiqqan zahoti</td><td>Bir marta, "Nusxa olish" tugmasi bilan birga</td><td class="mono">is-done</td></tr>
+        <tr><td>Hover</td><td>Header logosi</td><td>Faqat sichqonchada, sensorli ekranda oʻchiq</td><td class="mono">is-interactive</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section class="section-head" aria-labelledby="code-h">
+    <h2 id="code-h">Tayyor kod</h2>
+    <p>Uch boʻlak: logo HTML, CSS va holatni almashtiradigan kichik JS. Logo oʻlchami <code style="font-family:var(--font-mono);font-size:14px">font-size</code> bilan boshqariladi.</p>
+  </section>
+  <div class="code">
+    <div class="code-head">
+      <div class="tabs" role="tablist" aria-label="Kod turi">
+        <button type="button" class="tab" role="tab" id="tab-html" aria-selected="true" aria-controls="code-pre" data-k="html">HTML</button>
+        <button type="button" class="tab" role="tab" id="tab-css" aria-selected="false" aria-controls="code-pre" data-k="css">CSS</button>
+        <button type="button" class="tab" role="tab" id="tab-js" aria-selected="false" aria-controls="code-pre" data-k="js">JS</button>
+      </div>
+      <button type="button" class="btn btn-quiet" id="copy-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+        <span id="copy-label">Nusxa olish</span>
+      </button>
+    </div>
+    <pre id="code-pre" role="tabpanel" tabindex="0"><code id="code-out"></code></pre>
+  </div>
+</div>
+
+<!-- ===== Logo JS (saytingizga shu blokni koʻchiring) ===== -->
+<script id="pc-js">
+// Promptcha logo holatini almashtiradi: 'intro' | 'loading' | 'done' | null
+function pcPlay(el, state) {
+  el.classList.remove('is-intro', 'is-loading', 'is-done');
+  void el.getBoundingClientRect(); // animatsiyani boshidan boshlash uchun
+  if (state) el.classList.add('is-' + state);
+}
+
+// Kirish animatsiyasi sessiyada faqat bir marta
+function pcIntroOnce(el) {
+  var seen = false;
+  try { seen = sessionStorage.getItem('pc-intro') === '1'; } catch (e) {}
+  if (seen) return;
+  pcPlay(el, 'intro');
+  try { sessionStorage.setItem('pc-intro', '1'); } catch (e) {}
+}
+
+// Misol: prompt yaratish
+// pcPlay(logo, 'loading');
+// fetch('/api/generate', ...).then(function () { pcPlay(logo, 'done'); });
+</script>
+
+<script>
+(function () {
+  var tpl = document.getElementById('pc-svg');
+  function mount(slot) {
+    var node = tpl.content.firstElementChild.cloneNode(true);
+    slot.appendChild(node);
+    return node;
+  }
+
+  var hero = mount(document.getElementById('hero-slot'));
+  var ph = document.getElementById('playhead');
+  function playHero() {
+    pcPlay(hero, 'intro');
+    ph.classList.remove('run'); void ph.offsetWidth; ph.classList.add('run');
+  }
+  playHero();
+  document.getElementById('replay-hero').addEventListener('click', playHero);
+
+  var loader = mount(document.getElementById('load-slot'));
+  var status = document.getElementById('load-status');
+  var tBtn = document.getElementById('toggle-load');
+  var loading = true;
+  pcPlay(loader, 'loading');
+  tBtn.addEventListener('click', function () {
+    loading = !loading;
+    pcPlay(loader, loading ? 'loading' : 'done');
+    status.textContent = loading ? 'Prompt yaratilmoqda…' : 'Prompt tayyor';
+    tBtn.textContent = loading ? 'Natijani koʻrsatish' : 'Qayta yaratish';
+  });
+
+  var hv = mount(document.getElementById('hover-slot'));
+  var hint = document.getElementById('hover-hint');
+  var hvTimer;
+  if (!window.matchMedia('(hover: hover)').matches) hint.textContent = 'Telefonda tugma orqali sinab koʻring';
+  document.getElementById('play-hover').addEventListener('click', function () {
+    hv.classList.remove('is-hover'); void hv.getBoundingClientRect(); hv.classList.add('is-hover');
+    clearTimeout(hvTimer);
+    hvTimer = setTimeout(function () { hv.classList.remove('is-hover'); }, 1600);
+  });
+
+  function clean(s) { return s.replace(/^\n+|\s+$/g, ''); }
+  var CODE = {
+    html: '<!-- Shrift (agar saytda boʻlmasa) -->\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@800&display=swap">\n\n<!-- Logo: oʻlchamni font-size beradi -->\n' + clean(tpl.innerHTML),
+    css: clean(document.getElementById('pc-css').textContent),
+    js: clean(document.getElementById('pc-js').textContent)
+  };
+  var out = document.getElementById('code-out');
+  var current = 'html';
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  function show(k) {
+    current = k;
+    out.textContent = CODE[k];
+    tabs.forEach(function (t) { t.setAttribute('aria-selected', String(t.dataset.k === k)); });
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { show(t.dataset.k); });
+    t.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      var n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+      n.focus(); show(n.dataset.k);
+    });
+  });
+  show('html');
+
+  var label = document.getElementById('copy-label');
+  var timer;
+  function done(text) {
+    label.textContent = text;
+    clearTimeout(timer);
+    timer = setTimeout(function () { label.textContent = 'Nusxa olish'; }, 1800);
+  }
+  function selectCode() {
+    var r = document.createRange(); r.selectNodeContents(out);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+  document.getElementById('copy-btn').addEventListener('click', function () {
+    var text = CODE[current];
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done('Nusxa olindi'); }, function () { selectCode(); done('Belgilandi, Ctrl+C bosing'); });
+    } else { selectCode(); done('Belgilandi, Ctrl+C bosing'); }
+  });
+})();
+</script>
+
+</html>

@@ -19,6 +19,8 @@ export type GenerateBody = {
   text: string;
   ai?: AiTool | null; // null → sayt oʻzi tanlaydi
   kind?: Kind | null;
+  /** Nisbat — faqat rasm/video turlarida yuboriladi */
+  ratio?: string | null;
   answers?: Record<string, string>;
   locale: Locale;
   output_language?: Locale;
@@ -28,6 +30,12 @@ export type GenerateBody = {
 
 /** Tekshiruv mezoni (server rubrikasi): name — task_clear | facts_kept | measurable | audience_tone | constraints | no_filler */
 export type ReviewCriterion = { name: string; ok: boolean; note: string };
+
+/** Promptning ketma-ket boʻlagi: `text` lar birlashsa asl prompt chiqadi (`lib/segments.ts`). */
+export type PromptSegment = { type: string; text: string };
+
+/** «Prompt anatomiyasi» kartasi: promptdan parcha + nega kerakligi (foydalanuvchi tilida). */
+export type PromptPart = { type: string; excerpt: string; why: string };
 
 export type SseEvent =
   | {
@@ -49,7 +57,13 @@ export type SseEvent =
   | { event: "reset"; data: Record<string, never> } // provayder uzildi — prompt boshidan
   | {
       event: "explain";
-      data: { notes: string[]; score?: number; criteria?: ReviewCriterion[] };
+      data: {
+        notes: string[];
+        score?: number;
+        criteria?: ReviewCriterion[];
+        segments?: PromptSegment[];
+        parts?: PromptPart[];
+      };
     }
   | {
       event: "done";
@@ -58,6 +72,8 @@ export type SseEvent =
         kind: Kind;
         ai: AiTool;
         prompt: string;
+        /** Kirgan foydalanuvchida bazaga saqlangan prompt id (guest'da yoʻq) */
+        prompt_id?: string | null;
       };
     }
   | { event: "error"; data: { detail: string } };
@@ -127,6 +143,32 @@ export async function translatePrompt(
     json: { text, locale },
   });
   return r.text;
+}
+
+/** «Gʻoyani boyitish»: qisqa matnni 2–4 jumlaga kengaytiradi (foydalanuvchi tilida). */
+export async function enrichIdea(
+  text: string,
+  locale: Locale,
+  signal?: AbortSignal,
+): Promise<string> {
+  const res = await fetch("/api/prompts/enrich", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...REQUESTED_WITH },
+    body: JSON.stringify({ text, locale }),
+    credentials: "include",
+    signal,
+  });
+  if (!res.ok) throw new ApiError(await readError(res), res.status);
+  const j = (await res.json()) as { text: string };
+  return j.text;
+}
+
+/** Kutubxonaga qoʻshish / olib tashlash (faqat kirgan foydalanuvchi). */
+export async function savePrompt(id: string, saved: boolean): Promise<void> {
+  await apiJson(`/api/prompts/${encodeURIComponent(id)}/save`, {
+    method: "POST",
+    json: { saved },
+  });
 }
 
 /** Matn tahlili: tur + 2–3 ta eng mos vosita (yozib toʻxtagach chaqiriladi). */

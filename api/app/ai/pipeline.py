@@ -16,6 +16,7 @@ from app.ai.catalog import TOOLS, classifier_guide
 from app.ai.llm import ProviderError
 from app.ai.prompts import (
     KIND_NAMES,
+    RATIO_KINDS,
     RUBRIC,
     archetype_guide,
     brief_block,
@@ -26,6 +27,8 @@ from app.ai.prompts import (
     playbook,
     playbook_facts_block,
     playbook_rules_block,
+    segment_types,
+    segment_types_block,
     system_prompt,
 )
 from app.schemas import (
@@ -33,10 +36,13 @@ from app.schemas import (
     ClarifyQuestion,
     Classification,
     ContextFacts,
+    EnrichResult,
     GenerateRequest,
     ImproveRequest,
     PlanResult,
+    PromptPart,
     ReviewResult,
+    Segment,
 )
 
 log = logging.getLogger(__name__)
@@ -255,6 +261,16 @@ def apply_answers(brief: Brief, questions: list[ClarifyQuestion], answers: dict[
 # --------------------------------------------------------------------------- generate
 
 
+def ratio_line(ratio: str | None, kind: str) -> str:
+    """Foydalanuvchi tanlagan nisbat — faqat rasm/video uchun (boshqa turda maʼnosiz)."""
+    if not ratio or kind not in RATIO_KINDS:
+        return ""
+    return (
+        f"ASPECT RATIO: the user chose aspect ratio {ratio}: express it in the tool's own syntax "
+        f"(Midjourney `--ar {ratio}`, others in words) and never contradict it.\n"
+    )
+
+
 def _generate_system(
     ai: str,
     kind: str,
@@ -262,6 +278,7 @@ def _generate_system(
     output_language: str,
     brief: Brief | None,
     context: dict[str, str] | None,
+    ratio: str | None = None,
 ) -> str:
     lang = "English" if output_language == "en" else locale_name(output_language)
     parts = [
@@ -287,6 +304,7 @@ def _generate_system(
             f"LENGTH: the finished prompt is {'60–150' if kind in ('image', 'video') else '150–350'} "
             "words — long enough to be precise, short enough for a beginner to read and edit. "
             "Cut anything that repeats or that the tool already does by default.\n"
+            f"{ratio_line(ratio, kind)}"
             "SELF-CHECK before you answer: walk through the rubric; if a criterion fails, fix the "
             "prompt, then output it. Keep the playbook's must-include items and quality rules; "
             "do not add sections the task does not need.\n</task>"
@@ -330,10 +348,11 @@ async def generate(
     brief: Brief | None = None,
     archetype: str = "general",
     improve: ImproveRequest | None = None,
+    ratio: str | None = None,
 ) -> AsyncIterator[str]:
     """Promptni stream qilib qaytaradi (matn boʻlaklari)."""
     async for chunk in llm.stream(
-        _generate_system(ai, kind, archetype, output_language, brief, context),
+        _generate_system(ai, kind, archetype, output_language, brief, context, ratio),
         _generate_user(text, answers, improve),
         quality=improve is not None,
     ):
@@ -343,13 +362,80 @@ async def generate(
 # --------------------------------------------------------------------------- review (ball + izohlar)
 
 
+MAX_EXCERPT = 60  # anatomiya kartasidagi parcha uzunligi
+MAX_PARTS = 4
+
+
+def _stitch_segments(prompt: str, raw: list[Segment], allowed: set[str]) -> list[Segment]:
+    """Model bergan boʻlaklarni promptga qavsharlaydi: oradagi matn `plain` boʻlak boʻladi.
+
+    Boʻlak promptda (joriy oʻrindan keyin) topilmasa — boʻsh roʻyxat (frontend oddiy matn chizadi).
+    Natija birlashtirilganda prompt harfma-harf chiqadi.
+    """
+    out: list[Segment] = []
+    pos = 0
+    for s in raw:
+        if not s.text:
+            continue
+        idx = prompt.find(s.text, pos)
+        if idx < 0:
+            return []
+        if idx > pos:
+            out.append(Segment(type="plain", text=prompt[pos:idx]))
+        out.append(Segment(type=s.type if s.type in allowed else "plain", text=s.text))
+        pos = idx + len(s.text)
+    if pos < len(prompt):
+        out.append(Segment(type="plain", text=prompt[pos:]))
+    if not any(s.type != "plain" for s in out):
+        return []  # hammasi plain — rang bermaydi, oddiy matn koʻrsatilsin
+    return out
+
+
+def _clean_segments(prompt: str, raw: list[Segment], kind: str) -> list[Segment]:
+    allowed = set(segment_types(kind))
+    out = _stitch_segments(prompt, raw, allowed)
+    if (
+        out and "".join(s.text for s in out) != prompt
+    ):  # pragma: no cover — qavsharlash kafolatlaydi
+        out = []
+    if raw and not out:
+        log.info("segments tashlandi: model boʻlaklari promptga mos kelmadi (kind=%s)", kind)
+    return out
+
+
+def _clean_parts(raw: list[PromptPart], kind: str, locale: str) -> list[PromptPart]:
+    allowed = set(segment_types(kind))
+    out: list[PromptPart] = []
+    for p in raw:
+        excerpt = " ".join(p.excerpt.split())
+        if not excerpt or not p.why.strip():
+            continue
+        if len(excerpt) > MAX_EXCERPT:
+            excerpt = excerpt[: MAX_EXCERPT - 1].rstrip() + "…"
+        out.append(
+            PromptPart(
+                type=p.type if p.type in allowed else "plain",
+                excerpt=_localize(excerpt, locale),
+                why=_localize(p.why.strip(), locale),
+            )
+        )
+    return out[:MAX_PARTS]
+
+
 async def review(
-    text: str, prompt: str, ai: str, locale: str, brief: Brief | None = None
+    text: str,
+    prompt: str,
+    ai: str,
+    locale: str,
+    brief: Brief | None = None,
+    kind: str = "text",
 ) -> ReviewResult:
-    """Tayyor promptni rubrika boʻyicha baholaydi: ball 0–100, 6 mezon, 2–4 izoh («qoida — nega»)."""
+    """Tayyor promptni baholaydi: ball 0–100, 6 mezon, 2–4 izoh, rangli boʻlaklar + anatomiya."""
+    # `plain` — faqat server toʻldiradigan oraliq matn; modelga taklif qilinmaydi
+    types_no_plain = ", ".join(t for t in segment_types(kind) if t != "plain")
     system = (
         f"A prompt for {TOOLS[ai].name} was written from the user's request and brief. "
-        "Grade it strictly against the rubric.\n"
+        "Grade it strictly against the rubric and break it down for a beginner.\n"
         "criteria: exactly 6 items with names task_clear, facts_kept, measurable, audience_tone, "
         "constraints, no_filler; ok=true/false; note = what is missing when not ok (short, "
         f"in {locale_name(locale)}). score: 0–100 (roughly: each criterion ~16 points; deduct "
@@ -359,7 +445,20 @@ async def review(
         "quote the key phrase/parameter from the prompt (keep the quote as is), then ' — ', "
         f"then why it matters (max 18 words, in {locale_name(locale)}). If a criterion failed, "
         "one note says what the user should add. No fluff, no numbering.\n"
-        f"LANGUAGE RULE: every note and criterion note MUST be in {locale_name(locale)}.\n"
+        "segments: mark the meaningful spans of the prompt so the user can see its structure. "
+        f"4–10 spans, IN THE ORDER THEY APPEAR in the prompt, each with one of these types: "
+        f"{types_no_plain}. COPY RULE: every `text` is an exact substring of the prompt, copied "
+        "character by character (same spelling, case, punctuation, line breaks) — never reworded, "
+        "translated, merged or shortened; if you cannot copy a span exactly, leave it out. Do NOT "
+        'return type "plain" and do not try to cover the whole prompt: the punctuation and glue '
+        "text between your spans is filled in automatically. Spans must not overlap.\n"
+        f"parts: 3 or 4 cards explaining the prompt's anatomy. type = one of {types_no_plain}, "
+        "each type at most once, in the order they appear in the prompt. excerpt = a "
+        f"short quote from the prompt, max {MAX_EXCERPT} characters, copied as is. why = why this "
+        f"piece matters, max 20 words, in {locale_name(locale)}, concrete, no filler.\n"
+        f"LANGUAGE RULE: notes, criterion notes and `why` MUST be in {locale_name(locale)}; "
+        "`segments[].text` and `parts[].excerpt` stay in the prompt's own language.\n"
+        f"{segment_types_block(kind)}\n"
         f"{RUBRIC}"
     )
     user = (
@@ -368,11 +467,42 @@ async def review(
         + f"<prompt>\n{prompt}\n</prompt>"
     )
     # Tekshiruv foydalanuvchi promptni oʻqiyotganda boʻladi — tez zanjir yetarli
-    result = await llm.parse(system, user, ReviewResult, max_tokens=700, tier="fast")
+    result = await llm.parse(system, user, ReviewResult, max_tokens=1500, tier="fast")
     result.notes = [_localize(n, locale) for n in result.notes[:4]]
     for c in result.criteria:
         c.note = _localize(c.note, locale)
+    result.segments = _clean_segments(prompt, result.segments, kind)
+    result.parts = _clean_parts(result.parts, kind, locale)
     return result
+
+
+# --------------------------------------------------------------------------- enrich (gʻoyani boyitish)
+
+
+async def enrich(text: str, locale: str = "uz") -> str:
+    """Qisqa gʻoyani 2–4 jumlaga kengaytiradi (foydalanuvchi tilida). Savol bermaydi.
+
+    Yangi fakt oʻylab topmaydi: nom, raqam, narx, sana qoʻshmaydi — faqat ehtimoliy tanlovlarni
+    (maqsad, auditoriya, uslub, format) tabiiy matn ichida taklif qiladi.
+    """
+    metering.set_stage("enrich")
+    lang = locale_name(locale)
+    system = (
+        "You expand a beginner's short idea into a fuller description of the SAME idea, so that "
+        "a good AI prompt can be written from it later. You are not writing the prompt.\n"
+        f"Write 2–4 flowing sentences in {lang}, under 90 words, as one paragraph.\n"
+        "Cover, in natural prose: the goal (why they need it), who it is for, the tone or style, "
+        "and the 2–3 details that matter most (format, length, place, key elements).\n"
+        "NEVER INVENT FACTS: no brand or product names, no person names, no numbers, prices, "
+        "dates, phone numbers or addresses that are not in the user's text. Keep every name and "
+        "number the user did write exactly as written, including the ʻ apostrophe (oʻ, gʻ). "
+        "Plausible CHOICES (audience, tone, style, format) may be suggested and woven into the "
+        "text as part of the idea.\n"
+        "Do not ask questions. No lists, no headings, no quotes, no markdown, no mention of AI "
+        "tools or prompts. Return only the expanded idea in `text`."
+    )
+    result = await llm.parse(system, text, EnrichResult, max_tokens=500, tier="fast")
+    return _localize(result.text.strip(), locale)
 
 
 # --------------------------------------------------------------------------- context facts
@@ -445,6 +575,8 @@ async def run(
         yield "done", {"status": "needs_clarification", "kind": kind, "ai": ai, "prompt": ""}
         return
     brief = apply_answers(p.brief, p.questions, body.answers)
+    if body.ratio and kind in RATIO_KINDS:
+        brief.tool_params["aspect_ratio"] = body.ratio
 
     parts: list[str] = []
     metering.set_stage("generate")
@@ -461,6 +593,7 @@ async def run(
                 brief=brief,
                 archetype=archetype,
                 improve=body.improve,
+                ratio=body.ratio,
             ):
                 parts.append(chunk)
                 yield "delta", {"text": chunk}
@@ -477,13 +610,15 @@ async def run(
 
     metering.set_stage("explain")
     yield "stage", {"stage": "explain"}
-    r = await review(body.text, prompt, ai, body.locale, brief)
+    r = await review(body.text, prompt, ai, body.locale, brief, kind=kind)
     yield (
         "explain",
         {
             "notes": r.notes,
             "score": r.score,
             "criteria": [cr.model_dump() for cr in r.criteria],
+            "segments": [s.model_dump() for s in r.segments],
+            "parts": [p.model_dump() for p in r.parts],
         },
     )
     yield "done", {"status": "ok", "kind": kind, "ai": ai, "prompt": prompt}

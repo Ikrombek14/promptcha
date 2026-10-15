@@ -42,7 +42,7 @@ export function SectionTitle({
         className,
       )}
     >
-      <h2 className="font-serif text-headline-sm text-text">{children}</h2>
+      <h2 className="text-headline-sm font-extrabold tracking-tight text-text">{children}</h2>
       {aside && (
         <span className="font-mono text-code-sm text-muted">{aside}</span>
       )}
@@ -79,7 +79,7 @@ export function PageTitle({
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <h1 className="font-serif text-headline-md text-text">{children}</h1>
+      <h1 className="text-headline-md font-extrabold tracking-tight text-text">{children}</h1>
       {aside}
     </div>
   );

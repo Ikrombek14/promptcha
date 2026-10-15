@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Promptcha — generator</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0C10;color:#EDEEF2;font-family:'Manrope',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+textarea{font:inherit;color:inherit;resize:none}
+button:focus-visible,a:focus-visible,textarea:focus-visible{outline:2px solid #7AA2FF;outline-offset:2px}
+.opt,.primary,.secondary,.ghost,.qchip,.navlink,.iconbtn{transition:background .15s,border-color .15s,color .15s,transform .1s}
+@media (hover:hover){
+.opt:hover{border-color:#4A5163 !important;color:#EDEEF2 !important}
+.primary:hover{background:#2F55DB !important}
+.secondary:hover{background:#2A2F3A !important}
+.ghost:hover,.iconbtn:hover{background:#1C1F27 !important;color:#EDEEF2 !important}
+.qchip:hover{border-color:#4A5163 !important;color:#EDEEF2 !important}
+.navlink:hover{color:#EDEEF2 !important}
+.card-a:hover .sg{filter:brightness(1.15)}
+}
+.opt:active,.primary:active,.secondary:active,.qchip:active{transform:scale(.98)}
+.sg{border-radius:4px;padding:1px 3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.sg-a{background:rgba(122,162,255,.13);box-shadow:inset 0 -2px 0 rgba(122,162,255,.8);color:#DDE6FF}
+.sg-b{background:rgba(242,178,102,.12);box-shadow:inset 0 -2px 0 rgba(242,178,102,.8);color:#FBE6CC}
+.sg-c{background:rgba(196,155,255,.13);box-shadow:inset 0 -2px 0 rgba(196,155,255,.8);color:#EEE2FF}
+.sg-d{background:rgba(95,211,181,.12);box-shadow:inset 0 -2px 0 rgba(95,211,181,.8);color:#D3F5EC}
+a{color:#7AA2FF}a:hover{color:#A9C2FF}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: radial-gradient(1000px 420px at 72% -120px, rgba(76,125,255,0.10), rgba(11,12,16,0) 70%), #0B0C10; color: #EDEEF2; font-family: 'Manrope', system-ui, sans-serif">
+
+<header style="position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #1C1F27; background: rgba(11,12,16,0.82); backdrop-filter: blur(12px)">
+<div style="max-width: 1280px; margin: 0 auto; padding: 0 32px; min-height: 64px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap">
+<a href="#" aria-label="Promptcha bosh sahifa" style="display: flex; align-items: center; text-decoration: none; color: #EDEEF2">
+<span style="font-weight: 800; font-size: 24px; line-height: 1; letter-spacing: -0.04em; white-space: nowrap">Prompt<span style="color: #8C93A4">cha</span></span>
+</a>
+<nav aria-label="Asosiy menyu" style="display: flex; gap: 4px; margin-left: 16px">
+<a href="#" aria-current="page" class="navlink" style="position: relative; padding: 21px 12px; font-size: 14px; font-weight: 600; color: #EDEEF2; text-decoration: none; box-shadow: inset 0 -2px 0 #4C7DFF">Generator</a>
+<a href="#" class="navlink" style="padding: 21px 12px; font-size: 14px; font-weight: 600; color: #8C93A4; text-decoration: none">Kutubxona</a>
+<a href="#" class="navlink" style="padding: 21px 12px; font-size: 14px; font-weight: 600; color: #8C93A4; text-decoration: none">Tarix</a>
+</nav>
+<div style="flex: 1 1 0"></div>
+<div role="group" aria-label="Interfeys tili" style="display: flex; padding: 3px; gap: 2px; border: 1px solid #232733; border-radius: 10px; background: #111318">
+<sc-for list="{{langs}}" as="l" hint-placeholder-count="3">
+<button type="button" onClick="{{l.pick}}" aria-pressed="{{l.on}}" style="height: 32px; min-width: 40px; padding: 0 10px; border-radius: 7px; font-size: 13px; font-weight: 700; {{l.style}}">{{l.label}}</button>
+</sc-for>
+</div>
+<button type="button" class="iconbtn" aria-label="Yorugʻ rejimga oʻtish" style="width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #8C93A4">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+</button>
+<button type="button" aria-label="Profil menyusi" style="width: 36px; height: 36px; border-radius: 9999px; background: #2B2240; color: #D9C6FF; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center">IK</button>
+</div>
+</header>
+
+<main style="max-width: 1280px; margin: 0 auto; padding: 40px 32px 64px; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+
+<section aria-labelledby="h-input" style="flex: 4 1 380px; min-width: 0; background: #13151B; border: 1px solid #22262F; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 id="h-input" style="margin: 0; font-size: 28px; line-height: 1.15; font-weight: 800; letter-spacing: -0.025em">Fikringizni aniq promptga aylantiring</h1>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #9AA1B2">Oddiy tilda yozing — Promptcha uni model tushunadigan tilga oʻgiradi.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<label for="idea" style="font-size: 14px; font-weight: 700; color: #D5D9E3">Gʻoyangiz</label>
+<span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #7A8294">45 / 500</span>
+</div>
+<div style="background: #0E1015; border: 1px solid #2A2F3A; border-radius: 12px; display: flex; flex-direction: column">
+<textarea id="idea" rows="4" style="background: transparent; border: 0; border-radius: 12px; padding: 16px 16px 8px; font-size: 16px; line-height: 1.55; min-height: 112px; color: #EDEEF2; outline-offset: -2px">Menga oyda turgan bolani rasmini chizib ber</textarea>
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 8px 8px 10px">
+<button type="button" class="ghost" style="height: 36px; padding: 0 12px; border-radius: 9px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #9AA1B2">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><path d="M12 19v3"></path></svg>
+Ovoz bilan aytish
+</button>
+<button type="button" class="ghost" style="height: 36px; padding: 0 12px; border-radius: 9px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #9AA1B2">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 21 9-9"></path><path d="M15 4V2"></path><path d="M15 16v-2"></path><path d="M8 9h2"></path><path d="M20 9h2"></path><path d="M17.8 11.8 19 13"></path><path d="M17.8 6.2 19 5"></path><path d="M12.2 6.2 11 5"></path></svg>
+Gʻoyani boyitish
+</button>
+</div>
+</div>
+</div>
+
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 10px">
+<legend style="padding: 0; margin-bottom: 10px; font-size: 14px; font-weight: 700; color: #D5D9E3">Natija turi</legend>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<button type="button" class="opt" onClick="{{t.p_avto}}" aria-pressed="{{t.on_avto}}" style="height: 44px; padding: 0 12px; border: 1px solid; border-radius: 10px; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; {{t.avto}}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.13a.5.5 0 0 1 .96 0l1.58 6.13a2 2 0 0 0 1.44 1.44l6.13 1.58a.5.5 0 0 1 0 .96l-6.13 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.13a.5.5 0 0 1-.96 0z"></path></svg>Avto</button>
+<button type="button" class="opt" onClick="{{t.p_rasm}}" aria-pressed="{{t.on_rasm}}" style="height: 44px; padding: 0 12px; border: 1px solid; border-radius: 10px; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; {{t.rasm}}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"></path></svg>Rasm</button>
+<button type="button" class="opt" onClick="{{t.p_video}}" aria-pressed="{{t.on_video}}" style="height: 44px; padding: 0 12px; border: 1px solid; border-radius: 10px; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; {{t.video}}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 13 5.22 3.48a.5.5 0 0 0 .78-.42V7.87a.5.5 0 0 0-.75-.43L16 10.5"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect></svg>Video</button>
+<button type="button" class="opt" onClick="{{t.p_ilova}}" aria-pressed="{{t.on_ilova}}" style="height: 44px; padding: 0 12px; border: 1px solid; border-radius: 10px; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; {{t.ilova}}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>Ilova</button>
+<button type="button" class="opt" onClick="{{t.p_dizayn}}" aria-pressed="{{t.on_dizayn}}" style="height: 44px; padding: 0 12px; border: 1px solid; border-radius: 10px; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; {{t.dizayn}}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.65-.75 1.65-1.69 0-.44-.18-.84-.44-1.13-.29-.29-.44-.65-.44-1.13a1.64 1.64 0 0 1 1.67-1.67h2c3.05 0 5.55-2.5 5.55-5.55C21.97 6.01 17.46 2 12 2z"></path><circle cx="13.5" cy="6.5" r="1"></circle><circle cx="17.5" cy="10.5" r="1"></circle><circle cx="8.5" cy="7.5" r="1"></circle><circle cx="6.5" cy="12.5" r="1"></circle></svg>Dizayn</button>
+<button type="button" class="opt" onClick="{{t.p_matn}}" aria-pressed="{{t.on_matn}}" style="height: 44px; padding: 0 12px; border: 1px solid; border-radius: 10px; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; {{t.matn}}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V4h16v3"></path><path d="M9 20h6"></path><path d="M12 4v16"></path></svg>Matn</button>
+</div>
+</fieldset>
+
+<fieldset style="margin: 0; padding: 0; border: 0">
+<legend style="padding: 0; margin-bottom: 10px; font-size: 14px; font-weight: 700; color: #D5D9E3">Model</legend>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{models}}" as="m" hint-placeholder-count="2">
+<button type="button" class="opt" onClick="{{m.pick}}" aria-pressed="{{m.on}}" style="min-height: 64px; padding: 12px 14px; border: 1px solid; border-radius: 12px; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; text-align: left; {{m.style}}">
+<span style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<span style="font-size: 15px; font-weight: 700; color: #EDEEF2">{{m.name}} <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; color: #7A8294">{{m.ver}}</span></span>
+<span style="font-size: 13px; font-weight: 500; color: #9AA1B2">{{m.sub}}</span>
+</span>
+<sc-if value="{{m.on}}" hint-placeholder-val="{{ false }}">
+<span style="width: 20px; height: 20px; flex: 0 0 20px; border-radius: 9999px; background: #3A63F0; display: flex; align-items: center; justify-content: center; color: #FFFFFF">
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+</span>
+</sc-if>
+</button>
+</sc-for>
+</div>
+</fieldset>
+
+<fieldset style="margin: 0; padding: 0; border: 0">
+<legend style="padding: 0; margin-bottom: 10px; font-size: 14px; font-weight: 700; color: #D5D9E3">Nisbat</legend>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-for list="{{ratios}}" as="r" hint-placeholder-count="4">
+<button type="button" class="opt" onClick="{{r.pick}}" aria-pressed="{{r.on}}" style="height: 40px; min-width: 64px; padding: 0 14px; border: 1px solid; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; font-weight: 500; {{r.style}}">
+<span style="display: inline-block; border: 1.5px solid currentColor; border-radius: 2px; {{r.shape}}"></span>{{r.label}}</button>
+</sc-for>
+</div>
+</fieldset>
+
+<div style="display: flex; flex-direction: column; gap: 12px">
+<button type="button" class="primary" style="height: 52px; border-radius: 12px; background: #3A63F0; color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16px; font-weight: 700; position: relative">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.13a.5.5 0 0 1 .96 0l1.58 6.13a2 2 0 0 0 1.44 1.44l6.13 1.58a.5.5 0 0 1 0 .96l-6.13 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.13a.5.5 0 0 1-.96 0z"></path></svg>
+Promptni qayta yaratish
+<span style="position: absolute; right: 14px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; padding: 3px 6px; border-radius: 6px; background: rgba(255,255,255,0.16); color: #E6ECFF">Ctrl ↵</span>
+</button>
+<button type="button" class="ghost" style="align-self: center; height: 40px; padding: 0 14px; border-radius: 10px; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #9AA1B2">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+Boshidan boshlash
+</button>
+</div>
+</section>
+
+<section aria-labelledby="h-out" class="card-a" style="flex: 6 1 520px; min-width: 0; background: #13151B; border: 1px solid #22262F; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 24px">
+
+<div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 6px; flex: 1 1 240px; min-width: 0">
+<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+<h2 id="h-out" style="margin: 0; font-size: 22px; line-height: 1.2; font-weight: 800; letter-spacing: -0.02em">Tayyor prompt</h2>
+<span style="height: 26px; padding: 0 10px; border-radius: 9999px; background: #1C2030; border: 1px solid #2B3245; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #C9D3F5"><span style="width: 6px; height: 6px; border-radius: 9999px; background: #7AA2FF"></span>{{modelName}} {{modelVer}}</span>
+</div>
+<p style="margin: 0; font-size: 14px; color: #9AA1B2">Rangli qismlar ustiga qarang — har biri nima uchun kerakligi pastda.</p>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 6px 14px 6px 6px; border-radius: 9999px; background: #171A21; border: 1px solid #232733">
+<span style="position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">
+<svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" style="position: absolute; inset: 0; transform: rotate(-90deg)"><circle cx="20" cy="20" r="17" fill="none" stroke="#262A35" stroke-width="3.5"></circle><circle cx="20" cy="20" r="17" fill="none" stroke="#5FD3B5" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="98.3 106.8"></circle></svg>
+<span style="font-size: 13px; font-weight: 800; color: #EDEEF2">92</span>
+</span>
+<span style="display: flex; flex-direction: column; line-height: 1.25">
+<span style="font-size: 13px; font-weight: 700; color: #EDEEF2">Aʼlo sifat</span>
+<span style="font-size: 12px; color: #9AA1B2">100 balldan</span>
+</span>
+</div>
+</div>
+
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap">
+<div role="group" aria-label="Koʻrinish tili" style="display: flex; padding: 3px; gap: 2px; border: 1px solid #232733; border-radius: 10px; background: #0F1116">
+<button type="button" onClick="{{toEn}}" aria-pressed="{{isEn}}" style="height: 34px; padding: 0 14px; border-radius: 7px; font-size: 13px; font-weight: 700; {{viewEn}}">Inglizcha</button>
+<button type="button" onClick="{{toUz}}" aria-pressed="{{isUz}}" style="height: 34px; padding: 0 14px; border-radius: 7px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; {{viewUz}}">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg>Oʻzbekcha</button>
+</div>
+<div style="display: flex; gap: 8px">
+<button type="button" class="iconbtn" aria-label="Kutubxonaga saqlash" style="width: 40px; height: 40px; border-radius: 10px; border: 1px solid #2A2F3A; display: flex; align-items: center; justify-content: center; color: #9AA1B2">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg>
+</button>
+<button type="button" class="secondary" style="height: 40px; padding: 0 16px; border-radius: 10px; background: #EDEEF2; color: #0B0C10; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+Nusxa olish
+</button>
+</div>
+</div>
+
+<div style="background: #0E1015; border: 1px solid #232733; border-radius: 14px; overflow: hidden">
+<div style="display: flex; gap: 16px; flex-wrap: wrap; padding: 12px 20px; border-bottom: 1px solid #1C1F27; font-size: 12px; font-weight: 600; color: #9AA1B2">
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 2px; background: #7AA2FF"></span>Obyekt</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 2px; background: #C49BFF"></span>Kompozitsiya</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 2px; background: #F2B266"></span>Yorugʻlik va rang</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 2px; background: #5FD3B5"></span>Parametrlar</span>
+</div>
+<sc-if value="{{isEn}}" hint-placeholder-val="{{ true }}">
+<p style="margin: 0; padding: 20px 22px 22px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 15px; line-height: 1.85; color: #B7BDCB"><span style="color: #6B7385">/imagine prompt:</span> <span class="sg sg-a">A child standing on the moon's surface, wearing a silver spacesuit with a transparent helmet</span>, <span class="sg sg-c">looking up at Earth in the starry sky</span>, lunar dust and craters around, <span class="sg sg-b">soft ethereal moonlight casting long shadows, cool silver and deep blue palette with warm Earth glow</span>, <span class="sg sg-c">wide-angle composition showing the vastness of space</span>, highly detailed, sharp focus <span class="sg sg-d">--no text, watermark, blur --v 7 --ar {{ratio}}</span></p>
+</sc-if>
+<sc-if value="{{isUz}}" hint-placeholder-val="{{ false }}">
+<div style="padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 12px">
+<p style="margin: 0; font-size: 16px; line-height: 1.8; color: #B7BDCB"><span class="sg sg-a">Oy yuzasida turgan bola, kumushrang skafandr va shaffof dubulgʻada</span>, <span class="sg sg-c">yulduzli osmondagi Yerga qarab turibdi</span>, atrofda oy changi va kraterlar, <span class="sg sg-b">uzun soyalar tashlayotgan yumshoq, sehrli oy nuri, sovuq kumush va toʻq koʻk palitra, Yerning iliq yogʻdusi bilan</span>, <span class="sg sg-c">koinot kengligini koʻrsatuvchi keng burchakli kompozitsiya</span>, yuqori detallashtirilgan, aniq fokus <span class="sg sg-d">--no text, watermark, blur --v 7 --ar {{ratio}}</span></p>
+<p style="margin: 0; font-size: 13px; color: #7A8294">Tarjima faqat tushunish uchun. Modelga inglizcha variantni yuboring.</p>
+</div>
+</sc-if>
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 20px; border-top: 1px solid #1C1F27; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #7A8294">
+<span>65 soʻz · 412 belgi</span>
+<span>{{modelName}} sintaksisi</span>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<h3 style="margin: 0; font-size: 16px; font-weight: 800; letter-spacing: -0.01em">Prompt anatomiyasi</h3>
+<span style="font-size: 13px; color: #7A8294">4 ta qism</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px">
+<article style="background: #171A21; border: 1px solid #232733; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #9DB8FF"><span style="width: 8px; height: 8px; border-radius: 2px; background: #7AA2FF"></span>Obyekt</span>
+<span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: #D5D9E3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">A child standing on the moon's surface…</span>
+<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #9AA1B2">Qahramon va joy eng boshida — model birinchi soʻzlarga koʻproq vazn beradi.</p>
+</article>
+<article style="background: #171A21; border: 1px solid #232733; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #D4B6FF"><span style="width: 8px; height: 8px; border-radius: 2px; background: #C49BFF"></span>Kompozitsiya</span>
+<span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: #D5D9E3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">wide-angle composition, looking up at Earth</span>
+<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #9AA1B2">Keng burchak koinot kengligini, yuqoriga qarash esa orzu hissini beradi.</p>
+</article>
+<article style="background: #171A21; border: 1px solid #232733; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #F5C68E"><span style="width: 8px; height: 8px; border-radius: 2px; background: #F2B266"></span>Yorugʻlik va rang</span>
+<span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: #D5D9E3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">soft ethereal moonlight, silver and deep blue</span>
+<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #9AA1B2">Kayfiyatni yorugʻlik belgilaydi; Yerning iliq nuri sovuq fonda kontrast beradi.</p>
+</article>
+<article style="background: #171A21; border: 1px solid #232733; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #8FE3CC"><span style="width: 8px; height: 8px; border-radius: 2px; background: #5FD3B5"></span>Parametrlar</span>
+<span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: #D5D9E3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">--no text, watermark, blur --v 7 --ar {{ratio}}</span>
+<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #9AA1B2">Keraksiz yozuv va xiralikni olib tashlaydi, versiya va nisbatni belgilaydi.</p>
+</article>
+</div>
+</div>
+
+<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-top: 4px">
+<span style="font-size: 13px; font-weight: 700; color: #D5D9E3; margin-right: 4px">Tez oʻzgartirish</span>
+<button type="button" class="qchip" style="height: 36px; padding: 0 12px; border-radius: 9999px; border: 1px solid #2A2F3A; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #A3AABA"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Ertak uslubi</button>
+<button type="button" class="qchip" style="height: 36px; padding: 0 12px; border-radius: 9999px; border: 1px solid #2A2F3A; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #A3AABA"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Kinematografik</button>
+<button type="button" class="qchip" style="height: 36px; padding: 0 12px; border-radius: 9999px; border: 1px solid #2A2F3A; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #A3AABA"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Akvarel</button>
+<button type="button" class="qchip" style="height: 36px; padding: 0 12px; border-radius: 9999px; border: 1px solid #2A2F3A; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #A3AABA"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Iliqroq ranglar</button>
+</div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var self = this;
+    var s = this.state || {};
+    var type = s.type || 'rasm';
+    var ratio = s.ratio || '1:1';
+    var view = s.view || 'en';
+    var lang = s.lang || 'uz';
+    var SEL = 'background:rgba(58,99,240,.16);border-color:#4C7DFF;color:#EDEEF2;';
+    var OFF = 'background:#171A21;border-color:#262A35;color:#A3AABA;';
+    var SEG_ON = 'background:#232733;color:#EDEEF2;';
+    var SEG_OFF = 'background:transparent;color:#8C93A4;';
+    var MODELS = {
+      avto: [{ id: 'auto', name: 'Avtomatik', ver: '', sub: 'Promptcha oʻzi tanlaydi' }],
+      rasm: [{ id: 'mj', name: 'Midjourney', ver: 'v7', sub: 'Badiiy, kinematografik' }, { id: 'flux', name: 'Flux', ver: '1.1 Pro', sub: 'Fotorealizm, aniq yozuv' }],
+      video: [{ id: 'kling', name: 'Kling', ver: '', sub: 'Dinamik harakat' }, { id: 'higgs', name: 'Higgsfield', ver: '', sub: 'Kamera harakatlari' }],
+      ilova: [{ id: 'lovable', name: 'Lovable', ver: '', sub: 'Toʻliq web ilova' }, { id: 'v0', name: 'v0', ver: '', sub: 'UI komponentlar' }],
+      dizayn: [{ id: 'recraft', name: 'Recraft', ver: '', sub: 'Vektor va logotip' }, { id: 'figma', name: 'Figma Make', ver: '', sub: 'Interfeys maketi' }],
+      matn: [{ id: 'gpt', name: 'ChatGPT', ver: '', sub: 'Universal yordamchi' }, { id: 'claude', name: 'Claude', ver: '', sub: 'Uzun va aniq matn' }]
+    };
+    var list = MODELS[type];
+    var modelId = list[0].id;
+    for (var i = 0; i < list.length; i++) { if (list[i].id === s.model) modelId = s.model; }
+    var cur = list.filter(function (m) { return m.id === modelId; })[0];
+    var t = {};
+    ['avto', 'rasm', 'video', 'ilova', 'dizayn', 'matn'].forEach(function (k) {
+      t[k] = type === k ? SEL : OFF;
+      t['on_' + k] = type === k;
+      t['p_' + k] = function () { self.setState({ type: k, model: null }); };
+    });
+    var models = list.map(function (m) {
+      var on = m.id === modelId;
+      return { name: m.name, ver: m.ver, sub: m.sub, on: on, style: on ? SEL : OFF, pick: function () { self.setState({ model: m.id }); } };
+    });
+    var SHAPES = { '1:1': 'width:12px;height:12px;', '4:5': 'width:11px;height:14px;', '16:9': 'width:16px;height:9px;', '9:16': 'width:9px;height:16px;' };
+    var ratios = ['1:1', '4:5', '16:9', '9:16'].map(function (r) {
+      return { label: r, on: r === ratio, style: r === ratio ? SEL : OFF, shape: SHAPES[r], pick: function () { self.setState({ ratio: r }); } };
+    });
+    var langs = [['uz', 'Oʻz'], ['ru', 'Ру'], ['en', 'En']].map(function (p) {
+      return { label: p[1], on: lang === p[0], style: lang === p[0] ? SEG_ON : SEG_OFF, pick: function () { self.setState({ lang: p[0] }); } };
+    });
+    return {
+      t: t, models: models, ratios: ratios, langs: langs, ratio: ratio,
+      modelName: cur.name, modelVer: cur.ver,
+      isEn: view === 'en', isUz: view === 'uz',
+      viewEn: view === 'en' ? SEG_ON : SEG_OFF, viewUz: view === 'uz' ? SEG_ON : SEG_OFF,
+      toEn: function () { self.setState({ view: 'en' }); },
+      toUz: function () { self.setState({ view: 'uz' }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

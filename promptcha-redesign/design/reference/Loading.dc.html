@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Natija paneli — yaratilmoqda</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0C10}
+*{box-sizing:border-box}
+button{font:inherit;background:none;border:0;padding:0}
+@keyframes pc-shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+@keyframes pc-spin{to{transform:rotate(360deg)}}
+.sk{background:linear-gradient(90deg,#1A1D25 0%,#242833 50%,#1A1D25 100%);background-size:800px 100%;animation:pc-shimmer 1.4s linear infinite;border-radius:6px}
+.spin{animation:pc-spin .9s linear infinite}
+@media (prefers-reduced-motion:reduce){.sk,.spin{animation:none}}
+a{color:#7AA2FF}a:hover{color:#A9C2FF}
+</style>
+</helmet>
+<div style="width: 760px; height: 640px; padding: 24px; background: #0B0C10; font-family: 'Manrope', system-ui, sans-serif; color: #EDEEF2">
+<section aria-busy="true" aria-labelledby="l-h" style="height: 100%; background: #13151B; border: 1px solid #22262F; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<div style="display: flex; align-items: center; gap: 10px">
+<h2 id="l-h" style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em">Prompt yaratilmoqda</h2>
+<span style="height: 26px; padding: 0 10px; border-radius: 9999px; background: #1C2030; border: 1px solid #2B3245; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #C9D3F5"><span style="width: 6px; height: 6px; border-radius: 9999px; background: #7AA2FF"></span>Midjourney v7</span>
+</div>
+<button type="button" disabled="disabled" title="Prompt tayyor boʻlgach nusxa olish mumkin" style="height: 40px; padding: 0 16px; border-radius: 10px; background: #EDEEF2; color: #0B0C10; opacity: 0.4; cursor: not-allowed; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+Nusxa olish
+</button>
+</div>
+
+<ol role="status" aria-live="polite" style="margin: 0; padding: 0; list-style: none; display: flex; gap: 8px">
+<li style="flex: 1 1 0; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: #14211E; border: 1px solid #1F3A33; font-size: 13px; font-weight: 600; color: #8FE3CC">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Gʻoya tahlil qilindi</li>
+<li style="flex: 1 1 0; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: #1A1E2B; border: 1px solid #2E3754; font-size: 13px; font-weight: 600; color: #C9D3F5">
+<svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.22-8.56"></path></svg>Uslub tanlanmoqda</li>
+<li style="flex: 1 1 0; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: #171A21; border: 1px solid #232733; font-size: 13px; font-weight: 600; color: #7A8294">
+<span style="width: 16px; height: 16px; border-radius: 9999px; border: 2px solid #3A4050"></span>Parametrlar</li>
+</ol>
+
+<div style="background: #0E1015; border: 1px solid #232733; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<div class="sk" style="height: 14px; width: 92%"></div>
+<div class="sk" style="height: 14px; width: 100%"></div>
+<div class="sk" style="height: 14px; width: 84%"></div>
+<div class="sk" style="height: 14px; width: 96%"></div>
+<div class="sk" style="height: 14px; width: 58%"></div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<div style="background: #171A21; border: 1px solid #232733; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<div class="sk" style="height: 10px; width: 40%"></div>
+<div class="sk" style="height: 12px; width: 90%"></div>
+<div class="sk" style="height: 12px; width: 70%"></div>
+</div>
+<div style="background: #171A21; border: 1px solid #232733; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<div class="sk" style="height: 10px; width: 46%"></div>
+<div class="sk" style="height: 12px; width: 86%"></div>
+<div class="sk" style="height: 12px; width: 64%"></div>
+</div>
+</div>
+<p style="margin: 0; font-size: 13px; color: #7A8294">Odatda bir necha soniya oladi.</p>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":760,"height":640}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

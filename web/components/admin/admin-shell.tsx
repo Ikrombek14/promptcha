@@ -50,7 +50,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     <MotionConfig reducedMotion="user">
       <div className="mx-auto w-full max-w-[1100px] px-4 py-6 md:px-6">
         <div className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-border pb-4">
-          <span className="font-serif text-headline-md text-text">
+          <span className="text-headline-md font-extrabold tracking-tight text-text">
             {t("title")}
           </span>
           <nav
