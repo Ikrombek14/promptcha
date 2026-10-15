@@ -165,6 +165,35 @@ export async function enrichIdea(
   return j.text;
 }
 
+/** «Prompt ishladimi?» soʻraladigan prompt (yoʻq boʻlsa null). Faqat kirgan foydalanuvchi. */
+export type PendingFeedback = {
+  id: string;
+  kind: Kind;
+  ai: AiTool;
+  input_text: string;
+  score: number | null;
+  created_at: string;
+};
+
+export async function getPendingFeedback(): Promise<PendingFeedback | null> {
+  const r = await apiJson<{ item: PendingFeedback | null }>(
+    "/api/prompts/feedback/pending",
+  );
+  return r?.item ?? null;
+}
+
+/** «Ishladi / ishlamadi» javobi. */
+export async function sendFeedback(
+  id: string,
+  answer: "worked" | "not_worked",
+  note?: string,
+): Promise<void> {
+  await apiJson(`/api/prompts/${encodeURIComponent(id)}/feedback`, {
+    method: "POST",
+    json: { answer, note: note || null },
+  });
+}
+
 /** Kutubxonaga qoʻshish / olib tashlash (faqat kirgan foydalanuvchi). */
 export async function savePrompt(id: string, saved: boolean): Promise<void> {
   await apiJson(`/api/prompts/${encodeURIComponent(id)}/save`, {

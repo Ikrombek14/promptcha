@@ -58,10 +58,51 @@ async def test_unknown_event_name_is_ignored(monkeypatch):
 
 def test_payload_is_trimmed():
     out = events._trim({"long": "a" * 5000, "n": 3, "obj": {"k": "v"}, "none": None})
-    assert len(out["long"]) == 1000
+    assert len(out["long"]) == events.MAX_VALUE_CHARS
     assert out["n"] == 3
     assert out["obj"] == "{'k': 'v'}"
     assert out["none"] is None
+
+
+def test_payload_total_size_is_capped():
+    """Koʻp kalit bilan jadvalni shishirib boʻlmaydi — umumiy hajm ham cheklanadi."""
+    big = {f"k{i}": "x" * events.MAX_VALUE_CHARS for i in range(events.MAX_KEYS)}
+    out = events._trim(big)
+    assert len(str(out)) <= events.MAX_PAYLOAD_CHARS + events.MAX_VALUE_CHARS
+
+
+async def test_server_only_events_are_rejected_from_the_browser(client, written):
+    """`prompt_generated` ni brauzer yubora olmaydi — aks holda voronka soxtalashtiriladi."""
+    r = await client.post(
+        "/api/events",
+        json={
+            "session_id": "s-2",
+            "events": [
+                {"name": "prompt_generated", "payload": {"score": 100}},
+                {"name": "type_detected", "payload": {"kind": "image"}},
+                {"name": "limit_reached", "payload": {}},
+                {"name": "prompt_copied", "payload": {"prompt_id": "p-9"}},
+            ],
+        },
+    )
+    assert r.status_code == 202
+    assert [x[0] for x in written] == ["prompt_copied"]
+
+
+async def test_guest_id_is_ignored_for_signed_in_users(client, as_user, written):
+    """Kirgan foydalanuvchi oʻzini boshqa mehmon sifatida koʻrsata olmaydi."""
+    r = await client.post(
+        "/api/events",
+        json={
+            "events": [
+                {"name": "prompt_copied", "payload": None, "guest_id": "someone-else"}
+            ]
+        },
+    )
+    assert r.status_code == 202
+    (_, _, user_id, guest_id, _) = written[0]
+    assert user_id == as_user.id
+    assert guest_id is None
 
 
 def test_known_names_cover_the_funnel():

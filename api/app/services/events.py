@@ -19,17 +19,14 @@ from app.models import Event
 
 log = logging.getLogger(__name__)
 
-#: Faqat shu nomlar qabul qilinadi — tasodifiy/begona hodisa jadvalni ifloslantirmasin
-EVENT_NAMES: frozenset[str] = frozenset(
+#: Brauzer yuborishi mumkin boʻlgan hodisalar — faqat uning oʻzida sodir boʻladiganlar
+CLIENT_EVENT_NAMES: frozenset[str] = frozenset(
     {
         "idea_submitted",
-        "type_detected",
         "tool_selected",
         "questions_answered",
-        "prompt_generated",
         "prompt_copied",
         "prompt_shared",
-        "limit_reached",
         "prompt_feedback",
         "voice_started",
         "voice_transcribed",
@@ -37,26 +34,43 @@ EVENT_NAMES: frozenset[str] = frozenset(
     }
 )
 
-MAX_PAYLOAD_CHARS = 4000
+#: Faqat server yozadi — bu nomlarni brauzerdan qabul qilmaymiz, aks holda
+#: istalgan odam soxta «prompt_generated» yuborib voronka raqamlarini buzadi.
+SERVER_EVENT_NAMES: frozenset[str] = frozenset(
+    {"type_detected", "prompt_generated", "limit_reached"}
+)
+
+EVENT_NAMES: frozenset[str] = CLIENT_EVENT_NAMES | SERVER_EVENT_NAMES
+
+MAX_PAYLOAD_CHARS = 1500
+MAX_VALUE_CHARS = 300
+MAX_KEYS = 16
 
 
 def _trim(payload: dict[str, Any] | None) -> dict[str, Any] | None:
-    """Payload'ni meʼyorga soladi: uzun matnlar kesiladi, ichma-ich obyektlar matnga aylanadi."""
+    """Payload'ni meʼyorga soladi.
+
+    Har bir qiymat ham, **umumiy hajm ham** cheklanadi: kalit qoʻshilgandan keyin
+    jami uzunlik `MAX_PAYLOAD_CHARS` dan oshsa, qolgani tashlab ketiladi. Shunday
+    qilib bitta soʻrov bilan jadvalni shishirib boʻlmaydi.
+    """
     if not payload:
         return None
     out: dict[str, Any] = {}
-    for key, value in list(payload.items())[:20]:
+    size = 0
+    for key, value in list(payload.items())[:MAX_KEYS]:
         k = str(key)[:40]
         if isinstance(value, str):
-            out[k] = value[:1000]
+            v: Any = value[:MAX_VALUE_CHARS]
         elif isinstance(value, (int, float, bool)) or value is None:
-            out[k] = value
+            v = value
         else:
-            out[k] = str(value)[:1000]
-    text = str(out)
-    if len(text) > MAX_PAYLOAD_CHARS:  # pragma: no cover — juda kam uchraydi
-        out = {"_trimmed": text[:MAX_PAYLOAD_CHARS]}
-    return out
+            v = str(value)[:MAX_VALUE_CHARS]
+        size += len(k) + len(str(v)) + 4
+        if size > MAX_PAYLOAD_CHARS:
+            break
+        out[k] = v
+    return out or None
 
 
 async def _write(

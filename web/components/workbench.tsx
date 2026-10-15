@@ -12,6 +12,7 @@ import { AnimatePresence, MotionConfig } from "motion/react";
 import { Check, Copy, Pencil, RotateCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { FeedbackCard } from "@/components/generator/feedback-card";
 import { IdeaPanel } from "@/components/generator/idea-panel";
 import { ResultPanel } from "@/components/generator/result-panel";
 import {
@@ -29,7 +30,9 @@ import { type Ratio, RATIO_KINDS } from "@/lib/segments";
 import {
   ApiError,
   type ImproveBody,
+  type PendingFeedback,
   analyze,
+  getPendingFeedback,
   cancelJob,
   jobEvents,
   savePrompt,
@@ -100,6 +103,8 @@ export function Workbench() {
 
   // Savol javoblari (chapdagi chiplar) — ish tugagach tozalanadi
   const [picks, setPicks] = useState<Record<string, ClarifyPick>>({});
+  // «Prompt ishladimi?» — kirgan foydalanuvchida, javob berilmagan eski prompt boʻlsa
+  const [pending, setPending] = useState<PendingFeedback | null>(null);
   // Mobil: natija chiqqach gʻoya paneli yigʻiladi, «Tahrirlash» bilan ochiladi
   const [editing, setEditing] = useState(false);
   const [copiedBar, setCopiedBar] = useState(false);
@@ -120,6 +125,19 @@ export function Workbench() {
       .catch(() => {
         migratedFor.current = null;
       });
+  }, [userId]);
+
+  useEffect(() => {
+    let alive = true;
+    // Kirmagan boʻlsa soʻralmaydi; javob kelgach koʻrsatiladi
+    (userId ? getPendingFeedback() : Promise.resolve(null))
+      .then((item) => {
+        if (alive) setPending(item);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
   }, [userId]);
 
   // Matn tahlili: yozib toʻxtagach tur + 2–3 ta mos vosita (birinchisi tanlanadi)
@@ -551,7 +569,10 @@ export function Workbench() {
           </div>
 
           {/* oʻng: natija */}
-          <div className="flex min-w-0 flex-col lg:min-h-0">
+          <div className="flex min-w-0 flex-col gap-3 lg:min-h-0">
+            {pending && (
+              <FeedbackCard item={pending} onDone={() => setPending(null)} />
+            )}
             <AnimatePresence mode="wait" initial={false}>
               {s.phase === "error" ? (
                 <ErrorResult

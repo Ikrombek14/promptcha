@@ -87,6 +87,7 @@ async def test_item_shape():
         "explanations": ["a — b"],
         "score": 82,
         "is_saved": True,
+        "feedback": None,
         "created_at": datetime(2026, 10, 15, 12, 0, tzinfo=UTC),
     }
 
@@ -221,6 +222,7 @@ async def test_history_returns_items(client, as_user, session):
         "ai",
         "result",
         "explanations",
+        "feedback",
         "score",
         "is_saved",
         "created_at",
@@ -297,3 +299,45 @@ async def test_delete_foreign_prompt_is_404_over_http(client, as_user, session):
     session(FakeSession(row=None))
     r = await client.delete(f"/api/prompts/{PID}")
     assert r.status_code == 404
+
+
+# --------------------------------------------------------------- «ishladimi?» (A.4)
+
+
+async def test_set_feedback_writes_answer_and_note():
+    row = _row()
+    session = FakeSession(row=row)
+    out = await library.set_feedback(session, UID, PID, "not_worked", "  rasm boshqacha chiqdi  ")
+    assert out["feedback"] == "not_worked"
+    assert row.feedback_note == "rasm boshqacha chiqdi"
+    assert session.committed == 1
+
+
+async def test_set_feedback_rejects_unknown_answer():
+    session = FakeSession(row=_row())
+    with pytest.raises(HTTPException) as e:
+        await library.set_feedback(session, UID, PID, "maybe")
+    assert e.value.status_code == 422
+    assert session.committed == 0
+
+
+async def test_set_feedback_on_someone_elses_prompt_is_404():
+    session = FakeSession(row=None)
+    with pytest.raises(HTTPException) as e:
+        await library.set_feedback(session, UID, PID, "worked")
+    assert e.value.status_code == 404
+
+
+async def test_pending_feedback_none_when_nothing_to_ask():
+    session = FakeSession(row=None)
+    assert await library.pending_feedback(session, UID) is None
+
+
+async def test_pending_feedback_returns_short_item():
+    session = FakeSession(row=_row())
+    out = await library.pending_feedback(session, UID)
+    assert out["id"] == PID
+    assert out["kind"] == "image"
+    assert out["score"] == 82
+    # faqat kerakli maydonlar — prompt matni chiqmaydi
+    assert set(out) == {"id", "kind", "ai", "input_text", "score", "created_at"}

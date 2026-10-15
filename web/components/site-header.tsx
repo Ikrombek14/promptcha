@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Logo } from "@/components/logo";
+import { FreeCounter } from "@/components/free-counter";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
@@ -11,7 +12,7 @@ import { cn } from "@/lib/utils";
 /** Header: 64px, yopishqoq, blur fon. Chapda logo + boʻlimlar, oʻngda til, tema, hisob. */
 const NAV = [
   { href: "/app", key: "generator" },
-  { href: "/library", key: "library" },
+  // Kutubxona vaqtincha yashirilgan (TASKS.md A.6) — sahifa ishlaydi, menyuda yoʻq
   { href: "/history", key: "history" },
 ] as const;
 
@@ -54,6 +55,7 @@ export function SiteHeader() {
         <div className="flex-1" />
 
         <div className="flex items-center gap-2">
+          <FreeCounter className="hidden md:inline-flex" />
           <LocaleSwitcher />
           <ThemeToggle label={t("theme")} />
           <UserMenu />

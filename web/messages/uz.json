@@ -9,7 +9,9 @@
     "nav": "Asosiy menyu",
     "generator": "Generator",
     "library": "Kutubxona",
-    "history": "Tarix"
+    "history": "Tarix",
+    "freeLeft": "Bugun {n} ta bepul qoldi",
+    "freeShort": "{n} bepul"
   },
   "locales": {
     "uz": "Oʻz",
@@ -92,7 +94,9 @@
       "canva": "Tayyor shablonlar",
       "gamma": "Taqdimot slaydlari",
       "elevenlabs": "Tabiiy ovoz",
-      "cursor": "Kod yozadigan agent"
+      "cursor": "Kod yozadigan agent",
+      "lovable": "Toʻliq ishlaydigan ilova",
+      "v0": "UI komponentlar"
     }
   },
   "families": {
@@ -147,7 +151,9 @@
     "clarifyTitle": "Bir-ikki savol bor",
     "clarifyBody": "Chapdagi savollarga javob bersangiz prompt aniqroq boʻladi. Javobsiz ham yaratish mumkin.",
     "examplesLabel": "Namunalar",
-    "translateNote": "Tarjima faqat tushunish uchun. Modelga inglizcha variantni yuboring."
+    "translateNote": "Tarjima faqat tushunish uchun. Modelga inglizcha variantni yuboring.",
+    "showTranslation": "Tarjimasini koʻrish",
+    "hideTranslation": "Tarjimani yashirish"
   },
   "auth": {
     "title": "Kirish",
@@ -247,16 +253,26 @@
   },
   "examples": [
     {
-      "tag": "Rasm",
-      "text": "Yomgʻirli Toshkent koʻchasi, kechki chiroqlar"
-    },
-    {
-      "tag": "Video",
-      "text": "Qoʻqon bozorida non yopayotgan novvoy, sekin kamera"
+      "tag": "Ilova",
+      "text": "Oʻquv markazim uchun oʻquvchilar davomatini belgilaydigan oddiy web ilova"
     },
     {
       "tag": "Ilova",
-      "text": "Oʻquvchilar uchun kunlik vazifa rejalashtiruvchi"
+      "text": "Restoranim uchun Telegram orqali buyurtma qabul qiladigan sayt"
+    },
+    {
+      "tag": "Rasm",
+      "text": "Yangi ochilgan qahvaxonam uchun Instagramʼga post rasmi, iliq ranglarda"
     }
-  ]
+  ],
+  "feedback": {
+    "title": "Oldingi promptingiz ishladimi?",
+    "worked": "Ha, ishladi",
+    "notWorked": "Yoʻq",
+    "close": "Yopish",
+    "thanks": "Rahmat — shu asosda yaxshilaymiz.",
+    "whyLabel": "Nima toʻgʻri kelmadi?",
+    "whyPlaceholder": "Bir qatorda yozing (ixtiyoriy)",
+    "send": "Yuborish"
+  }
 }
