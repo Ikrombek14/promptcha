@@ -104,9 +104,11 @@ async def test_internal_key_required_when_configured():
                 "frontend_url": "https://promptcha.uz",
                 "database_url": "postgresql+asyncpg://promptcha:Str0ngPass@localhost/promptcha",
                 "auth_dev_login": False,  # lokal .env da true — test undan mustaqil
+                "action_limit_multiplier": 1,  # lokal .env da 50 (eval uchun)
             },
             None,
         ),
+        ({"action_limit_multiplier": 50}, "ACTION_LIMIT_MULTIPLIER"),
         ({"auth_dev_login": True}, "AUTH_DEV_LOGIN"),
         (
             {"google_client_id": "x", "google_redirect_uri": "http://promptcha.uz/cb"},

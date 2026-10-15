@@ -11,7 +11,7 @@ import re
 import time
 from collections.abc import AsyncIterator
 
-from app.ai import llm, metering
+from app.ai import llm, metering, quality
 from app.ai.catalog import TOOLS, classifier_guide
 from app.ai.llm import ProviderError
 from app.ai.prompts import (
@@ -647,6 +647,40 @@ async def run(
     prompt = "".join(parts).strip()
     if not prompt:
         raise PipelineError("Prompt boʻsh chiqdi. Qayta urinib koʻring.")
+
+    # Determinal tekshiruv: joʻrik oʻrnidagi oddiy soʻz, takror, notoʻgʻri joʻrik shakli.
+    # Mexanik tuzatiladiganini oʻzimiz tuzatamiz; qolgani (masalan takrorlangan boʻlim)
+    # uchun modeldan **bir marta** qayta yozish soʻraymiz. Ikkalasi ham kamdan-kam boʻladi.
+    prompt, remaining = quality.repair(prompt)
+    if remaining:
+        log.info("sifat nuqsonlari: %s", "; ".join(remaining))
+        yield "reset", {}
+        fixed_parts: list[str] = []
+        try:
+            async for chunk in generate(
+                body.text,
+                kind,
+                ai,
+                body.answers,
+                body.output_language,
+                context,
+                brief=brief,
+                archetype=archetype,
+                improve=ImproveRequest(previous_prompt=prompt, feedback=remaining),
+                ratio=body.ratio,
+            ):
+                fixed_parts.append(chunk)
+                yield "delta", {"text": chunk}
+            retry = "".join(fixed_parts).strip()
+            if retry:
+                prompt, _ = quality.repair(retry)
+        except llm.MidStreamError:  # pragma: no cover — qayta yozish ham uzildi
+            yield "reset", {}
+            yield "delta", {"text": prompt}
+    elif prompt != "".join(parts).strip():
+        # Faqat mexanik tuzatish boʻldi — oqimdagi matnni almashtiramiz
+        yield "reset", {}
+        yield "delta", {"text": prompt}
 
     metering.set_stage("explain")
     yield "stage", {"stage": "explain"}

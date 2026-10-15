@@ -132,8 +132,9 @@ async def check_action_quota(
     base = ACTION_DAILY_LIMITS.get(action)
     if base is None:
         return
-    if get_settings().app_env != "production":
-        base *= 50  # lokal sinov va eval chegaraga urilmasin
+    # Kengaytirish faqat aniq koʻrsatilganda (`ACTION_LIMIT_MULTIPLIER`). Muhit nomiga
+    # qarab yumshatish xavfli edi: `APP_ENV` notoʻgʻri boʻlsa prod'da chegara 50× ochilardi.
+    base *= max(1, get_settings().action_limit_multiplier)
     if user is not None and user.is_pro:
         return
     # Hisob egasi boʻyicha: kirganda uch barobar, mehmonda asosiy chegara

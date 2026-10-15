@@ -103,6 +103,9 @@ class Settings(BaseSettings):
 
     # Xavfsizlik
     internal_api_key: str = ""  # Nginx har soʻrovga X-Internal-Key qoʻshadi; prod'da majburiy
+    # Yordamchi chaqiruvlar (analyze/enrich/translate) kunlik chegarasini kengaytirish —
+    # faqat lokal sinov va eval uchun. Prod'da 1 boʻlishi shart (production_problems tekshiradi).
+    action_limit_multiplier: int = 1
     trust_proxy: bool = False  # true boʻlsa IP X-Forwarded-For dan olinadi (faqat Nginx orqasida)
 
     @property
@@ -119,6 +122,8 @@ class Settings(BaseSettings):
             or len(self.app_secret) < 32
         ):
             problems.append("APP_SECRET kamida 32 belgili tasodifiy boʻlishi kerak")
+        if self.action_limit_multiplier != 1:
+            problems.append("ACTION_LIMIT_MULTIPLIER prod'da 1 boʻlishi kerak")
         if (
             self.jwt_secret in ("dev-jwt-secret", "change-me-another-long-random-string")
             or len(self.jwt_secret) < 32

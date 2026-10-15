@@ -16,14 +16,14 @@ check = usage.check_action_quota
 
 
 @pytest.fixture(autouse=True)
-def _as_production(monkeypatch):
-    """Chegara prod qiymatlari bilan tekshiriladi (dev'da u ataylab 50× kengaytirilgan)."""
+def _default_multiplier(monkeypatch):
+    """Chegara asosiy qiymatlar bilan tekshiriladi (kengaytirish faqat `.env` orqali)."""
     from app.config import get_settings
 
-    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("ACTION_LIMIT_MULTIPLIER", "1")
     get_settings.cache_clear()
     yield
-    monkeypatch.delenv("APP_ENV", raising=False)
+    monkeypatch.delenv("ACTION_LIMIT_MULTIPLIER", raising=False)
     get_settings.cache_clear()
 
 
@@ -80,6 +80,22 @@ async def test_pro_user_has_no_action_limit(make_user):
 
 async def test_unknown_action_is_not_limited():
     await check(_Session(10_000), "whatever", "1.2.3.4")
+
+
+async def test_multiplier_only_loosens_when_explicitly_set(monkeypatch):
+    """Muhit nomi emas, aniq sozlama kengaytiradi — notoʻgʻri APP_ENV prodni ochmaydi."""
+    from app.config import get_settings
+
+    limit = usage.ACTION_DAILY_LIMITS["analyze"]
+    monkeypatch.setenv("APP_ENV", "dev")
+    get_settings.cache_clear()
+    with pytest.raises(Exception) as e:
+        await check(_Session(limit), "analyze", "1.2.3.4")
+    assert getattr(e.value, "status_code", None) == 429
+
+    monkeypatch.setenv("ACTION_LIMIT_MULTIPLIER", "50")
+    get_settings.cache_clear()
+    await check(_Session(limit), "analyze", "1.2.3.4")
 
 
 async def test_db_error_is_fail_closed():
