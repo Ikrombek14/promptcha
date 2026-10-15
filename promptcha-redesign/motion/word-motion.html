@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="uz">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Promptcha soʻz harakati</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: katta sahna (6 s xoreografiya + boshqaruv), ostida 6 ta kichik sahna — har biri bitta harakat */
+:root{
+  --bg:#0A0B0F; --surface:#121419; --sunk:#0D0F13; --line:#20242D; --line-2:#2A2F3A;
+  --fg:#EDEEF2; --muted:#9AA1B2; --subtle:#7A8294; --cha:#8C93A4;
+  --font-ui:'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:'JetBrains Mono', ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-ui);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:20px;padding-block:40px 72px;display:flex;flex-direction:column;gap:36px}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+
+.head{display:flex;flex-direction:column;gap:8px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-size:clamp(28px,4vw,40px);line-height:1.1;font-weight:800;letter-spacing:-.03em}
+.lede{margin:0;max-width:62ch;color:var(--muted)}
+.rm-note{display:none;padding:12px 16px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);color:var(--muted);font-size:14px}
+@media (prefers-reduced-motion:reduce){.rm-note{display:block}}
+
+.hero{border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--surface)}
+.hero-stage{height:clamp(240px,40vw,420px);display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--sunk)}
+.hero-slot{font-size:clamp(52px,11vw,128px)}
+.controls{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:16px;padding:14px 18px;border-top:1px solid var(--line)}
+.icon-btn{width:40px;height:40px;border-radius:10px;border:1px solid var(--line-2);background:#171A21;display:flex;align-items:center;justify-content:center}
+@media (hover:hover){.icon-btn:hover{background:#1F232C}}
+.track-wrap{display:flex;flex-direction:column;gap:8px;min-width:0}
+.track{position:relative;height:6px;border-radius:999px;background:#1C1F27;cursor:pointer;touch-action:none}
+.track-fill{position:absolute;inset:0;border-radius:999px;background:var(--fg);transform-origin:0 50%;transform:scaleX(0)}
+.track-hit{position:absolute;left:0;right:0;top:-10px;bottom:-10px}
+.phases{position:relative;height:16px;font-size:11px;font-weight:600;color:var(--subtle)}
+.phases span{position:absolute;top:0;white-space:nowrap}
+.phases span::before{content:"";position:absolute;left:0;top:-10px;width:1px;height:6px;background:var(--line-2)}
+.time{font-family:var(--font-mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.seg{display:flex;padding:3px;gap:2px;border:1px solid var(--line-2);border-radius:10px;background:var(--sunk)}
+.seg button{height:32px;min-width:44px;padding:0 10px;border-radius:7px;font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:#232733;color:var(--fg)}
+@media (max-width:640px){
+  .controls{grid-template-columns:auto minmax(0,1fr) auto}
+  .seg{grid-column:1 / -1;justify-self:start}
+  .phases{display:none}
+}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.tile{border:1px solid var(--line);border-radius:18px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.tile-stage{position:relative;height:200px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line);overflow:hidden;background:var(--sunk)}
+.tile-slot{font-size:clamp(40px,4.4vw,48px)}
+.tile-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+.tile-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+h2{margin:0;font-size:18px;font-weight:800;letter-spacing:-.02em}
+.dur{font-family:var(--font-mono);font-size:12px;color:var(--subtle);white-space:nowrap}
+.tile p{margin:0;color:var(--muted);font-size:14px}
+.where{font-size:13px;color:var(--subtle)}
+.where b{color:#C9CEDA;font-weight:600}
+.copy{margin-top:auto;align-self:flex-start;height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--line-2);background:#171A21;display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700}
+@media (hover:hover){.copy:hover{background:#1F232C}}
+.hint{position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:12px;color:var(--subtle);pointer-events:none}
+.hover-stage{cursor:pointer}
+</style>
+
+<!-- ============ Logo asosi (har bir variant bilan birga nusxalanadi) ============ -->
+<style id="css-base">
+/* Promptcha logo. Shrift: Manrope 800. Oʻlchamni font-size beradi. Faqat ikki rang. */
+.pw{display:inline-block;font:800 1em/1 'Manrope',system-ui,sans-serif;
+  letter-spacing:-.04em;white-space:nowrap;color:#EDEEF2}
+.pw .l{display:inline-block}
+.pw .cw{display:inline-block}
+.pw .c{color:#8C93A4}
+@media (prefers-reduced-motion:reduce){
+  .pw,.pw *{animation:none !important;transition:none !important}
+}
+</style>
+
+<!-- ============ Variantlar ============ -->
+<style id="css-hero">
+/* Bosh xoreografiya, 6 s: harflar niqobdan koʻtariladi → "cha" oqdan kulrangga oʻtadi → chiqish */
+.v-hero{clip-path:inset(-.05em -.3em -.28em -.3em)}
+.v-hero .l{animation:h-l 6s infinite both;animation-delay:calc(var(--i) * 55ms)}
+.v-hero .c{animation:h-l 6s infinite both,h-c 6s infinite both;
+  animation-delay:calc(var(--i) * 55ms + 120ms),calc(var(--i) * 55ms + 120ms)}
+@keyframes h-l{
+  0%{transform:translateY(1.2em);animation-timing-function:cubic-bezier(.16,1,.3,1)}
+  14%{transform:none}
+  76%{transform:none;animation-timing-function:cubic-bezier(.7,0,.84,0)}
+  88%,100%{transform:translateY(-1.25em)}}
+@keyframes h-c{
+  0%,16%{color:#EDEEF2;animation-timing-function:ease-in-out}
+  30%,100%{color:#8C93A4}}
+</style>
+
+<style id="css-mask">
+/* Niqob — harflar pastdan koʻtarilib chiqadi va yuqoriga ketadi, 4 s */
+.v-mask{clip-path:inset(-.05em -.3em -.28em -.3em)}
+.v-mask .l{animation:m-l 4s infinite both;animation-delay:calc(var(--i) * 55ms)}
+@keyframes m-l{
+  0%{transform:translateY(1.2em);animation-timing-function:cubic-bezier(.16,1,.3,1)}
+  20%{transform:none}
+  72%{transform:none;animation-timing-function:cubic-bezier(.7,0,.84,0)}
+  86%,100%{transform:translateY(-1.25em)}}
+</style>
+
+<style id="css-focus">
+/* Fokus — markazdan chetlarga qarab xiradan aniqlikka, 4 s */
+.v-focus .l{animation:f-l 4s infinite both;animation-delay:calc(var(--d) * 65ms)}
+@keyframes f-l{
+  0%{opacity:0;filter:blur(12px);transform:scale(1.15);animation-timing-function:cubic-bezier(.16,1,.3,1)}
+  24%{opacity:1;filter:blur(0);transform:none}
+  72%{opacity:1;filter:blur(0);transform:none;animation-timing-function:cubic-bezier(.7,0,.84,0)}
+  86%,100%{opacity:0;filter:blur(12px);transform:none}}
+</style>
+
+<style id="css-track">
+/* Yigʻilish — keng tarqalgan harflar bir soʻzga yigʻiladi, 4 s */
+.v-track{animation:t-w 4s infinite both}
+@keyframes t-w{
+  0%{letter-spacing:.3em;opacity:0;filter:blur(8px);animation-timing-function:cubic-bezier(.16,1,.3,1)}
+  34%{letter-spacing:-.04em;opacity:1;filter:blur(0)}
+  74%{letter-spacing:-.04em;opacity:1;filter:blur(0);animation-timing-function:cubic-bezier(.7,0,.84,0)}
+  88%,100%{letter-spacing:-.04em;opacity:0;filter:blur(8px)}}
+</style>
+
+<style id="css-suffix">
+/* "cha" — Prompt joyida turadi, "cha" t harfi ortidan sirgʻalib chiqadi va kulranglashadi, 3.6 s */
+.v-suffix .cw{clip-path:inset(-.1em -.3em -.3em 0)}
+.v-suffix .c{animation:x-c 3.6s infinite both;animation-delay:calc((var(--i) - 6) * 60ms)}
+@keyframes x-c{
+  0%{transform:translateX(-1.4em);opacity:0;color:#EDEEF2;animation-timing-function:cubic-bezier(.16,1,.3,1)}
+  22%{transform:none;opacity:1;color:#EDEEF2;animation-timing-function:ease-in-out}
+  38%{color:#8C93A4}
+  74%{transform:none;opacity:1;color:#8C93A4;animation-timing-function:cubic-bezier(.7,0,.84,0)}
+  88%,100%{transform:translateX(-1.4em);opacity:0;color:#8C93A4}}
+</style>
+
+<style id="css-breathe">
+/* Nafas — shaffoflik toʻlqini harflar boʻylab oʻtadi, 2.8 s sikl */
+.v-breathe .l{animation:b-l 2.8s ease-in-out infinite;animation-delay:calc(var(--i) * 110ms)}
+@keyframes b-l{0%,60%,100%{opacity:1} 25%{opacity:.3}}
+</style>
+
+<style id="css-hover">
+/* Hover — harflar toʻlqindek bir marta sakraydi, "cha" oqaradi */
+.v-hover .c{transition:color .35s ease}
+.v-hover:hover .l,.v-hover.is-hover .l{animation:hv .6s cubic-bezier(.34,1.56,.64,1) both;
+  animation-delay:calc(var(--i) * 35ms)}
+.v-hover:hover .c,.v-hover.is-hover .c{color:#EDEEF2}
+@keyframes hv{0%,100%{transform:none} 40%{transform:translateY(-.1em)}}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <span class="eyebrow">Promptcha · soʻz harakati</span>
+    <h1>"Promptcha" harakati</h1>
+    <p class="lede">Shrift oʻzgarmagan, ranglar ikkita: oq "Prompt" va kulrang "cha". Harakat faqat niqob, xiralik, harflar orasidagi masofa va shaffoflik bilan yasalgan.</p>
+    <p class="rm-note">Qurilmangizda "kamroq harakat" sozlamasi yoqilgan, shuning uchun logo harakatsiz koʻrsatilmoqda.</p>
+  </header>
+
+  <section class="hero" aria-label="Bosh xoreografiya">
+    <div class="hero-stage"><div class="hero-slot" id="hero-slot"></div></div>
+    <div class="controls">
+      <button type="button" class="icon-btn" id="play" aria-label="Pauza">
+        <svg id="ico-pause" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+        <svg id="ico-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></svg>
+      </button>
+      <div class="track-wrap">
+        <div class="track" id="track" role="slider" tabindex="0" aria-label="Animatsiya vaqti" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0">
+          <div class="track-fill" id="fill"></div>
+          <div class="track-hit"></div>
+        </div>
+        <div class="phases" aria-hidden="true">
+          <span style="left:0">Koʻtarilish</span>
+          <span style="left:24%">"cha" kulranglashadi</span>
+          <span style="left:52%">Turish</span>
+          <span style="left:76%">Chiqish</span>
+        </div>
+      </div>
+      <span class="time" id="time">0:00.0 / 0:06.0</span>
+      <div class="seg" role="group" aria-label="Tezlik">
+        <button type="button" data-rate="0.5" aria-pressed="false">0.5×</button>
+        <button type="button" data-rate="1" aria-pressed="true">1×</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <article class="tile" data-v="mask">
+      <div class="tile-stage"><div class="tile-slot"></div></div>
+      <div class="tile-body">
+        <div class="tile-top"><h2>Niqob</h2><span class="dur">4 s · sikl</span></div>
+        <p>Harflar koʻrinmas chiziq ostidan navbat bilan koʻtariladi va yuqoriga chiqib ketadi.</p>
+        <span class="where"><b>Qayerda:</b> sahifa yuklanishi, splash</span>
+        <button type="button" class="copy">Kodni nusxalash</button>
+      </div>
+    </article>
+
+    <article class="tile" data-v="focus">
+      <div class="tile-stage"><div class="tile-slot"></div></div>
+      <div class="tile-body">
+        <div class="tile-top"><h2>Fokus</h2><span class="dur">4 s · sikl</span></div>
+        <p>Soʻz markazdan chetlarga qarab xiralikdan aniqlikka keladi.</p>
+        <span class="where"><b>Qayerda:</b> landing hero, video intro</span>
+        <button type="button" class="copy">Kodni nusxalash</button>
+      </div>
+    </article>
+
+    <article class="tile" data-v="track">
+      <div class="tile-stage"><div class="tile-slot"></div></div>
+      <div class="tile-body">
+        <div class="tile-top"><h2>Yigʻilish</h2><span class="dur">4 s · sikl</span></div>
+        <p>Keng tarqalgan harflar sekin yaqinlashib, bitta zich soʻzga yigʻiladi.</p>
+        <span class="where"><b>Qayerda:</b> taqdimot, video oxiri</span>
+        <button type="button" class="copy">Kodni nusxalash</button>
+      </div>
+    </article>
+
+    <article class="tile" data-v="suffix">
+      <div class="tile-stage"><div class="tile-slot"></div></div>
+      <div class="tile-body">
+        <div class="tile-top"><h2>"cha"</h2><span class="dur">3.6 s · sikl</span></div>
+        <p>"Prompt" joyida turadi, "cha" t harfi ortidan sirgʻalib chiqadi va oqdan kulrangga oʻtadi.</p>
+        <span class="where"><b>Qayerda:</b> brend intro, ijtimoiy tarmoq</span>
+        <button type="button" class="copy">Kodni nusxalash</button>
+      </div>
+    </article>
+
+    <article class="tile" data-v="breathe">
+      <div class="tile-stage"><div class="tile-slot"></div></div>
+      <div class="tile-body">
+        <div class="tile-top"><h2>Nafas</h2><span class="dur">2.8 s · sikl</span></div>
+        <p>Harflar boʻylab yumshoq shaffoflik toʻlqini oʻtadi, soʻz tinch "nafas oladi".</p>
+        <span class="where"><b>Qayerda:</b> prompt yaratilayotganda</span>
+        <button type="button" class="copy">Kodni nusxalash</button>
+      </div>
+    </article>
+
+    <article class="tile" data-v="hover">
+      <div class="tile-stage hover-stage" id="hover-stage">
+        <div class="tile-slot"></div>
+        <span class="hint" id="hover-hint">Kursorni shu maydonga olib keling</span>
+      </div>
+      <div class="tile-body">
+        <div class="tile-top"><h2>Hover</h2><span class="dur">0.6 s</span></div>
+        <p>Harflar toʻlqindek bir marta sakraydi, "cha" oqarib "Prompt" bilan qoʻshiladi.</p>
+        <span class="where"><b>Qayerda:</b> header logosi</span>
+        <button type="button" class="copy">Kodni nusxalash</button>
+      </div>
+    </article>
+  </div>
+</div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function wordHTML(v) {
+    var s = '<span class="pw v-' + v + '" role="img" aria-label="Promptcha"><span aria-hidden="true">';
+    var ch = 'Promptcha';
+    for (var i = 0; i < ch.length; i++) {
+      if (i === 6) s += '<span class="cw">';
+      s += '<span class="l' + (i >= 6 ? ' c' : '') + '" style="--i:' + i + ';--d:' + Math.abs(i - 4) + '">' + ch[i] + '</span>';
+    }
+    return s + '</span></span></span>';
+  }
+  function clean(s) { return s.replace(/^\n+|\s+$/g, ''); }
+
+  var heroSlot = document.getElementById('hero-slot');
+  heroSlot.innerHTML = wordHTML('hero');
+  var snippets = {};
+  Array.prototype.forEach.call(document.querySelectorAll('.tile'), function (tile) {
+    var v = tile.dataset.v;
+    var html = wordHTML(v);
+    tile.querySelector('.tile-slot').innerHTML = html;
+    snippets[v] = '<!-- Shrift -->\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@800&display=swap">\n\n<!-- Logo -->\n' + html +
+      '\n\n<style>\n' + clean(document.getElementById('css-base').textContent) + '\n\n' + clean(document.getElementById('css-' + v).textContent) + '\n</style>';
+  });
+
+  // Hover: maydonga kirganda / bosilganda
+  var hStage = document.getElementById('hover-stage');
+  var hWord = hStage.querySelector('.pw');
+  function hoverOn() { hWord.classList.remove('is-hover'); void hWord.getBoundingClientRect(); hWord.classList.add('is-hover'); }
+  hStage.addEventListener('mouseenter', hoverOn);
+  hStage.addEventListener('mouseleave', function () { hWord.classList.remove('is-hover'); });
+  hStage.addEventListener('click', hoverOn);
+  if (!window.matchMedia('(hover: hover)').matches) document.getElementById('hover-hint').textContent = 'Shu maydonga bosing';
+
+  // Nusxalash
+  Array.prototype.forEach.call(document.querySelectorAll('.copy'), function (btn) {
+    var v = btn.closest('.tile').dataset.v;
+    var t;
+    function say(s) { btn.textContent = s; clearTimeout(t); t = setTimeout(function () { btn.textContent = 'Kodni nusxalash'; }, 1800); }
+    function fallback(s) {
+      var ta = document.createElement('textarea');
+      ta.value = s; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      say(ok ? 'Nusxa olindi' : 'Nusxa olib boʻlmadi');
+    }
+    btn.addEventListener('click', function () {
+      var text = snippets[v];
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { say('Nusxa olindi'); }, function () { fallback(text); });
+      } else { fallback(text); }
+    });
+  });
+
+  // Bosh sahna boshqaruvi
+  var DUR = 6000;
+  var heroWord = heroSlot.querySelector('.pw');
+  var anims = (!reduce && heroWord.getAnimations) ? heroWord.getAnimations({ subtree: true }) : [];
+  var fill = document.getElementById('fill');
+  var timeEl = document.getElementById('time');
+  var track = document.getElementById('track');
+  var playBtn = document.getElementById('play');
+  var paused = false;
+
+  function seekTo(ms) {
+    ms = Math.max(0, Math.min(DUR - 1, ms));
+    anims.forEach(function (a) { a.currentTime = ms; });
+  }
+  function now() {
+    if (!anims.length) return 0;
+    var t = anims[0].currentTime || 0;
+    return ((t % DUR) + DUR) % DUR;
+  }
+  function fmt(ms) { return '0:0' + (ms / 1000).toFixed(1); }
+  function tick() {
+    var t = now();
+    fill.style.transform = 'scaleX(' + (t / DUR) + ')';
+    timeEl.textContent = fmt(t) + ' / 0:06.0';
+    track.setAttribute('aria-valuenow', (t / 1000).toFixed(1));
+    requestAnimationFrame(tick);
+  }
+  if (anims.length) {
+    seekTo(2800); // sahifa toʻliq logo bilan ochiladi
+    requestAnimationFrame(tick);
+  }
+
+  function setPaused(pz) {
+    paused = pz;
+    anims.forEach(function (a) { pz ? a.pause() : a.play(); });
+    document.getElementById('ico-pause').hidden = pz;
+    document.getElementById('ico-play').hidden = !pz;
+    playBtn.setAttribute('aria-label', pz ? 'Ijro etish' : 'Pauza');
+  }
+  playBtn.addEventListener('click', function () { setPaused(!paused); });
+
+  function seekFromEvent(e) {
+    var r = track.getBoundingClientRect();
+    seekTo((e.clientX - r.left) / r.width * DUR);
+  }
+  var dragging = false;
+  track.addEventListener('pointerdown', function (e) { dragging = true; track.setPointerCapture(e.pointerId); seekFromEvent(e); });
+  track.addEventListener('pointermove', function (e) { if (dragging) seekFromEvent(e); });
+  track.addEventListener('pointerup', function () { dragging = false; });
+  track.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') { seekTo(now() + 250); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { seekTo(now() - 250); e.preventDefault(); }
+    if (e.key === ' ') { setPaused(!paused); e.preventDefault(); }
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('.seg button'), function (b) {
+    b.addEventListener('click', function () {
+      var rate = parseFloat(b.dataset.rate);
+      anims.forEach(function (a) { a.playbackRate = rate; });
+      Array.prototype.forEach.call(document.querySelectorAll('.seg button'), function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+    });
+  });
+})();
+</script>
+
+</html>

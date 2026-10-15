@@ -14,7 +14,7 @@ export function LocaleSwitcher() {
   return (
     <div
       role="group"
-      className="flex h-10 items-center gap-1 rounded-[var(--radius)] border border-border bg-surface-2 p-1"
+      className="flex items-center gap-0.5 rounded-[var(--radius-md)] border border-border bg-surface-2 p-[3px]"
     >
       {locales.map((l: Locale) => (
         <button
@@ -23,9 +23,9 @@ export function LocaleSwitcher() {
           aria-pressed={l === locale}
           onClick={() => router.replace(pathname, { locale: l })}
           className={cn(
-            "h-8 rounded-[var(--radius-sm)] px-2.5 text-label-md font-medium transition-colors",
+            "h-8 min-w-10 rounded-[7px] px-2.5 text-[13px] font-bold transition-colors",
             l === locale
-              ? "border border-border bg-surface text-text"
+              ? "bg-border-strong text-text"
               : "text-muted hover:text-text",
           )}
         >

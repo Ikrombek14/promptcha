@@ -1,37 +1,80 @@
 @import "tailwindcss";
 
-/* Qiymatlar manbasi: design/tokens.md */
+/* Qiymatlar manbasi: promptcha-redesign/design/tokens.css (tungi rejim — asosiy) */
 
 :root {
-  --bg: #f7f6f2;
-  --surface: #ffffff;
-  --surface-2: #f7f6f2;
-  --border: #e4e2dc;
-  --text: #17181c;
-  --muted: #6b6e76;
-  --accent: #1d4ed8;
-  --accent-soft: #eef2ff;
-  --on-accent: #ffffff;
-  --error: #ba1a1a;
-  --error-soft: #ffdad6;
-  --scrim: rgba(23, 24, 28, 0.15);
-  color-scheme: light;
-}
+  /* Sirtlar */
+  --bg: #0b0c10;
+  --surface: #13151b;
+  --surface-2: #171a21;
+  --sunk: #0e1015;
+  --border: #22262f;
+  --border-strong: #2a2f3a;
 
-[data-theme="dark"] {
-  --bg: #121317;
-  --surface: #1a1b20;
-  --surface-2: #1f2026;
-  --border: #2a2c33;
-  --text: #ececea;
-  --muted: #9a9da6;
-  --accent: #3b82f6;
-  --accent-soft: #1b2440;
+  /* Matn */
+  --text: #edeef2;
+  --text-2: #d5d9e3;
+  --muted: #9aa1b2;
+  --subtle: #7a8294;
+  --logo-cha: #8c93a4;
+
+  /* Brend */
+  --accent: #3a63f0;
+  --accent-hover: #2f55db;
+  --selected-bg: rgba(58, 99, 240, 0.16);
+  --selected-border: #4c7dff;
+  --focus: #7aa2ff;
   --on-accent: #ffffff;
+  --accent-soft: #1c2030;
+
+  /* Prompt anatomiyasi */
+  --seg-object: #7aa2ff;
+  --seg-composition: #c49bff;
+  --seg-light: #f2b266;
+  --seg-params: #5fd3b5;
+  --quality: #5fd3b5;
+  --glow: rgba(76, 125, 255, 0.1);
+
   --error: #ff6b6b;
   --error-soft: #3a1f1f;
-  --scrim: rgba(0, 0, 0, 0.5);
+  --scrim: rgba(0, 0, 0, 0.6);
   color-scheme: dark;
+}
+
+/* Yorugʻ rejim — logo varagʻidagi juftlikdan (#0B0C10 / #6B7385) kelib chiqib */
+[data-theme="light"] {
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --surface-2: #f2f4f7;
+  --sunk: #f7f8fa;
+  --border: #e3e6ec;
+  --border-strong: #d4d9e2;
+
+  --text: #0b0c10;
+  --text-2: #2a2f3a;
+  --muted: #5b6272;
+  --subtle: #767d8c;
+  --logo-cha: #6b7385;
+
+  --accent: #3a63f0;
+  --accent-hover: #2f55db;
+  --selected-bg: rgba(58, 99, 240, 0.1);
+  --selected-border: #3a63f0;
+  --focus: #3a63f0;
+  --on-accent: #ffffff;
+  --accent-soft: #eef2ff;
+
+  --seg-object: #2f5fd4;
+  --seg-composition: #8b4fd8;
+  --seg-light: #b2762a;
+  --seg-params: #1f8f74;
+  --glow: rgba(58, 99, 240, 0.06);
+  --quality: #1f8f74;
+
+  --error: #ba1a1a;
+  --error-soft: #ffdad6;
+  --scrim: rgba(11, 12, 16, 0.2);
+  color-scheme: light;
 }
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -40,25 +83,39 @@
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-sunk: var(--sunk);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-text: var(--text);
+  --color-text-2: var(--text-2);
   --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
   --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
   --color-accent-soft: var(--accent-soft);
   --color-on-accent: var(--on-accent);
+  --color-selected-border: var(--selected-border);
+  --color-focus: var(--focus);
+  --color-quality: var(--quality);
+  --color-seg-object: var(--seg-object);
+  --color-seg-composition: var(--seg-composition);
+  --color-seg-light: var(--seg-light);
+  --color-seg-params: var(--seg-params);
   --color-error: var(--error);
   --color-error-soft: var(--error-soft);
   --color-scrim: var(--scrim);
 
-  --font-serif: var(--font-instrument-serif), Georgia, serif;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 
-  --radius: 10px;
+  --radius: 12px;
+  --radius-xl: 16px;
+  --radius-lg: 12px;
+  --radius-md: 10px;
   --radius-sm: 6px;
   --radius-xs: 4px;
 
-  /* tipografika (tokens.md) */
+  /* tipografika */
   --text-headline-xl: 44px;
   --text-headline-xl--line-height: 52px;
   --text-headline-xl--letter-spacing: -0.02em;
@@ -89,11 +146,14 @@
 
 html,
 body {
-  height: 100%;
+  min-height: 100%;
 }
 
 body {
-  background: var(--bg);
+  /* Yuqori oʻng burchakdagi sokin yogʻdu — dizayndagi fon */
+  background:
+    radial-gradient(1000px 420px at 72% -120px, var(--glow), transparent 70%),
+    var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
   font-size: 16px;
@@ -148,4 +208,122 @@ body {
 
 ::selection {
   background: var(--accent-soft);
+}
+
+/* ---------------------------------------------------------------- Logo
+   Matnli logo: «Prompt» + kulrang «cha». Oʻlchamni font-size beradi.
+   Manba: promptcha-redesign/logo/*. Nafas — sahifa ochilganda doimiy toʻlqin. */
+.pw {
+  display: inline-block;
+  font:
+    800 1em/1 var(--font-manrope),
+    system-ui,
+    sans-serif;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+  color: var(--text);
+}
+.pw .l {
+  display: inline-block;
+  transition: color 0.35s ease;
+}
+.pw .c {
+  color: var(--logo-cha);
+}
+
+/* Nafas — shaffoflik toʻlqini harflar boʻylab, 2.8 s sikl */
+.pw.v-breathe .l {
+  animation: pw-breathe 2.8s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 110ms);
+}
+@keyframes pw-breathe {
+  0%,
+  60%,
+  100% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 0.3;
+  }
+}
+
+/* Yasalmoqda — xuddi shu toʻlqin, lekin tezroq */
+.pw.v-loading .l {
+  animation: pw-breathe 1.6s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 90ms);
+}
+
+/* Tayyor — harflar bir marta toʻlqindek sakraydi */
+.pw.v-done .l {
+  animation: pw-bump 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: calc(var(--i) * 35ms);
+}
+@keyframes pw-bump {
+  0%,
+  100% {
+    transform: none;
+  }
+  40% {
+    transform: translateY(-0.1em);
+  }
+}
+
+/* Hover — sakrash va «cha» yorishadi (faqat sichqonchali qurilmalarda) */
+@media (hover: hover) {
+  .pw.v-interactive:hover .l {
+    animation: pw-bump 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    animation-delay: calc(var(--i) * 35ms);
+  }
+  .pw.v-interactive:hover .c {
+    color: var(--text);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pw,
+  .pw * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------- Prompt boʻlaklari
+   Natija panelidagi rangli qismlar (Obyekt / Kompozitsiya / Yorugʻlik / Parametrlar) */
+.sg {
+  border-radius: 4px;
+  padding: 1px 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.sg-object {
+  background: rgba(122, 162, 255, 0.13);
+  box-shadow: inset 0 -2px 0 rgba(122, 162, 255, 0.8);
+  color: #dde6ff;
+}
+.sg-composition {
+  background: rgba(196, 155, 255, 0.13);
+  box-shadow: inset 0 -2px 0 rgba(196, 155, 255, 0.8);
+  color: #eee2ff;
+}
+.sg-light {
+  background: rgba(242, 178, 102, 0.12);
+  box-shadow: inset 0 -2px 0 rgba(242, 178, 102, 0.8);
+  color: #fbe6cc;
+}
+.sg-params {
+  background: rgba(95, 211, 181, 0.12);
+  box-shadow: inset 0 -2px 0 rgba(95, 211, 181, 0.8);
+  color: #d3f5ec;
+}
+[data-theme="light"] .sg-object {
+  color: #16306e;
+}
+[data-theme="light"] .sg-composition {
+  color: #3e1a6b;
+}
+[data-theme="light"] .sg-light {
+  color: #5a3708;
+}
+[data-theme="light"] .sg-params {
+  color: #0c3f33;
 }

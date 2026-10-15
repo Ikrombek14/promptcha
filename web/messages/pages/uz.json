@@ -1,0 +1,50 @@
+{
+  "pages": {
+    "history": {
+      "title": "Tarix",
+      "subtitle": "Siz yasagan barcha promptlar — eng yangisi yuqorida.",
+      "emptyTitle": "Hali prompt yoʻq",
+      "emptyBody": "Generatorda birinchi promptingizni yasang — u shu yerda saqlanadi."
+    },
+    "library": {
+      "title": "Kutubxona",
+      "subtitle": "Saqlangan promptlar — kerak boʻlganda qayta ishlatish uchun.",
+      "emptyTitle": "Kutubxona boʻsh",
+      "emptyBody": "Tarixdagi promptni «Saqlash» bilan belgilasangiz, shu yerga tushadi."
+    },
+    "kinds": {
+      "image": "Rasm",
+      "app": "Ilova",
+      "design": "Dizayn",
+      "video": "Video",
+      "text": "Matn"
+    },
+    "common": {
+      "count": "{total} ta prompt",
+      "idea": "Gʻoya",
+      "prompt": "Prompt",
+      "scoreLabel": "Sifat balli: {score} / 100",
+      "copy": "Nusxa olish",
+      "copied": "Nusxa olindi",
+      "copyFailed": "Nusxa olinmadi — matnni qoʻlda belgilab koʻring.",
+      "save": "Saqlash",
+      "saved": "Saqlangan",
+      "unsave": "Saqlanganlardan olib tashlash",
+      "delete": "Oʻchirish",
+      "deleteAsk": "Oʻchirilsinmi?",
+      "deleteYes": "Ha, oʻchirish",
+      "deleteNo": "Bekor qilish",
+      "goGenerator": "Generatorga oʻtish",
+      "retry": "Qayta urinish",
+      "errorTitle": "Maʼlumot olinmadi",
+      "loading": "Yuklanmoqda",
+      "pagination": "Sahifalar",
+      "range": "{from}–{to} / {total}",
+      "prev": "Oldingi",
+      "next": "Keyingi",
+      "signInTitle": "Kirish kerak",
+      "signInBody": "Tarix va kutubxona faqat hisobingizda saqlanadi. Google bilan kiring — avvalgi promptlaringiz ham koʻchiriladi.",
+      "signInAction": "Google bilan kirish"
+    }
+  }
+}

@@ -11,5 +11,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
     : routing.defaultLocale;
   const base = (await import(`../messages/${locale}.json`)).default;
   const admin = (await import(`../messages/admin/${locale}.json`)).default;
-  return { locale, messages: { ...base, ...admin } };
+  const pages = (await import(`../messages/pages/${locale}.json`)).default;
+  return { locale, messages: { ...base, ...admin, ...pages } };
 });

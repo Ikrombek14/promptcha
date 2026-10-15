@@ -2,7 +2,13 @@
 // foydalanuvchi boʻlgan joyidan davom etadi; yasalayotgan ishga (jobId) qayta ulanadi.
 
 import { type AiTool, type Kind, isAiTool } from "@/lib/ai-tools";
-import type { ClarifyQuestion, ReviewCriterion } from "@/lib/api";
+import type {
+  ClarifyQuestion,
+  PromptPart,
+  PromptSegment,
+  ReviewCriterion,
+} from "@/lib/api";
+import { type Ratio, isRatio } from "@/lib/segments";
 
 export const DRAFT_KEY = "promptcha_draft";
 
@@ -11,9 +17,11 @@ export type Phase =
 export type Stage = "classify" | "clarify" | "generate" | "explain" | "done";
 
 export type Draft = {
-  v: 2;
+  v: 3;
   text: string;
   kind: Kind | null;
+  /** Nisbat (rasm/video) — tanlanmagan boʻlsa 1:1 */
+  ratio: Ratio;
   /** Tanlangan vosita (tavsiyalardan biri); null → sayt oʻzi tanlaydi */
   ai: AiTool | null;
   /** Ish uchun aniqlangan vosita (classify'dan) */
@@ -37,6 +45,14 @@ export type Draft = {
   /** Tekshiruv bali 0–100 (explain hodisasi), null — hali yoʻq */
   score: number | null;
   criteria: ReviewCriterion[];
+  /** Rangli boʻlaklar; boʻsh boʻlsa prompt oddiy matn sifatida chiziladi */
+  segments: PromptSegment[];
+  /** «Prompt anatomiyasi» kartalari */
+  parts: PromptPart[];
+  /** Bazadagi prompt id (kirgan foydalanuvchi) — kutubxonaga saqlash uchun */
+  promptId: string | null;
+  /** Kutubxonaga qoʻshilgan */
+  saved: boolean;
   error: string | null;
   jobId: string | null;
   /** Bu ishning natijasi guest tarixiga yozilgan boʻlsa — qayta yozilmasin (replay) */
@@ -44,9 +60,10 @@ export type Draft = {
 };
 
 export const EMPTY_DRAFT: Draft = {
-  v: 2,
+  v: 3,
   text: "",
   kind: null,
+  ratio: "1:1",
   ai: null,
   resolvedAi: null,
   aiPicked: false,
@@ -62,6 +79,10 @@ export const EMPTY_DRAFT: Draft = {
   notes: [],
   score: null,
   criteria: [],
+  segments: [],
+  parts: [],
+  promptId: null,
+  saved: false,
   error: null,
   jobId: null,
   savedJobId: null,
@@ -93,9 +114,12 @@ export function loadDraft(): Draft {
     const raw = localStorage.getItem(DRAFT_KEY);
     if (!raw) return EMPTY_DRAFT;
     const d = JSON.parse(raw) as Partial<Omit<Draft, "v">> & { v?: number };
-    if (!d || (d.v !== 1 && d.v !== 2) || typeof d.text !== "string")
+    if (!d || typeof d.v !== "number" || d.v < 1 || d.v > 3 || typeof d.text !== "string")
       return EMPTY_DRAFT;
-    const draft: Draft = { ...EMPTY_DRAFT, ...d, v: 2 };
+    const draft: Draft = { ...EMPTY_DRAFT, ...d, v: 3 };
+    if (!isRatio(draft.ratio)) draft.ratio = "1:1";
+    if (!Array.isArray(draft.segments)) draft.segments = [];
+    if (!Array.isArray(draft.parts)) draft.parts = [];
     // Eski yoki katalogdan chiqarilgan vositalar (sora, dalle) — tozalanadi
     if (!isAiTool(draft.ai)) draft.ai = null;
     if (!isAiTool(draft.resolvedAi)) draft.resolvedAi = null;
