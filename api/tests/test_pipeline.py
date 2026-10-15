@@ -277,3 +277,39 @@ async def test_improve_uses_quality_model(fake, monkeypatch):
     )
     await _collect(body)
     assert seen["quality"] is True
+
+
+# -------------------------------------------------------- nisbat (aspect ratio)
+
+
+async def test_ratio_goes_into_brief_and_generate_system(fake):
+    body = GenerateRequest(
+        text="logo kerak", ai="midjourney", kind="image", ratio="16:9", answers={"style": "a"}
+    )
+    await _collect(body)
+    system = fake.stream_calls[0]["system"]
+    assert "ASPECT RATIO" in system
+    assert "--ar 16:9" in system
+    assert '"aspect_ratio":"16:9"' in system  # brifga ham tushadi (tool_params)
+
+
+async def test_ratio_is_ignored_for_text_kind(fake):
+    body = GenerateRequest(
+        text="post kerak", ai="chatgpt", kind="text", ratio="16:9", answers={"tone": "a"}
+    )
+    await _collect(body)
+    assert "ASPECT RATIO" not in fake.stream_calls[0]["system"]
+    assert "aspect_ratio" not in fake.stream_calls[0]["system"]
+
+
+async def test_no_ratio_no_line(fake):
+    body = GenerateRequest(text="logo", ai="midjourney", kind="image", answers={"style": "a"})
+    await _collect(body)
+    assert "ASPECT RATIO" not in fake.stream_calls[0]["system"]
+
+
+def test_ratio_line_only_for_image_and_video():
+    assert pipeline.ratio_line("1:1", "image")
+    assert pipeline.ratio_line("9:16", "video")
+    assert pipeline.ratio_line("1:1", "text") == ""
+    assert pipeline.ratio_line(None, "image") == ""

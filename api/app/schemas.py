@@ -9,11 +9,14 @@ from pydantic import BaseModel, Field
 from app.ai.catalog import TOOL_IDS, AiTool, Kind
 
 Locale = Literal["uz", "ru", "en"]
+# Nisbat — faqat rasm/video uchun maʼnoli (`ai.prompts.RATIO_KINDS`)
+Ratio = Literal["1:1", "4:5", "16:9", "9:16"]
 
 KINDS: tuple[str, ...] = ("image", "app", "design", "video", "text")
 AI_TOOLS: tuple[str, ...] = TOOL_IDS
+RATIOS: tuple[str, ...] = ("1:1", "4:5", "16:9", "9:16")
 
-__all__ = ["AI_TOOLS", "KINDS", "AiTool", "Kind", "Locale"]
+__all__ = ["AI_TOOLS", "KINDS", "RATIOS", "AiTool", "Kind", "Locale", "Ratio"]
 
 
 # ---------- AI pipeline natijalari (structured output) ----------
@@ -68,12 +71,41 @@ class ReviewCriterion(BaseModel):
     note: str = ""
 
 
+class Segment(BaseModel):
+    """Promptning ketma-ket boʻlagi — frontend rangli koʻrsatadi.
+
+    `text` lar birlashtirilganda asl prompt harfma-harf chiqadi; oradagi tinish va boʻshliqlar
+    `type="plain"` boʻlak sifatida turadi. Toifalar kind boʻyicha: `ai.prompts.SEGMENT_TYPES`.
+    """
+
+    type: str = "plain"
+    text: str = ""
+
+
+class PromptPart(BaseModel):
+    """«Prompt anatomiyasi» kartasi: promptdan qisqa parcha va nega kerakligi."""
+
+    type: str = "plain"
+    excerpt: str = ""  # ≤60 belgi
+    why: str = ""  # foydalanuvchi tilida, ≤20 soʻz
+
+
 class ReviewResult(BaseModel):
-    """Tayyor promptni rubrika boʻyicha tekshirish: ball + izohlar («qoida — nega»)."""
+    """Tayyor promptni rubrika boʻyicha tekshirish: ball + izohlar («qoida — nega») + boʻlaklar."""
 
     score: int = Field(default=0, ge=0, le=100)
     criteria: list[ReviewCriterion] = Field(default_factory=list, max_length=6)
     notes: list[str] = Field(default_factory=list, max_length=4)
+    # Model koʻp boʻlak qaytarishi mumkin — chegara qoʻymaymiz (validatsiya yiqilmasin),
+    # serverda tozalanadi va kesiladi (`pipeline.review`).
+    segments: list[Segment] = Field(default_factory=list)
+    parts: list[PromptPart] = Field(default_factory=list)
+
+
+class EnrichResult(BaseModel):
+    """Qisqa gʻoyani 2–4 jumlaga kengaytirish (foydalanuvchi tilida)."""
+
+    text: str = ""
 
 
 class ContextFacts(BaseModel):
@@ -90,6 +122,13 @@ class AnalyzeRequest(BaseModel):
     locale: Locale = "uz"
 
 
+class EnrichRequest(BaseModel):
+    """«Gʻoyani boyitish»: qisqa matnni 2–4 jumlaga kengaytirish."""
+
+    text: str = Field(min_length=3, max_length=2000)
+    locale: Locale = "uz"
+
+
 class ImproveRequest(BaseModel):
     """«Yaxshilash»: avvalgi prompt + tekshiruv izohlari asosida qayta yozish (savollarsiz)."""
 
@@ -101,6 +140,8 @@ class GenerateRequest(BaseModel):
     text: str = Field(min_length=3, max_length=2000)
     ai: AiTool | None = None  # None → sayt oʻzi tanlaydi (classify)
     kind: Kind | None = None
+    # Nisbat (aspect ratio) — faqat image/video turlarida qoʻllanadi, boshqa turda eʼtiborsiz
+    ratio: Ratio | None = None
     answers: dict[str, str] = Field(default_factory=dict)
     locale: Locale = "uz"
     output_language: Locale = "en"
@@ -125,9 +166,40 @@ class PromptOut(BaseModel):
     output_language: str
     share_slug: str | None
     is_public: bool
+    is_saved: bool = False
+    score: int | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class SaveRequest(BaseModel):
+    """`POST /api/prompts/{id}/save` — kutubxonaga qoʻshish yoki olib tashlash."""
+
+    saved: bool
+
+
+class HistoryItem(BaseModel):
+    """Tarix/kutubxona roʻyxatining bitta elementi."""
+
+    id: UUID
+    input_text: str
+    kind: str
+    ai: str
+    result: str
+    explanations: list | None = None
+    score: int | None = None
+    is_saved: bool = False
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class HistoryPage(BaseModel):
+    items: list[HistoryItem]
+    total: int
+    page: int
+    limit: int
 
 
 class UserOut(BaseModel):

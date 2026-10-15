@@ -244,6 +244,47 @@ def brief_block(brief_json: str) -> str:
     )
 
 
+# --------------------------------------------------------------------------- prompt boʻlaklari
+# Review promptni ketma-ket boʻlaklarga ajratadi (frontend rangli koʻrsatadi) va 3–4 ta
+# «anatomiya» kartasini yozadi. Toifalar kind boʻyicha; `plain` — tinish/boʻshliq/bogʻlovchi matn.
+
+SEGMENT_TYPES: dict[str, tuple[str, ...]] = {
+    "image": ("object", "composition", "light", "params", "plain"),
+    "video": ("object", "composition", "light", "params", "plain"),
+    "text": ("role", "task", "requirements", "format", "plain"),
+    "design": ("role", "task", "requirements", "format", "plain"),
+    "app": ("goal", "stack", "features", "acceptance", "plain"),
+}
+SEGMENT_TYPE_HINTS: dict[str, str] = {
+    "object": "the subject: who/what is shown and its visible details",
+    "composition": "framing, angle, layout, where things are",
+    "light": "lighting, colour palette, mood, style",
+    "params": "tool syntax and settings (--ar, --v, --no, duration, resolution)",
+    "role": "who the assistant should be, its expertise",
+    "task": "what exactly to produce",
+    "requirements": "facts, constraints, audience, tone, what to avoid",
+    "format": "output shape: structure, length, sections, language",
+    "goal": "what the app/feature is for and for whom",
+    "stack": "technologies, framework, files, libraries",
+    "features": "the concrete features/screens/endpoints to build",
+    "acceptance": "done criteria, tests, edge cases",
+    "plain": "glue text, punctuation and whitespace between the coloured parts",
+}
+# Nisbat (aspect ratio) faqat shu turlarda maʼnoli
+RATIO_KINDS: tuple[str, ...] = ("image", "video")
+
+
+def segment_types(kind: str) -> tuple[str, ...]:
+    """Shu kind uchun ruxsat etilgan boʻlak toifalari (`plain` doim oxirida)."""
+    return SEGMENT_TYPES.get(kind, SEGMENT_TYPES["text"])
+
+
+def segment_types_block(kind: str) -> str:
+    """Review system prompti uchun: kind'ga mos toifalar roʻyxati va izohi."""
+    lines = "\n".join(f"- {t}: {SEGMENT_TYPE_HINTS[t]}" for t in segment_types(kind))
+    return f"<segment_types>\n{lines}\n</segment_types>"
+
+
 # Umumiy rubrika — generate (oʻz-oʻzini tekshirish) va review (baholash) bir xil mezonlar bilan
 RUBRIC = chr(10).join(
     [

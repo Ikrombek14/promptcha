@@ -1,6 +1,8 @@
 """/api/prompts/generate + /jobs/{id} — pipeline soxta, HTTP va job qatlami tekshiriladi."""
 
 import asyncio
+import json
+import uuid
 
 import pytest
 
@@ -116,7 +118,7 @@ async def _fake_run_metered(body, context=None):
     yield "delta", {"text": "hello"}
     metering.set_stage("explain")
     metering.record("groq", "q1", input_tokens=50, output_tokens=10)
-    yield "explain", {"notes": ["a — b"]}
+    yield "explain", {"notes": ["a — b"], "score": 82}
     yield "done", {"status": "ok", "kind": "image", "ai": "midjourney", "prompt": "hello"}
 
 
@@ -125,6 +127,7 @@ async def _drain(client, job_id):
     assert "event: done" in r.text
     # `done` dan keyingi finally (record_llm_calls) tugashini kutamiz
     await asyncio.wait_for(jobs.get(job_id).task, timeout=2)
+    return r.text
 
 
 async def test_guest_job_records_usage_with_token_sums(client, monkeypatch):
@@ -172,8 +175,12 @@ async def test_user_job_has_user_id_and_saves_prompt(client, as_user, monkeypatc
     async def consume(user_id):
         calls["bonus"] = user_id
 
-    async def save_prompt(user_id, body, done, notes):
-        calls["prompt"] = (user_id, body.text, done["prompt"], notes)
+    class FakeRow:
+        id = uuid.UUID("11111111-1111-1111-1111-111111111111")
+
+    async def save_prompt(user_id, body, done, notes, score=None):
+        calls["prompt"] = (user_id, body.text, done["prompt"], notes, score)
+        return FakeRow()
 
     monkeypatch.setattr(jobs.usage, "record_usage", record_usage)
     monkeypatch.setattr(jobs.usage, "consume_bonus_if_needed", consume)
@@ -181,12 +188,26 @@ async def test_user_job_has_user_id_and_saves_prompt(client, as_user, monkeypatc
 
     job_id = await _start(client)
     assert jobs.get(job_id).user_id == as_user.id
-    await _drain(client, job_id)
+    text = await _drain(client, job_id)
 
     assert calls["usage"]["user_id"] == as_user.id
     assert calls["usage"]["input_tokens"] == 150
     assert calls["bonus"] == as_user.id
-    assert calls["prompt"] == (as_user.id, "restoran uchun logo", "hello", ["a — b"])
+    # review balli ham tarixga yoziladi
+    assert calls["prompt"] == (as_user.id, "restoran uchun logo", "hello", ["a — b"], 82)
+    # `done` hodisasida saqlangan prompt id'si — frontend «Kutubxonaga saqlash» uchun ishlatadi
+    assert "11111111-1111-1111-1111-111111111111" in text
+
+
+async def test_guest_done_has_null_prompt_id(client, monkeypatch):
+    """Kirmagan foydalanuvchida tarix saqlanmaydi — `prompt_id` null."""
+    monkeypatch.setattr(pipeline, "run", _fake_run_metered)
+    job_id = await _start(client, guest_id="g1")
+    text = await _drain(client, job_id)
+    lines = text.splitlines()
+    data = lines[lines.index("event: done") + 1]
+    done = json.loads(data.removeprefix("data: "))
+    assert done["prompt_id"] is None
 
 
 async def test_failed_job_still_records_llm_calls(client, monkeypatch):

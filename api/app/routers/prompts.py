@@ -2,10 +2,17 @@
 
 Oqim:
   POST /api/prompts/analyze           → {kind, confidence, tools}
+  POST /api/prompts/enrich            → {text}  (qisqa gʻoyani 2–4 jumlaga kengaytirish)
   POST /api/prompts/generate          → {"job_id"}  (ish fonda boshlanadi)
   GET  /api/prompts/jobs/{id}         → SSE: avval toʻplangan hodisalar, keyin jonli
   POST /api/prompts/jobs/{id}/cancel  → ishni toʻxtatish
 Brauzer yangilansa ham ish davom etadi; qayta GET qilinsa boʻlgan joyidan ulanadi.
+
+Tarix va kutubxona (faqat kirgan foydalanuvchi, SQL `services/library.py` da):
+  GET    /api/prompts/history?page=&limit=   → hamma yasalgan promptlar (yangidan eskiga)
+  GET    /api/prompts/library?page=&limit=   → faqat saqlanganlar (`is_saved`)
+  POST   /api/prompts/{id}/save              {saved} → yangilangan element
+  DELETE /api/prompts/{id}                   → {"status": "ok"}
 Limitlar (`services/usage.check_quota`, qiymatlar admin sozlamalaridan yoki .env):
   daqiqalik (IP, slowapi); guest jami `guest_total_generations` va IP kuniga
   `guest_daily_ip_generations`; kirgan bepul kuniga `free_daily_generations` (+ bonus); Pro cheksiz.
@@ -14,21 +21,34 @@ Limitlar (`services/usage.check_quota`, qiymatlar admin sozlamalaridan yoki .env
 import asyncio
 import json
 from typing import Annotated
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette.sse import EventSourceResponse
 
-from app.ai import pipeline
+from app.ai import metering, pipeline
 from app.db import get_session
 from app.rate_limit import limiter
-from app.schemas import AnalyzeRequest, GenerateRequest, TranslateRequest
+from app.schemas import (
+    AnalyzeRequest,
+    EnrichRequest,
+    GenerateRequest,
+    HistoryItem,
+    HistoryPage,
+    SaveRequest,
+    TranslateRequest,
+)
 from app.security import client_ip
-from app.services import jobs, usage
+from app.services import jobs, library, usage
 from app.services import translate as translate_service
-from app.services.auth import CurrentUser
+from app.services.auth import CurrentUser, LoggedInUser
 
 router = APIRouter(prefix="/prompts", tags=["prompts"])
+
+Session = Annotated[AsyncSession, Depends(get_session)]
+Page = Annotated[int, Query(ge=1)]
+Limit = Annotated[int, Query(ge=1, le=library.PAGE_LIMIT_MAX)]
 
 
 def _event(name: str, data: dict) -> dict:
@@ -51,6 +71,22 @@ async def analyze(request: Request, body: AnalyzeRequest):
         "tools": c.tools,
         "archetype": c.archetype,
     }
+
+
+@router.post("/enrich")
+@limiter.limit("20/minute")
+async def enrich(request: Request, body: EnrichRequest, user: CurrentUser):
+    """«Gʻoyani boyitish»: qisqa matnni 2–4 jumlaga kengaytiradi (foydalanuvchi tilida)."""
+    meter = metering.new()
+    try:
+        text = await pipeline.enrich(body.text, body.locale)
+    except pipeline.PipelineError as e:
+        raise HTTPException(status_code=503, detail=str(e)) from e
+    finally:
+        await usage.record_llm_calls(
+            meter, job=None, user_id=user.id if user else None, job_id="enrich"
+        )
+    return {"text": text}
 
 
 @router.post("/translate")
@@ -86,8 +122,11 @@ async def job_events(request: Request, job_id: str):
     clarify   {questions:[{id,question,options}]}   — aniqlashtiruvchi savollar
     delta     {text}                                — prompt boʻlagi (stream)
     reset     {}                                    — provayder uzildi, prompt boshidan
-    explain   {notes:[...]}                         — izohlar
-    done      {status, kind, ai, prompt}            — yakun. status: ok | needs_kind | needs_clarification
+    explain   {notes, score, criteria, segments, parts}  — izohlar, ball, rangli boʻlaklar,
+                                                      «anatomiya» kartalari
+    done      {status, kind, ai, prompt, prompt_id} — yakun. status: ok | needs_kind |
+                                                      needs_clarification. `prompt_id` faqat
+                                                      `ok` da (kirmagan foydalanuvchida null)
     error     {detail}
     """
     job = jobs.get(job_id)
@@ -107,3 +146,58 @@ async def cancel_job(request: Request, job_id: str):
     if not jobs.cancel(job_id):
         raise HTTPException(status_code=404, detail="Bu ish topilmadi yoki muddati oʻtgan.")
     return {"status": "cancelled"}
+
+
+# ---------------------------------------------------------------- tarix va kutubxona
+
+
+@router.get("/history", response_model=HistoryPage)
+@limiter.limit("60/minute")
+async def history(
+    request: Request,
+    session: Session,
+    user: LoggedInUser,
+    page: Page = 1,
+    limit: Limit = 20,
+):
+    """Hamma yasalgan promptlar, yangidan eskiga."""
+    return await library.list_prompts(session, user.id, page=page, limit=limit)
+
+
+@router.get("/library", response_model=HistoryPage)
+@limiter.limit("60/minute")
+async def saved_library(
+    request: Request,
+    session: Session,
+    user: LoggedInUser,
+    page: Page = 1,
+    limit: Limit = 20,
+):
+    """Faqat kutubxonaga saqlangan promptlar."""
+    return await library.list_prompts(session, user.id, page=page, limit=limit, saved_only=True)
+
+
+@router.post("/{prompt_id}/save", response_model=HistoryItem)
+@limiter.limit("60/minute")
+async def save_to_library(
+    request: Request,
+    prompt_id: UUID,
+    body: SaveRequest,
+    session: Session,
+    user: LoggedInUser,
+):
+    """Kutubxonaga qoʻshish yoki olib tashlash. Begona prompt → 404."""
+    return await library.set_saved(session, user.id, prompt_id, body.saved)
+
+
+@router.delete("/{prompt_id}")
+@limiter.limit("60/minute")
+async def delete_prompt(
+    request: Request,
+    prompt_id: UUID,
+    session: Session,
+    user: LoggedInUser,
+):
+    """Oʻz promptini oʻchirish. Begona prompt → 404."""
+    await library.delete_prompt(session, user.id, prompt_id)
+    return {"status": "ok"}

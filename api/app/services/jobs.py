@@ -66,8 +66,17 @@ def _prune() -> None:
             del _jobs[job_id]
 
 
-async def _on_success(job: Job, meter: metering.Meter, done: dict, notes: list[str]) -> None:
-    """Muvaffaqiyatli generate — server tomondagi limit hisobi va tarix."""
+async def _on_success(
+    job: Job,
+    meter: metering.Meter,
+    done: dict,
+    notes: list[str],
+    score: int | None = None,
+) -> str | None:
+    """Muvaffaqiyatli generate — limit hisobi va tarix. Saqlangan prompt id'sini qaytaradi.
+
+    Guest'da (kirmagan) tarix saqlanmaydi → `None`.
+    """
     await usage.record_usage(
         user_id=job.user_id,
         guest_id=job.body.guest_id,
@@ -76,21 +85,27 @@ async def _on_success(job: Job, meter: metering.Meter, done: dict, notes: list[s
         input_tokens=meter.input_tokens,
         output_tokens=meter.output_tokens,
     )
-    if job.user_id is not None:
-        await usage.consume_bonus_if_needed(job.user_id)
-        await usage.save_prompt(job.user_id, job.body, done, notes)
+    if job.user_id is None:
+        return None
+    await usage.consume_bonus_if_needed(job.user_id)
+    row = await usage.save_prompt(job.user_id, job.body, done, notes, score)
+    return str(row.id) if row is not None else None
 
 
 async def _run(job: Job, context: dict[str, str] | None) -> None:
     meter = metering.new()
     notes: list[str] = []
+    score: int | None = None
     try:
         async for name, data in pipeline.run(job.body, context):
-            await job.push(name, data)
             if name == "explain":
                 notes = list(data.get("notes") or [])
+                score = data.get("score")
             elif name == "done" and data.get("status") == "ok":
-                await _on_success(job, meter, data, notes)
+                # Tarix shu yerda saqlanadi — id'ni `done` bilan qaytaramiz (frontend
+                # «Kutubxonaga saqlash» tugmasi uchun). Guest'da null.
+                data = {**data, "prompt_id": await _on_success(job, meter, data, notes, score)}
+            await job.push(name, data)
     except asyncio.CancelledError:
         await job.push("error", {"detail": CANCELLED_ERROR})
         raise
