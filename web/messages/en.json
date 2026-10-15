@@ -64,7 +64,9 @@
     "title": "Clarification",
     "subtitle": "One or two questions for a quality prompt. Pick one or more options, or write your own.",
     "custom": "Other…",
-    "customPlaceholder": "Your answer"
+    "customPlaceholder": "Your answer",
+    "continue": "Continue",
+    "skip": "Generate without answers"
   },
   "tools": {
     "analyzing": "Picking the right tools…",

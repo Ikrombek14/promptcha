@@ -35,10 +35,7 @@ type Props = {
   disabled?: boolean;
 };
 
-/**
- * Aniqlashtiruvchi savollar — gʻoya maydoni ostida, ixtiyoriy.
- * Javob bermasa ham prompt yasaladi (asosiy tugma bitta).
- */
+/** Savollar roʻyxati: raqam, savol, chiplar va «Boshqa…» maydoni. Ramkasiz — kartani egasi beradi. */
 export function ClarifyFields({
   questions,
   picks,
@@ -55,24 +52,21 @@ export function ClarifyFields({
 
   return (
     <motion.div
-      className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-dashed border-border-strong bg-surface-2/60 p-4"
+      className="flex w-full flex-col gap-5"
       variants={stagger}
       initial="hidden"
       animate="show"
     >
-      <motion.p variants={fadeUp} className="text-body-sm text-muted">
-        {t("subtitle")}
-      </motion.p>
-
-      {questions.map((q) => {
+      {questions.map((q, i) => {
         const p = pick(q.id);
         return (
           <motion.fieldset
             key={q.id}
             variants={fadeUp}
-            className="flex min-w-0 flex-col gap-2"
+            className="flex min-w-0 flex-col gap-2.5"
           >
-            <legend className="mb-2 text-body-sm font-bold text-text-2">
+            <legend className="mb-2.5 flex gap-2 text-body-md font-bold text-text">
+              <span className="font-mono text-body-sm text-accent">{i + 1}.</span>
               {q.question}
             </legend>
             <div className="flex flex-wrap gap-2" role="group" aria-label={q.question}>
@@ -84,6 +78,7 @@ export function ClarifyFields({
                     tone="outline"
                     selected={on}
                     disabled={disabled}
+                    className="h-10"
                     onClick={() =>
                       update(q.id, (cur) => ({
                         ...cur,
@@ -101,6 +96,7 @@ export function ClarifyFields({
                 tone="outline"
                 selected={p.custom}
                 disabled={disabled}
+                className="h-10"
                 onClick={() => update(q.id, (cur) => ({ ...cur, custom: !cur.custom }))}
               >
                 {t("custom")}

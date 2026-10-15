@@ -64,7 +64,9 @@
     "title": "Aniqlashtirish",
     "subtitle": "Sifatli prompt uchun bir-ikki savol. Bir yoki bir nechta variantni tanlang, yoki oʻzingiz yozing.",
     "custom": "Boshqa…",
-    "customPlaceholder": "Oʻz javobingiz"
+    "customPlaceholder": "Oʻz javobingiz",
+    "continue": "Davom etish",
+    "skip": "Savolsiz yasash"
   },
   "tools": {
     "analyzing": "Mos vositalar tanlanmoqda…",

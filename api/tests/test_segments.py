@@ -114,8 +114,8 @@ async def test_segments_dropped_when_text_is_not_in_the_prompt(run_with, caplog)
     assert "segments tashlandi" in caplog.text
 
 
-async def test_segments_dropped_when_out_of_order(run_with):
-    """Boʻlaklar tartibi promptdagiga mos kelmasa — qavsharlab boʻlmaydi."""
+async def test_out_of_order_segment_is_skipped_but_the_rest_stay(run_with):
+    """Tartibdan chiqqan boʻlak tashlanadi, qolganlari rangli boʻlib qoladi."""
     explain, _ = await run_with(
         _review(
             segments=[
@@ -124,7 +124,18 @@ async def test_segments_dropped_when_out_of_order(run_with):
             ]
         )
     )
-    assert explain["segments"] == []
+    types = [s["type"] for s in explain["segments"]]
+    assert "params" in types
+    assert "object" not in types
+    assert "".join(s["text"] for s in explain["segments"]) == PROMPT
+
+
+async def test_segment_matches_despite_different_whitespace(run_with):
+    """Model qator uzilishini boshqacha koʻchirsa ham boʻlak topiladi."""
+    spaced = PROMPT.split()[0] + "   " + PROMPT.split()[1]
+    explain, _ = await run_with(_review(segments=[Segment(type="object", text=spaced)]))
+    assert [s["type"] for s in explain["segments"]][0] == "object"
+    assert "".join(s["text"] for s in explain["segments"]) == PROMPT
 
 
 async def test_no_segments_when_model_returns_none(run_with):

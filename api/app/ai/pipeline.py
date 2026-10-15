@@ -366,6 +366,23 @@ MAX_EXCERPT = 60  # anatomiya kartasidagi parcha uzunligi
 MAX_PARTS = 4
 
 
+def _find_span(prompt: str, text: str, pos: int) -> tuple[int, int] | None:
+    r"""Boʻlakni promptdan topadi: avval aniq, keyin boʻshliqlarga eʼtiborsiz.
+
+    Model qator uzilishi yoki ikki boʻshliqni boshqacha koʻchirishi mumkin — shu sabab
+    zaxira sifatida boʻshliqlar `\s+` deb qidiriladi. Topilgan oʻrin promptning oʻzidan
+    kesib olinadi, shuning uchun natija harfma-harf asl matn boʻladi.
+    """
+    idx = prompt.find(text, pos)
+    if idx >= 0:
+        return idx, idx + len(text)
+    parts = [re.escape(w) for w in text.split()]
+    if not parts:
+        return None
+    m = re.compile(r"\s+".join(parts)).search(prompt, pos)
+    return (m.start(), m.end()) if m else None
+
+
 def _stitch_segments(prompt: str, raw: list[Segment], allowed: set[str]) -> list[Segment]:
     """Model bergan boʻlaklarni promptga qavsharlaydi: oradagi matn `plain` boʻlak boʻladi.
 
@@ -377,13 +394,16 @@ def _stitch_segments(prompt: str, raw: list[Segment], allowed: set[str]) -> list
     for s in raw:
         if not s.text:
             continue
-        idx = prompt.find(s.text, pos)
-        if idx < 0:
-            return []
+        span = _find_span(prompt, s.text, pos)
+        if span is None:
+            continue  # bu boʻlak mos kelmadi — qolganlari baribir rangli boʻladi
+        idx, end = span
         if idx > pos:
             out.append(Segment(type="plain", text=prompt[pos:idx]))
-        out.append(Segment(type=s.type if s.type in allowed else "plain", text=s.text))
-        pos = idx + len(s.text)
+        out.append(
+            Segment(type=s.type if s.type in allowed else "plain", text=prompt[idx:end])
+        )
+        pos = end
     if pos < len(prompt):
         out.append(Segment(type="plain", text=prompt[pos:]))
     if not any(s.type != "plain" for s in out):

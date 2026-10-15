@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { AnimatePresence, motion } from "motion/react";
 import {
   Image as ImageIcon,
   LayoutGrid,
@@ -21,13 +20,8 @@ import { Link } from "@/i18n/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Callout } from "@/components/ui/callout";
 import { Picker, type PickerOption } from "@/components/generator/picker";
-import {
-  ClarifyFields,
-  type Pick as ClarifyPick,
-} from "@/components/generator/clarify-fields";
 import { AI_META, type AiTool, type Kind, type Locale } from "@/lib/ai-tools";
 import { type Ratio, RATIOS, RATIO_KINDS, RATIO_SHAPE } from "@/lib/segments";
-import type { ClarifyQuestion } from "@/lib/api";
 import { ApiError, enrichIdea } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -63,9 +57,10 @@ type Props = {
   ratio: Ratio;
   onRatio: (r: Ratio) => void;
 
-  questions: ClarifyQuestion[];
-  picks: Record<string, ClarifyPick>;
-  onPicks: (p: Record<string, ClarifyPick>) => void;
+  /** Savollar oʻng panelda — chapdagi asosiy tugma yashiriladi */
+  clarifying: boolean;
+  /** Tur/model/nisbat faqat natija boʻlgach koʻrsatiladi */
+  showDecisions: boolean;
 
   busy: boolean;
   hasResult: boolean;
@@ -112,9 +107,8 @@ export function IdeaPanel({
   analyzing,
   ratio,
   onRatio,
-  questions,
-  picks,
-  onPicks,
+  clarifying,
+  showDecisions,
   busy,
   hasResult,
   exhausted,
@@ -244,11 +238,9 @@ export function IdeaPanel({
 
   const primaryLabel = busy
     ? t("generating")
-    : questions.length
-      ? t("continueAnswers")
-      : hasResult
-        ? t("regenerate")
-        : t("generate");
+    : hasResult
+      ? t("regenerate")
+      : t("generate");
 
   return (
     <section
@@ -348,28 +340,8 @@ export function IdeaPanel({
         )}
       </div>
 
-      {/* Aniqlashtiruvchi savollar — ixtiyoriy */}
-      <AnimatePresence initial={false}>
-        {questions.length > 0 && (
-          <motion.div
-            key="clarify"
-            className="shrink-0"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4, transition: { duration: 0.15 } }}
-          >
-            <ClarifyFields
-              questions={questions}
-              picks={picks}
-              onChange={onPicks}
-              onSubmit={onSubmit}
-              disabled={busy}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Qaror qatori */}
+      {/* Qaror qatori — prompt yasalgandan keyin: nima tanlangani koʻrinadi va oʻzgartiriladi */}
+      {showDecisions && (
       <div className="flex shrink-0 flex-col gap-2">
         <div className="flex flex-wrap items-baseline gap-x-2">
           <span className="text-body-sm font-bold text-text-2">{t("decisions")}</span>
@@ -415,10 +387,11 @@ export function IdeaPanel({
           )}
         </div>
       </div>
+      )}
 
       {/* Asosiy harakat */}
       <div className="flex shrink-0 flex-col gap-2">
-        {busy ? (
+        {clarifying && !busy ? null : busy ? (
           <Button
             variant="secondary"
             className="h-13 w-full justify-center gap-2.5 rounded-[var(--radius-lg)] text-body-md font-bold"

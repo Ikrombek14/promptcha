@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { IdeaPanel } from "@/components/generator/idea-panel";
 import { ResultPanel } from "@/components/generator/result-panel";
 import {
-  ClarifyWaiting,
+  ClarifyCard,
   EmptyResult,
   ErrorResult,
   LoadingResult,
@@ -520,9 +520,8 @@ export function Workbench() {
                 analyzing={analyzing}
                 ratio={s.ratio}
                 onRatio={(ratio: Ratio) => patch({ ratio })}
-                questions={s.questions}
-                picks={picks}
-                onPicks={setPicks}
+                clarifying={s.questions.length > 0}
+                showDecisions={hasResult || busy}
                 busy={busy}
                 hasResult={hasResult}
                 exhausted={exhausted}
@@ -570,7 +569,14 @@ export function Workbench() {
                   ai={s.resolvedAi ?? s.ai}
                 />
               ) : s.phase === "clarify" ? (
-                <ClarifyWaiting key="clarify" />
+                <ClarifyCard
+                  key="clarify"
+                  questions={s.questions}
+                  picks={picks}
+                  onPicks={setPicks}
+                  onSubmit={start}
+                  busy={busy}
+                />
               ) : (
                 <EmptyResult
                   key="empty"

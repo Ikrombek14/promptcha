@@ -12,7 +12,12 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  ClarifyFields,
+  type Pick as ClarifyPick,
+} from "@/components/generator/clarify-fields";
 import { AI_META, type AiTool } from "@/lib/ai-tools";
+import type { ClarifyQuestion } from "@/lib/api";
 import type { Stage } from "@/lib/draft";
 import { fadeUp, stagger } from "@/lib/motion";
 import { cn } from "@/lib/utils";
@@ -91,19 +96,63 @@ export function EmptyResult({ onExample }: { onExample: (text: string) => void }
   );
 }
 
-/** Savollar bor — javob chapda beriladi. */
-export function ClarifyWaiting() {
+/** Savollar kartasi: savollar shu yerda beriladi, asosiy tugma ham shu yerda. */
+export function ClarifyCard({
+  questions,
+  picks,
+  onPicks,
+  onSubmit,
+  busy,
+}: {
+  questions: ClarifyQuestion[];
+  picks: Record<string, ClarifyPick>;
+  onPicks: (p: Record<string, ClarifyPick>) => void;
+  onSubmit: () => void;
+  busy: boolean;
+}) {
   const t = useTranslations("result");
+  const tc = useTranslations("clarify");
+  const answered = Object.values(picks).some(
+    (p) => p.chosen.length > 0 || (p.custom && p.text.trim().length > 0),
+  );
+
   return (
-    <section className={cn(panel, "items-center justify-center text-center")}>
-      <div className="flex max-w-md flex-col items-center gap-4">
-        <span className="flex h-16 w-16 items-center justify-center rounded-[18px] border border-[color-mix(in_oklab,var(--accent),var(--border)_55%)] bg-accent-soft text-accent">
-          <HelpCircle size={28} strokeWidth={1.6} />
+    <section aria-labelledby="c-h" className={cn(panel, "gap-5")}>
+      <div className="flex items-start gap-3.5">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] border border-[color-mix(in_oklab,var(--accent),var(--border)_55%)] bg-accent-soft text-accent">
+          <HelpCircle size={22} strokeWidth={1.8} />
         </span>
-        <h2 className="text-headline-sm font-extrabold tracking-[-0.015em] text-text">
-          {t("clarifyTitle")}
-        </h2>
-        <p className="text-body-md text-muted">{t("clarifyBody")}</p>
+        <div className="flex flex-col gap-1">
+          <h2
+            id="c-h"
+            className="text-headline-sm font-extrabold tracking-[-0.015em] text-text"
+          >
+            {t("clarifyTitle")}
+          </h2>
+          <p className="text-body-sm text-muted">{tc("subtitle")}</p>
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col justify-center py-2">
+        <ClarifyFields
+          questions={questions}
+          picks={picks}
+          onChange={onPicks}
+          onSubmit={onSubmit}
+          disabled={busy}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Button
+          variant="primary"
+          className="h-12 w-full justify-center gap-2.5 rounded-[var(--radius-lg)] text-body-md font-bold"
+          disabled={busy}
+          onClick={onSubmit}
+        >
+          <Sparkles size={17} />
+          {answered ? tc("continue") : tc("skip")}
+        </Button>
       </div>
     </section>
   );
