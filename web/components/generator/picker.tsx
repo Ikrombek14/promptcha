@@ -135,11 +135,6 @@ export function Picker<T extends string>({
         )}
         {current.icon}
         <span className="truncate">{current.label}</span>
-        {current.hint && (
-          <span className="hidden truncate font-mono text-label-sm font-medium text-subtle sm:inline">
-            {current.hint}
-          </span>
-        )}
         {auto && (
           <span
             aria-hidden

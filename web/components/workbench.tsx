@@ -55,6 +55,7 @@ const getServerRemaining = () => null;
 export function Workbench() {
   const t = useTranslations("app");
   const tr = useTranslations("result");
+  const tc = useTranslations("clarify");
   const ta = useTranslations("auth");
   const locale = useLocale() as Locale;
   const user = useUser();
@@ -449,6 +450,9 @@ export function Workbench() {
     }
   };
 
+  const answeredSomething = Object.values(picks).some(
+    (p) => p.chosen.length > 0 || (p.custom && p.text.trim().length > 0),
+  );
   const showResult = s.phase === "streaming" || s.phase === "done";
   const resultAi = s.resolvedAi ?? s.ai ?? "chatgpt";
   const hasResult = showResult && s.prompt.length > 0;
@@ -627,7 +631,9 @@ export function Workbench() {
             {busy
               ? t("generating")
               : s.questions.length
-                ? t("continueAnswers")
+                ? answeredSomething
+                  ? tc("continue")
+                  : tc("skip")
                 : t("generate")}
           </Button>
         )}
