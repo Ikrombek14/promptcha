@@ -25,6 +25,8 @@ export type GenerateBody = {
   locale: Locale;
   output_language?: Locale;
   guest_id?: string | null;
+  /** Brauzer sessiyasi — hodisalar voronkasi uchun */
+  session_id?: string | null;
   improve?: ImproveBody | null;
 };
 
@@ -161,6 +163,35 @@ export async function enrichIdea(
   if (!res.ok) throw new ApiError(await readError(res), res.status);
   const j = (await res.json()) as { text: string };
   return j.text;
+}
+
+/** «Prompt ishladimi?» soʻraladigan prompt (yoʻq boʻlsa null). Faqat kirgan foydalanuvchi. */
+export type PendingFeedback = {
+  id: string;
+  kind: Kind;
+  ai: AiTool;
+  input_text: string;
+  score: number | null;
+  created_at: string;
+};
+
+export async function getPendingFeedback(): Promise<PendingFeedback | null> {
+  const r = await apiJson<{ item: PendingFeedback | null }>(
+    "/api/prompts/feedback/pending",
+  );
+  return r?.item ?? null;
+}
+
+/** «Ishladi / ishlamadi» javobi. */
+export async function sendFeedback(
+  id: string,
+  answer: "worked" | "not_worked",
+  note?: string,
+): Promise<void> {
+  await apiJson(`/api/prompts/${encodeURIComponent(id)}/feedback`, {
+    method: "POST",
+    json: { answer, note: note || null },
+  });
 }
 
 /** Kutubxonaga qoʻshish / olib tashlash (faqat kirgan foydalanuvchi). */

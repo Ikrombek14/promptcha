@@ -178,7 +178,7 @@ async def test_user_job_has_user_id_and_saves_prompt(client, as_user, monkeypatc
     class FakeRow:
         id = uuid.UUID("11111111-1111-1111-1111-111111111111")
 
-    async def save_prompt(user_id, body, done, notes, score=None):
+    async def save_prompt(user_id, body, done, notes, score=None, criteria=None):
         calls["prompt"] = (user_id, body.text, done["prompt"], notes, score)
         return FakeRow()
 

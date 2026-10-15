@@ -6,7 +6,8 @@
       "overview": "Overview",
       "users": "Users",
       "payments": "Payments",
-      "settings": "Settings"
+      "settings": "Settings",
+      "funnel": "Funnel"
     },
     "common": {
       "loading": "Loading…",
@@ -124,6 +125,27 @@
       "save": "Save",
       "saving": "Saving…",
       "saved": "Saved"
+    },
+    "funnel": {
+      "title": "Funnel",
+      "days": "{n} days",
+      "steps": "Steps",
+      "bySession": "by session",
+      "step": {
+        "idea_submitted": "Idea submitted",
+        "prompt_generated": "Prompt generated",
+        "prompt_copied": "Copied",
+        "prompt_feedback": "“Did it work?” answer"
+      },
+      "byKind": "By type",
+      "kind": "Type",
+      "count": "Count",
+      "avgScore": "Average score",
+      "feedback": "Did the prompt work?",
+      "feedbackHint": "user answer",
+      "worked": "Worked",
+      "notWorked": "Did not work",
+      "empty": "No data yet"
     }
   }
 }

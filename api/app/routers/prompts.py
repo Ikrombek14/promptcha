@@ -12,6 +12,8 @@ Tarix va kutubxona (faqat kirgan foydalanuvchi, SQL `services/library.py` da):
   GET    /api/prompts/history?page=&limit=   → hamma yasalgan promptlar (yangidan eskiga)
   GET    /api/prompts/library?page=&limit=   → faqat saqlanganlar (`is_saved`)
   POST   /api/prompts/{id}/save              {saved} → yangilangan element
+  GET    /api/prompts/feedback/pending       → {item} — «ishladimi?» soʻraladigan prompt
+  POST   /api/prompts/{id}/feedback          {answer, note} → yangilangan element
   DELETE /api/prompts/{id}                   → {"status": "ok"}
 Limitlar (`services/usage.check_quota`, qiymatlar admin sozlamalaridan yoki .env):
   daqiqalik (IP, slowapi); guest jami `guest_total_generations` va IP kuniga
@@ -33,6 +35,7 @@ from app.rate_limit import limiter
 from app.schemas import (
     AnalyzeRequest,
     EnrichRequest,
+    FeedbackRequest,
     GenerateRequest,
     HistoryItem,
     HistoryPage,
@@ -40,7 +43,7 @@ from app.schemas import (
     TranslateRequest,
 )
 from app.security import client_ip
-from app.services import jobs, library, usage
+from app.services import events, jobs, library, usage
 from app.services import translate as translate_service
 from app.services.auth import CurrentUser, LoggedInUser
 
@@ -175,6 +178,31 @@ async def saved_library(
 ):
     """Faqat kutubxonaga saqlangan promptlar."""
     return await library.list_prompts(session, user.id, page=page, limit=limit, saved_only=True)
+
+
+@router.get("/feedback/pending")
+async def feedback_pending(session: Session, user: LoggedInUser) -> dict:
+    """Javob kutilayotgan prompt (A.4). Yoʻq boʻlsa `{"item": null}`."""
+    return {"item": await library.pending_feedback(session, user.id)}
+
+
+@router.post("/{prompt_id}/feedback", response_model=HistoryItem)
+@limiter.limit("60/minute")
+async def feedback(
+    request: Request,
+    prompt_id: UUID,
+    body: FeedbackRequest,
+    session: Session,
+    user: LoggedInUser,
+):
+    """«Prompt ishladimi?» javobi — tarixga yoziladi va hodisa sifatida qayd etiladi."""
+    row = await library.set_feedback(session, user.id, prompt_id, body.answer, body.note)
+    events.record(
+        "prompt_feedback",
+        {"prompt_id": str(prompt_id), "answer": body.answer, "has_note": bool(body.note)},
+        user_id=user.id,
+    )
+    return row
 
 
 @router.post("/{prompt_id}/save", response_model=HistoryItem)

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Promptcha — ulashilgan prompt</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0C10}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+button:focus-visible,a:focus-visible{outline:2px solid #7AA2FF;outline-offset:2px}
+a{color:#EDEEF2}a:hover{color:#FFFFFF}
+.sg{border-radius:4px;padding:1px 3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.sg-a{background:rgba(122,162,255,.13);box-shadow:inset 0 -2px 0 rgba(122,162,255,.8);color:#DDE6FF}
+.sg-b{background:rgba(242,178,102,.12);box-shadow:inset 0 -2px 0 rgba(242,178,102,.8);color:#FBE6CC}
+.sg-c{background:rgba(196,155,255,.13);box-shadow:inset 0 -2px 0 rgba(196,155,255,.8);color:#EEE2FF}
+.sg-d{background:rgba(95,211,181,.12);box-shadow:inset 0 -2px 0 rgba(95,211,181,.8);color:#D3F5EC}
+</style>
+</helmet>
+<div style="width: 1366px; height: 768px; overflow: hidden; display: flex; flex-direction: column; background: #0B0C10; color: #EDEEF2; font-family: 'Manrope', system-ui, sans-serif">
+
+<header style="height: 56px; flex: 0 0 56px; padding: 0 28px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid #1C1F27">
+<a href="#" aria-label="Promptcha bosh sahifa" style="text-decoration: none; font-size: 22px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; color: #EDEEF2">Prompt<span style="color: #8C93A4">cha</span></a>
+<div style="flex: 1 1 0"></div>
+<a href="#" style="height: 38px; padding: 0 16px; border-radius: 10px; background: #3A63F0; color: #FFFFFF; display: inline-flex; align-items: center; font-size: 14px; font-weight: 700; text-decoration: none">Oʻzingiz sinab koʻring</a>
+</header>
+
+<main style="flex: 1 1 0; min-height: 0; padding: 24px 28px; display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; max-width: 1180px; width: 100%; margin: 0 auto">
+
+<article aria-labelledby="sh-h" style="min-height: 0; background: #13151B; border: 1px solid #22262F; border-radius: 16px; padding: 24px 26px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #9AA1B2">Gʻoya</span>
+<h1 id="sh-h" style="margin: 0; font-size: 24px; line-height: 1.3; font-weight: 800; letter-spacing: -0.02em">"Yangi qahvaxonam uchun Instagram post rasmi, iliq ranglarda"</h1>
+</div>
+<div style="display: flex; align-items: center; gap: 10px">
+<span style="height: 26px; padding: 0 10px; border-radius: 999px; background: #1C2030; border: 1px solid #2B3245; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #C9D3F5"><span style="width: 6px; height: 6px; border-radius: 999px; background: #7AA2FF"></span>Midjourney v7</span>
+<span style="height: 26px; padding: 0 10px; border-radius: 999px; background: #171A21; border: 1px solid #262A35; display: inline-flex; align-items: center; font-size: 12px; font-weight: 700; color: #BFC4D0">Rasm · post</span>
+<span style="font-size: 12px; color: #7A8294">15-oktabr</span>
+</div>
+<div style="background: #0E1015; border: 1px solid #232733; border-radius: 14px">
+<p style="margin: 0; padding: 18px 20px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; line-height: 1.85; color: #B7BDCB"><span style="color: #6B7385">/imagine prompt:</span> <span class="sg sg-a">A cozy specialty coffee shop counter with a fresh latte and pastries</span>, <span class="sg sg-c">overhead 45-degree shot, centered composition with empty space at the top for text</span>, <span class="sg sg-b">warm morning sunlight, soft shadows, terracotta, cream and walnut palette</span>, inviting and calm mood, editorial food photography <span class="sg sg-d">--v 7 --ar 4:5 --style raw</span></p>
+<div style="display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 20px; border-top: 1px solid #1C1F27">
+<span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #7A8294">52 soʻz</span>
+<div style="flex: 1 1 0"></div>
+<button type="button" style="height: 36px; padding: 0 14px; border-radius: 9px; background: #EDEEF2; color: #0B0C10; font-size: 13px; font-weight: 700">Nusxa olish</button>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<div style="padding: 12px 14px; border-radius: 12px; background: #171A21; border: 1px solid #232733; display: flex; gap: 10px"><span style="width: 8px; height: 8px; margin-top: 6px; border-radius: 2px; background: #7AA2FF; flex: 0 0 8px"></span><span style="font-size: 13px; line-height: 1.5; color: #9AA1B2"><b style="color: #EDEEF2">Obyekt.</b> Mahsulot birinchi oʻrinda — post nimani sotayotgani darhol koʻrinadi.</span></div>
+<div style="padding: 12px 14px; border-radius: 12px; background: #171A21; border: 1px solid #232733; display: flex; gap: 10px"><span style="width: 8px; height: 8px; margin-top: 6px; border-radius: 2px; background: #C49BFF; flex: 0 0 8px"></span><span style="font-size: 13px; line-height: 1.5; color: #9AA1B2"><b style="color: #EDEEF2">Kompozitsiya.</b> Tepada boʻsh joy — yozuv qoʻshish uchun.</span></div>
+<div style="padding: 12px 14px; border-radius: 12px; background: #171A21; border: 1px solid #232733; display: flex; gap: 10px"><span style="width: 8px; height: 8px; margin-top: 6px; border-radius: 2px; background: #F2B266; flex: 0 0 8px"></span><span style="font-size: 13px; line-height: 1.5; color: #9AA1B2"><b style="color: #EDEEF2">Yorugʻlik.</b> Ertalabki iliq nur — "iliq ranglar" iltimosining aniq tili.</span></div>
+<div style="padding: 12px 14px; border-radius: 12px; background: #171A21; border: 1px solid #232733; display: flex; gap: 10px"><span style="width: 8px; height: 8px; margin-top: 6px; border-radius: 2px; background: #5FD3B5; flex: 0 0 8px"></span><span style="font-size: 13px; line-height: 1.5; color: #9AA1B2"><b style="color: #EDEEF2">Parametrlar.</b> 4:5 — Instagram lentasi uchun eng mos nisbat.</span></div>
+</div>
+</article>
+
+<aside aria-label="Baho va harakat" style="min-height: 0; display: flex; flex-direction: column; gap: 16px">
+<div style="background: #13151B; border: 1px solid #22262F; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
+<span style="position: relative; width: 104px; height: 104px; display: flex; align-items: center; justify-content: center">
+<svg width="104" height="104" viewBox="0 0 104 104" aria-hidden="true" style="position: absolute; inset: 0; transform: rotate(-90deg)"><circle cx="52" cy="52" r="45" fill="none" stroke="#262A35" stroke-width="7"></circle><circle cx="52" cy="52" r="45" fill="none" stroke="#5FD3B5" stroke-width="7" stroke-linecap="round" stroke-dasharray="248.8 282.7"></circle></svg>
+<span style="display: flex; flex-direction: column; line-height: 1"><span style="font-size: 32px; font-weight: 800">88</span><span style="font-size: 12px; color: #9AA1B2; margin-top: 4px">100 dan</span></span>
+</span>
+<span style="font-size: 15px; font-weight: 800">6 mezon boʻyicha baho</span>
+<div style="width: 100%; display: flex; flex-direction: column; gap: 8px; font-size: 13px; text-align: left">
+<div style="display: flex; justify-content: space-between"><span style="color: #9AA1B2">Aniqlik</span><span style="font-family: 'JetBrains Mono', ui-monospace, monospace">9/10</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #9AA1B2">Kompozitsiya</span><span style="font-family: 'JetBrains Mono', ui-monospace, monospace">9/10</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #9AA1B2">Yorugʻlik va rang</span><span style="font-family: 'JetBrains Mono', ui-monospace, monospace">9/10</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #9AA1B2">Uslub</span><span style="font-family: 'JetBrains Mono', ui-monospace, monospace">8/10</span></div>
+</div>
+</div>
+<div style="flex: 1 1 0; background: #13151B; border: 1px solid #22262F; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; justify-content: center; gap: 12px">
+<span style="font-size: 18px; font-weight: 800; line-height: 1.3">Bu prompt oʻzbekcha bitta gapdan 30 soniyada yozildi</span>
+<span style="font-size: 14px; line-height: 1.5; color: #9AA1B2">Gʻoyangizni oddiy tilda yozing — Promptcha uni rasm, video yoki ilova uchun tayyor promptga aylantiradi.</span>
+<a href="#" style="height: 48px; border-radius: 12px; background: #3A63F0; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; text-decoration: none">Oʻz gʻoyamni yozish</a>
+<span style="text-align: center; font-size: 12px; color: #7A8294">Roʻyxatdan oʻtmasdan · 2 ta bepul</span>
+</div>
+</aside>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1366,"height":768}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

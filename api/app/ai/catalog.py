@@ -35,6 +35,8 @@ AiTool = Literal[
     "gamma",
     "elevenlabs",
     "cursor",
+    "lovable",
+    "v0",
 ]
 
 
@@ -262,7 +264,27 @@ TOOLS: dict[str, Tool] = {
             "voice-over and narration from text; dubbing; realistic voices in many languages",
             6,
         ),
-        # ---- kod
+        # ---- kod va ilova quruvchilar (vibe coder'lar uchun asosiy yoʻnalish)
+        _t(
+            "lovable",
+            "Lovable",
+            "",
+            ("app",),
+            {"app": "code"},
+            "builds a full working web app from a plain description in the browser: pages, database, auth, deploy; best for a first MVP without coding",
+            9,
+            examples_dir="cursor",
+        ),
+        _t(
+            "v0",
+            "v0",
+            "",
+            ("app", "design"),
+            {"app": "code", "design": "code"},
+            "generates React/Next.js UI components and screens from a description; best for interface pieces, not a whole backend",
+            7,
+            examples_dir="cursor",
+        ),
         _t(
             "cursor",
             "Cursor / Claude Code",

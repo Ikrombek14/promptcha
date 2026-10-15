@@ -9,7 +9,9 @@
     "nav": "Main menu",
     "generator": "Generator",
     "library": "Library",
-    "history": "History"
+    "history": "History",
+    "freeLeft": "{n} free left today",
+    "freeShort": "{n} free"
   },
   "locales": {
     "uz": "Oʻz",
@@ -92,7 +94,9 @@
       "canva": "Ready-made templates",
       "gamma": "Presentation slides",
       "elevenlabs": "Natural voice",
-      "cursor": "An agent that writes code"
+      "cursor": "An agent that writes code",
+      "lovable": "A full working app",
+      "v0": "UI components"
     }
   },
   "families": {
@@ -147,7 +151,9 @@
     "clarifyTitle": "A couple of questions",
     "clarifyBody": "Answer the questions on the left for a sharper prompt. You can also generate without them.",
     "examplesLabel": "Examples",
-    "translateNote": "The translation is for reading only. Send the English version to the model."
+    "translateNote": "The translation is for reading only. Send the English version to the model.",
+    "showTranslation": "Show translation",
+    "hideTranslation": "Hide translation"
   },
   "auth": {
     "title": "Sign in",
@@ -247,16 +253,26 @@
   },
   "examples": [
     {
-      "tag": "Image",
-      "text": "A rainy Tashkent street with evening lights"
-    },
-    {
-      "tag": "Video",
-      "text": "A baker making bread at the bazaar, slow camera"
+      "tag": "App",
+      "text": "A simple web app that marks student attendance at my learning centre"
     },
     {
       "tag": "App",
-      "text": "A daily homework planner for school students"
+      "text": "A site for my restaurant that takes orders through Telegram"
+    },
+    {
+      "tag": "Image",
+      "text": "An Instagram post image for my new coffee shop, in warm colours"
     }
-  ]
+  ],
+  "feedback": {
+    "title": "Did your last prompt work?",
+    "worked": "Yes, it worked",
+    "notWorked": "No",
+    "close": "Close",
+    "thanks": "Thanks — we will use this to improve.",
+    "whyLabel": "What went wrong?",
+    "whyPlaceholder": "One line (optional)",
+    "send": "Send"
+  }
 }

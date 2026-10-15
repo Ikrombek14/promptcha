@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Promptcha — kredit olish</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0C10}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+button:focus-visible,a:focus-visible{outline:2px solid #7AA2FF;outline-offset:2px}
+a{color:#EDEEF2}a:hover{color:#FFFFFF}
+</style>
+</helmet>
+<div style="position: relative; width: 1366px; height: 768px; overflow: hidden; background: #0B0C10; color: #EDEEF2; font-family: 'Manrope', system-ui, sans-serif">
+
+<div aria-hidden="true" style="position: absolute; inset: 0; display: flex; flex-direction: column">
+<div style="height: 56px; padding: 0 28px; display: flex; align-items: center; border-bottom: 1px solid #1C1F27"><span style="font-size: 22px; font-weight: 800; letter-spacing: -0.04em">Prompt<span style="color: #8C93A4">cha</span></span></div>
+<div style="flex: 1 1 0; padding: 20px 28px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px">
+<div style="background: #13151B; border: 1px solid #22262F; border-radius: 16px"></div>
+<div style="background: #13151B; border: 1px solid #22262F; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="height: 24px; width: 220px; border-radius: 6px; background: #1C1F27"></div>
+<div style="height: 160px; border-radius: 14px; background: #0E1015; border: 1px solid #232733"></div>
+<div style="height: 90px; border-radius: 14px; background: #151A28; border: 1px solid #2E3754"></div>
+</div>
+</div>
+</div>
+<div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(5,6,9,0.72); backdrop-filter: blur(3px)"></div>
+
+<div role="dialog" aria-modal="true" aria-labelledby="pw-h" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 540px; background: #13151B; border: 1px solid #2A2F3A; border-radius: 20px; padding: 26px 28px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 24px 64px rgba(0,0,0,0.5)">
+
+<div style="display: flex; align-items: flex-start; gap: 12px">
+<div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 6px">
+<h2 id="pw-h" style="margin: 0; font-size: 22px; line-height: 1.2; font-weight: 800; letter-spacing: -0.02em">Promptni 90+ ga yetkazish</h2>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #9AA1B2">Kuchli funksiyalar kredit bilan ishlaydi. Bir marta toʻlaysiz, kreditlar hech qachon yonib ketmaydi.</p>
+</div>
+<button type="button" aria-label="Yopish" style="width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #7A8294"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+
+<ul style="margin: 0; padding: 12px 14px; list-style: none; border-radius: 12px; background: #0E1015; border: 1px solid #232733; display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: #D5D9E3">
+<li style="display: flex; justify-content: space-between; gap: 12px"><span>"90+ ga yetkazish"</span><span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #9AA1B2">1 kredit</span></li>
+<li style="display: flex; justify-content: space-between; gap: 12px"><span>Ilova uchun toʻliq spek</span><span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #9AA1B2">2 kredit</span></li>
+<li style="display: flex; justify-content: space-between; gap: 12px"><span>Kunlik bepul limitdan tashqari prompt</span><span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #9AA1B2">1 kredit</span></li>
+</ul>
+
+<fieldset style="margin: 0; padding: 0; border: 0">
+<legend style="padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #D5D9E3">Paket</legend>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{packs}}" as="p" hint-placeholder-count="2">
+<button type="button" onClick="{{p.pick}}" aria-pressed="{{p.on}}" style="position: relative; min-height: 104px; padding: 14px 16px; border: 1px solid; border-radius: 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; {{p.style}}">
+<sc-if value="{{p.best}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: -10px; right: 12px; height: 20px; padding: 0 8px; border-radius: 999px; background: #EDEEF2; color: #0B0C10; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center">Foydaliroq</span></sc-if>
+<span style="font-size: 24px; font-weight: 800; letter-spacing: -0.02em">{{p.credits}} <span style="font-size: 14px; font-weight: 600; color: #9AA1B2">kredit</span></span>
+<span style="font-size: 15px; font-weight: 700">{{p.price}} soʻm</span>
+<span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #9AA1B2">≈ {{p.unit}} soʻm / kredit</span>
+</button>
+</sc-for>
+</div>
+</fieldset>
+
+<fieldset style="margin: 0; padding: 0; border: 0">
+<legend style="padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #D5D9E3">Toʻlov usuli</legend>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<button type="button" onClick="{{toClick}}" aria-pressed="{{isClick}}" style="height: 46px; border: 1px solid; border-radius: 12px; font-size: 15px; font-weight: 800; {{clickStyle}}">Click</button>
+<button type="button" onClick="{{toPayme}}" aria-pressed="{{isPayme}}" style="height: 46px; border: 1px solid; border-radius: 12px; font-size: 15px; font-weight: 800; {{paymeStyle}}">Payme</button>
+</div>
+</fieldset>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<button type="button" style="height: 52px; border-radius: 12px; background: #3A63F0; color: #FFFFFF; font-size: 16px; font-weight: 700">{{payLabel}}</button>
+<span style="text-align: center; font-size: 12px; color: #7A8294">Bir martalik toʻlov · Obuna emas · Kreditlar muddatsiz</span>
+</div>
+<button type="button" style="align-self: center; height: 36px; padding: 0 12px; border-radius: 9px; font-size: 13px; font-weight: 600; color: #9AA1B2; text-decoration: underline; text-underline-offset: 3px">Avval bepul sinab koʻrish · 3 ta qoldi</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1366,"height":768}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var self = this;
+    var s = this.state || {};
+    var pack = s.pack || 'big';
+    var method = s.method || 'click';
+    var ON = 'background:rgba(58,99,240,.16);border-color:#4C7DFF;color:#EDEEF2;';
+    var OFF = 'background:#171A21;border-color:#262A35;color:#EDEEF2;';
+    var list = [
+      { id: 'small', credits: 40, price: '15 000', unit: '375', best: false },
+      { id: 'big', credits: 120, price: '35 000', unit: '292', best: true }
+    ];
+    var cur = list.filter(function (p) { return p.id === pack; })[0];
+    return {
+      packs: list.map(function (p) {
+        return { credits: p.credits, price: p.price, unit: p.unit, best: p.best, on: p.id === pack, style: p.id === pack ? ON : OFF, pick: function () { self.setState({ pack: p.id }); } };
+      }),
+      isClick: method === 'click', isPayme: method === 'payme',
+      clickStyle: method === 'click' ? ON : OFF, paymeStyle: method === 'payme' ? ON : OFF,
+      toClick: function () { self.setState({ method: 'click' }); },
+      toPayme: function () { self.setState({ method: 'payme' }); },
+      payLabel: cur.price + ' soʻm toʻlash'
+    };
+  }
+}
+</script>
+</body>
+</html>

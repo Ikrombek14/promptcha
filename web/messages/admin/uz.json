@@ -6,7 +6,8 @@
       "overview": "Umumiy",
       "users": "Foydalanuvchilar",
       "payments": "Toʻlovlar",
-      "settings": "Sozlamalar"
+      "settings": "Sozlamalar",
+      "funnel": "Voronka"
     },
     "common": {
       "loading": "Yuklanmoqda…",
@@ -124,6 +125,27 @@
       "save": "Saqlash",
       "saving": "Saqlanmoqda…",
       "saved": "Saqlandi"
+    },
+    "funnel": {
+      "title": "Voronka",
+      "days": "{n} kun",
+      "steps": "Qadamlar",
+      "bySession": "sessiyalar boʻyicha",
+      "step": {
+        "idea_submitted": "Gʻoya yuborildi",
+        "prompt_generated": "Prompt yasaldi",
+        "prompt_copied": "Nusxa olindi",
+        "prompt_feedback": "«Ishladimi?» javobi"
+      },
+      "byKind": "Turlar boʻyicha",
+      "kind": "Tur",
+      "count": "Soni",
+      "avgScore": "Oʻrtacha ball",
+      "feedback": "Prompt ishladimi?",
+      "feedbackHint": "foydalanuvchi javobi",
+      "worked": "Ishladi",
+      "notWorked": "Ishlamadi",
+      "empty": "Hali maʼlumot yoʻq"
     }
   }
 }

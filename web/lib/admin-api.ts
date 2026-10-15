@@ -141,6 +141,18 @@ export function getStats(days: number): Promise<AdminStats> {
   return apiJson<AdminStats>(`/api/admin/stats${qs({ days })}`);
 }
 
+export type AdminFunnel = {
+  days: number;
+  steps: { name: string; sessions: number; total: number }[];
+  by_kind: { kind: string; count: number; avg_score: number | null }[];
+  feedback: Record<string, number>;
+  daily: { day: string; ideas: number; prompts: number; copies: number }[];
+};
+
+export function getFunnel(days: number): Promise<AdminFunnel> {
+  return apiJson<AdminFunnel>(`/api/admin/funnel${qs({ days })}`);
+}
+
 export function listUsers(
   params: { q?: string; page?: number; limit?: number } = {},
 ): Promise<Page<AdminUser>> {

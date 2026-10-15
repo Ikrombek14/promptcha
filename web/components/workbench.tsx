@@ -12,6 +12,7 @@ import { AnimatePresence, MotionConfig } from "motion/react";
 import { Check, Copy, Pencil, RotateCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { FeedbackCard } from "@/components/generator/feedback-card";
 import { IdeaPanel } from "@/components/generator/idea-panel";
 import { ResultPanel } from "@/components/generator/result-panel";
 import {
@@ -29,13 +30,16 @@ import { type Ratio, RATIO_KINDS } from "@/lib/segments";
 import {
   ApiError,
   type ImproveBody,
+  type PendingFeedback,
   analyze,
+  getPendingFeedback,
   cancelJob,
   jobEvents,
   savePrompt,
   startGenerate,
 } from "@/lib/api";
 import { type Draft, EMPTY_DRAFT, loadDraft, saveDraft } from "@/lib/draft";
+import { sessionId, track } from "@/lib/events";
 import {
   guestRemaining,
   readGuest,
@@ -99,6 +103,8 @@ export function Workbench() {
 
   // Savol javoblari (chapdagi chiplar) — ish tugagach tozalanadi
   const [picks, setPicks] = useState<Record<string, ClarifyPick>>({});
+  // «Prompt ishladimi?» — kirgan foydalanuvchida, javob berilmagan eski prompt boʻlsa
+  const [pending, setPending] = useState<PendingFeedback | null>(null);
   // Mobil: natija chiqqach gʻoya paneli yigʻiladi, «Tahrirlash» bilan ochiladi
   const [editing, setEditing] = useState(false);
   const [copiedBar, setCopiedBar] = useState(false);
@@ -119,6 +125,19 @@ export function Workbench() {
       .catch(() => {
         migratedFor.current = null;
       });
+  }, [userId]);
+
+  useEffect(() => {
+    let alive = true;
+    // Kirmagan boʻlsa soʻralmaydi; javob kelgach koʻrsatiladi
+    (userId ? getPendingFeedback() : Promise.resolve(null))
+      .then((item) => {
+        if (alive) setPending(item);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
   }, [userId]);
 
   // Matn tahlili: yozib toʻxtagach tur + 2–3 ta mos vosita (birinchisi tanlanadi)
@@ -354,6 +373,7 @@ export function Workbench() {
           locale,
           output_language: "en",
           guest_id: readGuest().id,
+          session_id: sessionId(),
           improve,
         });
         await attach(jobId);
@@ -399,9 +419,19 @@ export function Workbench() {
       const answers = Object.fromEntries(
         s.questions.map((q) => [q.id, picked[q.id] ?? "(not specified)"]),
       );
+      track(
+        "questions_answered",
+        { answered: Object.keys(picked).length, asked: s.questions.length },
+        readGuest().id,
+      );
       void run(answers, s.kind ?? s.suggestedKind);
       return;
     }
+    track(
+      "idea_submitted",
+      { input: "text", locale, chars: s.text.trim().length, kind: s.kind ?? "auto" },
+      readGuest().id,
+    );
     patch({ answers: {}, questions: [], resolvedAi: null });
     setPicks({});
     void run({}, s.kind);
@@ -443,6 +473,7 @@ export function Workbench() {
   const copyBar = async () => {
     try {
       await navigator.clipboard.writeText(s.prompt);
+      track("prompt_copied", { prompt_id: s.promptId, where: "mobile" }, readGuest().id);
       setCopiedBar(true);
       setTimeout(() => setCopiedBar(false), 1600);
     } catch {
@@ -538,7 +569,10 @@ export function Workbench() {
           </div>
 
           {/* oʻng: natija */}
-          <div className="flex min-w-0 flex-col lg:min-h-0">
+          <div className="flex min-w-0 flex-col gap-3 lg:min-h-0">
+            {pending && (
+              <FeedbackCard item={pending} onDone={() => setPending(null)} />
+            )}
             <AnimatePresence mode="wait" initial={false}>
               {s.phase === "error" ? (
                 <ErrorResult

@@ -66,7 +66,13 @@ class PlanResult(BaseModel):
 
 
 class ReviewCriterion(BaseModel):
+    """Bitta mezon: 0–10 ball + nima yetishmayotgani.
+
+    `ok` — eski maydon (ball ≥ 7 boʻlsa rost), moslik uchun saqlanadi.
+    """
+
     name: str
+    score: int = Field(default=10, ge=0, le=10)
     ok: bool = True
     note: str = ""
 
@@ -122,6 +128,21 @@ class AnalyzeRequest(BaseModel):
     locale: Locale = "uz"
 
 
+class EventIn(BaseModel):
+    """Brauzerdan keladigan bitta hodisa (`services/events.EVENT_NAMES` dagi nomlar)."""
+
+    name: str = Field(max_length=48)
+    payload: dict | None = None
+    guest_id: str | None = Field(default=None, max_length=64)
+
+
+class EventsIn(BaseModel):
+    """Bir soʻrovda bir nechta hodisa (sendBeacon)."""
+
+    session_id: str | None = Field(default=None, max_length=64)
+    events: list[EventIn] = Field(default_factory=list, max_length=10)
+
+
 class EnrichRequest(BaseModel):
     """«Gʻoyani boyitish»: qisqa matnni 2–4 jumlaga kengaytirish."""
 
@@ -146,6 +167,8 @@ class GenerateRequest(BaseModel):
     locale: Locale = "uz"
     output_language: Locale = "en"
     guest_id: str | None = Field(default=None, max_length=64)
+    # Brauzer sessiyasi — hodisalar voronkasini bogʻlash uchun (shaxsiy maʼlumot emas)
+    session_id: str | None = Field(default=None, max_length=64)
     improve: ImproveRequest | None = None
 
 
@@ -173,6 +196,24 @@ class PromptOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class FeedbackRequest(BaseModel):
+    """«Prompt ishladimi?» javobi."""
+
+    answer: Literal["worked", "not_worked"]
+    note: str | None = Field(default=None, max_length=500)
+
+
+class PendingFeedback(BaseModel):
+    """Javob kutilayotgan prompt (yoʻq boʻlsa `item: null`)."""
+
+    id: UUID
+    kind: str
+    ai: str
+    input_text: str
+    score: int | None = None
+    created_at: datetime
+
+
 class SaveRequest(BaseModel):
     """`POST /api/prompts/{id}/save` — kutubxonaga qoʻshish yoki olib tashlash."""
 
@@ -190,6 +231,7 @@ class HistoryItem(BaseModel):
     explanations: list | None = None
     score: int | None = None
     is_saved: bool = False
+    feedback: str | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

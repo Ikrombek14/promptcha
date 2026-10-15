@@ -29,6 +29,7 @@ import {
 } from "@/lib/api";
 import { SLOT_OF, legendTypes, segClass, slotColor } from "@/lib/segments";
 import { quickEdits } from "@/lib/quick-edits";
+import { track } from "@/lib/events";
 import { fadeUp, stagger } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -83,6 +84,7 @@ export function ResultPanel({
     try {
       // Nusxa olganda har doim inglizcha asl matn (AI'lar unga yaxshiroq javob beradi)
       await navigator.clipboard.writeText(prompt);
+      track("prompt_copied", { prompt_id: promptId, where: "panel" });
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch {
@@ -143,80 +145,6 @@ export function ResultPanel({
         {score !== null && <ScoreRing score={score} />}
       </motion.div>
 
-      {/* Til + saqlash + nusxa */}
-      <motion.div
-        variants={fadeUp}
-        className="flex flex-wrap items-center justify-between gap-3"
-      >
-        {locale === "en" || streaming ? (
-          <span />
-        ) : (
-          <div
-            role="group"
-            aria-label={t("translate")}
-            className="flex gap-0.5 rounded-[var(--radius-md)] border border-border bg-sunk p-0.5"
-          >
-            <button
-              type="button"
-              aria-pressed={!showUz}
-              onClick={() => setTranslated(null)}
-              className={cn(
-                "h-9 rounded-[7px] px-3.5 text-body-sm font-bold transition-colors",
-                !showUz ? "bg-surface-2 text-text" : "text-muted hover:text-text",
-              )}
-            >
-              {t("viewOriginal")}
-            </button>
-            <button
-              type="button"
-              aria-pressed={showUz}
-              disabled={translating}
-              onClick={() => void toggleTranslate()}
-              className={cn(
-                "flex h-9 items-center gap-1.5 rounded-[7px] px-3.5 text-body-sm font-bold transition-colors disabled:opacity-60",
-                showUz ? "bg-surface-2 text-text" : "text-muted hover:text-text",
-              )}
-            >
-              {translating ? (
-                <LoaderCircle size={14} className="animate-spin" />
-              ) : (
-                <Languages size={14} />
-              )}
-              {t("viewTranslated")}
-            </button>
-          </div>
-        )}
-
-        <div className="flex gap-2">
-          {promptId && (
-            <Button
-              variant="secondary"
-              size="icon"
-              aria-label={saved ? t("unsave") : t("save")}
-              title={saved ? t("unsave") : t("save")}
-              aria-pressed={saved}
-              className={cn(
-                "h-10 w-10 rounded-[var(--radius-md)]",
-                saved && "border-selected-border text-accent",
-              )}
-              onClick={() => onSave(!saved)}
-            >
-              <Bookmark size={16} fill={saved ? "currentColor" : "none"} />
-            </Button>
-          )}
-          <Button
-            variant="secondary"
-            disabled={streaming || !prompt}
-            title={streaming ? t("copyWaiting") : undefined}
-            className="h-10 gap-2 rounded-[var(--radius-md)] border-0 bg-text px-4 font-bold text-bg hover:bg-text-2 disabled:opacity-40"
-            onClick={() => void copy()}
-          >
-            {copied ? <Check size={16} strokeWidth={2.4} /> : <Copy size={16} />}
-            <span aria-live="polite">{copied ? t("copied") : t("copy")}</span>
-          </Button>
-        </div>
-      </motion.div>
-
       {/* Prompt bloki */}
       <motion.div
         variants={fadeUp}
@@ -237,15 +165,7 @@ export function ResultPanel({
           </div>
         )}
 
-        {showUz ? (
-          <div className="flex flex-col gap-3 px-5 py-5">
-            <p className="whitespace-pre-wrap text-body-md leading-[1.8] text-text-2">
-              {translated.text}
-            </p>
-            <p className="text-body-sm text-subtle">{t("translateNote")}</p>
-          </div>
-        ) : (
-          <p className="whitespace-pre-wrap px-5 py-5 font-mono text-code-md leading-[1.85] text-text-2">
+        <p className="whitespace-pre-wrap px-5 py-5 font-mono text-code-md leading-[1.85] text-text-2">
             {useSegments
               ? segments.map((sg, i) => {
                   const cls = segClass(sg.type);
@@ -257,20 +177,71 @@ export function ResultPanel({
                     <span key={i}>{sg.text}</span>
                   );
                 })
-              : prompt}
-            {streaming && (
-              <span
-                aria-hidden
-                className="animate-caret ml-0.5 inline-block h-4 w-[2px] translate-y-0.5 bg-accent"
-              />
-            )}
-          </p>
+            : prompt}
+          {streaming && (
+            <span
+              aria-hidden
+              className="animate-caret ml-0.5 inline-block h-4 w-[2px] translate-y-0.5 bg-accent"
+            />
+          )}
+        </p>
+
+        {showUz && (
+          <div className="flex flex-col gap-2 border-t border-border px-5 py-4">
+            <p className="whitespace-pre-wrap text-body-md leading-[1.8] text-text-2">
+              {translated.text}
+            </p>
+            <p className="text-body-sm text-subtle">{t("translateNote")}</p>
+          </div>
         )}
 
         {!streaming && (
-          <div className="flex flex-wrap justify-between gap-3 border-t border-border px-5 py-2.5 font-mono text-label-sm text-subtle">
-            <span>{t("wordsChars", { w: words, c: prompt.length })}</span>
-            <span>{t("syntax", { ai: meta.name })}</span>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border px-5 py-2.5">
+            <span className="font-mono text-label-sm text-subtle">
+              {t("wordsChars", { w: words, c: prompt.length })}
+            </span>
+            {locale !== "en" && (
+              <button
+                type="button"
+                disabled={translating}
+                onClick={() => void toggleTranslate()}
+                className="inline-flex items-center gap-1.5 text-body-sm font-semibold text-accent underline-offset-4 hover:underline disabled:opacity-60"
+              >
+                {translating ? (
+                  <LoaderCircle size={14} className="animate-spin" />
+                ) : (
+                  <Languages size={14} />
+                )}
+                {showUz ? t("hideTranslation") : t("showTranslation")}
+              </button>
+            )}
+            <div className="ml-auto flex items-center gap-2">
+              {promptId && (
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  aria-label={saved ? t("unsave") : t("save")}
+                  title={saved ? t("unsave") : t("save")}
+                  aria-pressed={saved}
+                  className={cn(
+                    "h-9 w-9 rounded-[var(--radius-md)]",
+                    saved && "border-selected-border text-accent",
+                  )}
+                  onClick={() => onSave(!saved)}
+                >
+                  <Bookmark size={15} fill={saved ? "currentColor" : "none"} />
+                </Button>
+              )}
+              <Button
+                variant="secondary"
+                disabled={!prompt}
+                className="h-9 gap-2 rounded-[var(--radius-md)] border-0 bg-text px-3.5 font-bold text-bg hover:bg-text-2 disabled:opacity-40"
+                onClick={() => void copy()}
+              >
+                {copied ? <Check size={15} strokeWidth={2.4} /> : <Copy size={15} />}
+                <span aria-live="polite">{copied ? t("copied") : t("copy")}</span>
+              </Button>
+            </div>
           </div>
         )}
       </motion.div>

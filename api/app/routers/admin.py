@@ -182,6 +182,16 @@ async def stats(
     return await service.stats(session, days)
 
 
+@router.get("/funnel")
+async def funnel(
+    admin: AdminUser,
+    session: Session,
+    days: Annotated[int, Query(ge=1, le=365)] = 30,
+):
+    """Mahsulot voronkasi: gʻoya → prompt → nusxa → «ishladi» (A.1 hodisalaridan)."""
+    return await service.funnel(session, days)
+
+
 @router.get("/users", response_model=UsersOut)
 async def users(
     admin: AdminUser,

@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 
 from app.ai import metering, pipeline
 from app.schemas import GenerateRequest
-from app.services import usage
+from app.services import events, usage
 
 log = logging.getLogger(__name__)
 
@@ -72,6 +72,7 @@ async def _on_success(
     done: dict,
     notes: list[str],
     score: int | None = None,
+    criteria: list[dict] | None = None,
 ) -> str | None:
     """Muvaffaqiyatli generate — limit hisobi va tarix. Saqlangan prompt id'sini qaytaradi.
 
@@ -85,26 +86,59 @@ async def _on_success(
         input_tokens=meter.input_tokens,
         output_tokens=meter.output_tokens,
     )
-    if job.user_id is None:
-        return None
-    await usage.consume_bonus_if_needed(job.user_id)
-    row = await usage.save_prompt(job.user_id, job.body, done, notes, score)
-    return str(row.id) if row is not None else None
+    prompt_id: str | None = None
+    if job.user_id is not None:
+        await usage.consume_bonus_if_needed(job.user_id)
+        row = await usage.save_prompt(job.user_id, job.body, done, notes, score, criteria)
+        prompt_id = str(row.id) if row is not None else None
+    events.record(
+        "prompt_generated",
+        {
+            "prompt_id": prompt_id,
+            "kind": done.get("kind"),
+            "ai": done.get("ai"),
+            "score": score,
+            "improved": bool(job.body.improve),
+            **{f"c_{c.get('name')}": c.get("score") for c in (criteria or []) if c.get("name")},
+        },
+        user_id=job.user_id,
+        guest_id=job.body.guest_id,
+        session_id=job.body.session_id,
+    )
+    return prompt_id
 
 
 async def _run(job: Job, context: dict[str, str] | None) -> None:
     meter = metering.new()
     notes: list[str] = []
     score: int | None = None
+    criteria: list[dict] = []
     try:
         async for name, data in pipeline.run(job.body, context):
-            if name == "explain":
+            if name == "classify":
+                events.record(
+                    "type_detected",
+                    {
+                        "kind": data.get("kind"),
+                        "confidence": data.get("confidence"),
+                        "ai": data.get("ai"),
+                        "picked_by": "user" if job.body.ai else "auto",
+                    },
+                    user_id=job.user_id,
+                    guest_id=job.body.guest_id,
+                    session_id=job.body.session_id,
+                )
+            elif name == "explain":
                 notes = list(data.get("notes") or [])
                 score = data.get("score")
+                criteria = list(data.get("criteria") or [])
             elif name == "done" and data.get("status") == "ok":
                 # Tarix shu yerda saqlanadi — id'ni `done` bilan qaytaramiz (frontend
                 # «Kutubxonaga saqlash» tugmasi uchun). Guest'da null.
-                data = {**data, "prompt_id": await _on_success(job, meter, data, notes, score)}
+                data = {
+                    **data,
+                    "prompt_id": await _on_success(job, meter, data, notes, score, criteria),
+                }
             await job.push(name, data)
     except asyncio.CancelledError:
         await job.push("error", {"detail": CANCELLED_ERROR})

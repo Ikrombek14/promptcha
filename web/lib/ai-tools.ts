@@ -24,6 +24,8 @@ export const AI_TOOLS = [
   "gamma",
   "elevenlabs",
   "cursor",
+  "lovable",
+  "v0",
 ] as const;
 export type AiTool = (typeof AI_TOOLS)[number];
 
@@ -183,6 +185,18 @@ export const AI_META: Record<AiTool, Meta> = {
     version: "Agent",
     dot: "var(--text)",
     family: { app: "code" },
+  },
+  lovable: {
+    name: "Lovable",
+    version: "",
+    dot: "#F97316",
+    family: { app: "code" },
+  },
+  v0: {
+    name: "v0",
+    version: "",
+    dot: "var(--text)",
+    family: { app: "code", design: "code" },
   },
 };
 

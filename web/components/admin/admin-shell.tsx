@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 const SECTIONS = [
   { key: "overview", href: "/admin" },
+  { key: "funnel", href: "/admin/funnel" },
   { key: "users", href: "/admin/users" },
   { key: "payments", href: "/admin/payments" },
   { key: "settings", href: "/admin/settings" },
