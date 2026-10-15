@@ -1,28 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import {
   Image as ImageIcon,
   LayoutGrid,
   LoaderCircle,
   LogIn,
-  Mic,
   Palette,
   RotateCcw,
   Sparkles,
   Type as TypeIcon,
-  Undo2,
   Video as VideoIcon,
-  WandSparkles,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Callout } from "@/components/ui/callout";
 import { Picker, type PickerOption } from "@/components/generator/picker";
-import { AI_META, type AiTool, type Kind, type Locale } from "@/lib/ai-tools";
+import { AI_META, type AiTool, type Kind } from "@/lib/ai-tools";
 import { type Ratio, RATIOS, RATIO_KINDS, RATIO_SHAPE } from "@/lib/segments";
-import { ApiError, enrichIdea } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export const MAX_CHARS = 2000;
@@ -50,8 +45,6 @@ type Props = {
   tools: AiTool[];
   ai: AiTool | null;
   onAi: (ai: AiTool | null) => void;
-  /** Vositani foydalanuvchi oʻzi tanlagan (aks holda tahlil tanlagan) */
-  aiPicked: boolean;
   analyzing: boolean;
 
   ratio: Ratio;
@@ -66,30 +59,8 @@ type Props = {
   hasResult: boolean;
   exhausted: boolean;
   isUser: boolean;
-  remainingLabel: string | null;
   onStop: () => void;
   onReset: () => void;
-};
-
-type SpeechRec = {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  start: () => void;
-  stop: () => void;
-  onresult:
-    | ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void)
-    | null;
-  onerror: (() => void) | null;
-  onend: (() => void) | null;
-};
-
-type SpeechCtor = new () => SpeechRec;
-
-const SPEECH_LANG: Record<Locale, string> = {
-  uz: "uz-UZ",
-  ru: "ru-RU",
-  en: "en-US",
 };
 
 export function IdeaPanel({
@@ -103,7 +74,6 @@ export function IdeaPanel({
   tools,
   ai,
   onAi,
-  aiPicked,
   analyzing,
   ratio,
   onRatio,
@@ -113,92 +83,14 @@ export function IdeaPanel({
   hasResult,
   exhausted,
   isUser,
-  remainingLabel,
   onStop,
   onReset,
 }: Props) {
   const t = useTranslations("app");
   const tt = useTranslations("tools");
-  const locale = useLocale() as Locale;
 
   const effectiveKind = kind ?? suggestedKind;
   const showRatio = effectiveKind !== null && RATIO_KINDS.includes(effectiveKind);
-
-  // Ovoz bilan aytish — brauzer Web Speech API'si bor boʻlsa koʻrinadi
-  const [speechReady] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const w = window as unknown as {
-      SpeechRecognition?: SpeechCtor;
-      webkitSpeechRecognition?: SpeechCtor;
-    };
-    return Boolean(w.SpeechRecognition ?? w.webkitSpeechRecognition);
-  });
-  const [listening, setListening] = useState(false);
-  const [voiceError, setVoiceError] = useState(false);
-  const recRef = useRef<SpeechRec | null>(null);
-  useEffect(() => () => recRef.current?.stop(), []);
-
-  const toggleVoice = useCallback(() => {
-    if (listening) {
-      recRef.current?.stop();
-      return;
-    }
-    const w = window as unknown as {
-      SpeechRecognition?: SpeechCtor;
-      webkitSpeechRecognition?: SpeechCtor;
-    };
-    const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
-    if (!Ctor) return;
-    setVoiceError(false);
-    const rec = new Ctor();
-    recRef.current = rec;
-    rec.lang = SPEECH_LANG[locale];
-    rec.continuous = false;
-    rec.interimResults = false;
-    let heard = "";
-    rec.onresult = (e) => {
-      for (let i = 0; i < e.results.length; i++) {
-        heard += e.results[i][0]?.transcript ?? "";
-      }
-    };
-    rec.onerror = () => {
-      setVoiceError(true);
-      setListening(false);
-    };
-    rec.onend = () => {
-      setListening(false);
-      const said = heard.trim();
-      if (said) onTextChange(text ? `${text.trimEnd()} ${said}` : said);
-    };
-    try {
-      rec.start();
-      setListening(true);
-    } catch {
-      setVoiceError(true);
-    }
-  }, [listening, locale, onTextChange, text]);
-
-  // Gʻoyani boyitish — qisqa matnni 2–4 jumlaga kengaytiradi, bir marta qaytarish mumkin
-  const [enriching, setEnriching] = useState(false);
-  const [enrichError, setEnrichError] = useState<string | null>(null);
-  const [beforeEnrich, setBeforeEnrich] = useState<string | null>(null);
-  const enrich = async () => {
-    const src = text.trim();
-    if (src.length < 3 || enriching) return;
-    setEnriching(true);
-    setEnrichError(null);
-    try {
-      const better = await enrichIdea(src, locale);
-      if (better.trim()) {
-        setBeforeEnrich(text);
-        onTextChange(better.trim());
-      }
-    } catch (e) {
-      setEnrichError(e instanceof ApiError ? e.message : t("enrichError"));
-    } finally {
-      setEnriching(false);
-    }
-  };
 
   // Qaror qatori: tur / model / nisbat. Qiymatlar gʻoyadan aniqlanadi,
   // bosilganda roʻyxat ochiladi — shuning uchun bitta qator joy egallaydi.
@@ -210,9 +102,8 @@ export function IdeaPanel({
     },
     ...KINDS.map((k) => ({ value: k, label: t(`kinds.${k}`), icon: KIND_ICON[k] })),
   ];
-  // «Avto» tanlangan boʻlsa tahlil aniqlagan tur koʻrsatiladi (✦ belgisi bilan)
+  // «Avto» tanlangan boʻlsa tahlil aniqlagan tur koʻrsatiladi
   const kindValue: string = kind ?? suggestedKind ?? "auto";
-  const kindIsAuto = kind === null && suggestedKind !== null;
 
   const modelOptions: PickerOption<string>[] = tools.length
     ? tools.map((tool) => ({
@@ -285,59 +176,7 @@ export function IdeaPanel({
             }}
             className="min-h-24 w-full flex-1 resize-none rounded-[var(--radius-lg)] bg-transparent px-4 pb-2 pt-3.5 text-body-md text-text outline-offset-[-2px] placeholder:text-subtle disabled:opacity-60"
           />
-          <div className="flex flex-wrap items-center justify-between gap-1 p-1.5 pl-2">
-            {speechReady ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-9 gap-2 text-label-md font-semibold"
-                aria-pressed={listening}
-                disabled={busy}
-                onClick={toggleVoice}
-              >
-                <Mic size={16} className={listening ? "text-error" : undefined} />
-                {listening ? t("voiceListening") : t("voice")}
-              </Button>
-            ) : (
-              <span />
-            )}
-            <div className="flex items-center gap-1">
-              {beforeEnrich !== null && !enriching && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 gap-2 text-label-md font-semibold"
-                  onClick={() => {
-                    onTextChange(beforeEnrich);
-                    setBeforeEnrich(null);
-                  }}
-                >
-                  <Undo2 size={15} />
-                  {t("enrichUndo")}
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-9 gap-2 text-label-md font-semibold"
-                disabled={busy || enriching || text.trim().length < 3}
-                onClick={() => void enrich()}
-              >
-                {enriching ? (
-                  <LoaderCircle size={16} className="animate-spin" />
-                ) : (
-                  <WandSparkles size={16} />
-                )}
-                {enriching ? t("enriching") : t("enrich")}
-              </Button>
-            </div>
-          </div>
         </div>
-        {(voiceError || enrichError) && (
-          <p className="text-body-sm text-error">
-            {voiceError ? t("voiceError") : enrichError}
-          </p>
-        )}
       </div>
 
       {/* Qaror qatori — prompt yasalgandan keyin: nima tanlangani koʻrinadi va oʻzgartiriladi */}
@@ -361,7 +200,6 @@ export function IdeaPanel({
             label={t("typeLabel")}
             value={kindValue}
             options={kindOptions}
-            auto={kindIsAuto}
             disabled={busy}
             onChange={(v) => onKind(v === "auto" ? null : (v as Kind))}
             className="flex-[3]"
@@ -370,7 +208,6 @@ export function IdeaPanel({
             label={t("modelLabel")}
             value={modelValue}
             options={modelOptions}
-            auto={!aiPicked && tools.length > 0}
             disabled={busy || !tools.length}
             onChange={(v) => onAi(v === "auto" ? null : (v as AiTool))}
             className="flex-[4]"
@@ -433,14 +270,13 @@ export function IdeaPanel({
             )}
           </Callout>
         ) : (
-          <div className="flex min-h-9 items-center justify-center gap-3">
+          <div className="flex min-h-9 items-center justify-center">
             {(text || hasResult) && (
               <Button variant="ghost" size="sm" className="h-9 gap-2" onClick={onReset}>
                 <RotateCcw size={14} />
                 {t("reset")}
               </Button>
             )}
-            <p className="font-mono text-label-sm text-subtle">{remainingLabel}</p>
           </div>
         )}
       </div>

@@ -44,13 +44,6 @@
     "connectionLost": "The connection dropped before the result arrived. Please try again.",
     "ideaLabel": "Your idea",
     "counter": "{n} / {max}",
-    "voice": "Say it out loud",
-    "voiceListening": "Listening…",
-    "voiceError": "The microphone did not work.",
-    "enrich": "Enrich the idea",
-    "enriching": "Enriching…",
-    "enrichError": "Could not enrich the idea.",
-    "enrichUndo": "Undo",
     "typeLabel": "Result type",
     "modelLabel": "Model",
     "modelAuto": "Automatic",
@@ -153,7 +146,8 @@
     "examplesLabel": "Examples",
     "translateNote": "The translation is for reading only. Send the English version to the model.",
     "showTranslation": "Show translation",
-    "hideTranslation": "Hide translation"
+    "hideTranslation": "Hide translation",
+    "toFill": "Fill in:"
   },
   "auth": {
     "title": "Sign in",
@@ -228,28 +222,6 @@
     "stack": "Stack",
     "features": "Features",
     "acceptance": "Acceptance"
-  },
-  "quick": {
-    "storybook": "Storybook style",
-    "cinematic": "Cinematic",
-    "watercolor": "Watercolour",
-    "warmer": "Warmer colours",
-    "slowmo": "Slow motion",
-    "closeup": "Close-up",
-    "goldenhour": "Golden hour",
-    "dynamic": "Dynamic camera",
-    "shorter": "Shorter",
-    "simpler": "Simpler language",
-    "examples": "Add examples",
-    "stricter": "Stricter format",
-    "tests": "Add tests",
-    "simplestack": "Simpler stack",
-    "detail": "More detail",
-    "edge": "Edge cases",
-    "minimal": "Minimal",
-    "bolder": "Bolder colours",
-    "contrast": "More contrast",
-    "variants": "Variants"
   },
   "examples": [
     {

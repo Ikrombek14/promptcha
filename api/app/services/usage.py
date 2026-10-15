@@ -36,6 +36,11 @@ GUEST_EXHAUSTED = "Bepul urinishlar tugadi. Davom etish uchun Google orqali kiri
 IP_EXHAUSTED = "Bugungi bepul limit tugadi. Ertaga qayta urinib koʻring yoki kiring."
 USER_EXHAUSTED = "Bugungi bepul limit tugadi. Ertaga qayting yoki Pro'ga oʻting."
 DB_DOWN = "Xizmat vaqtincha ishlamayapti. Birozdan soʻng urinib koʻring."
+ACTION_EXHAUSTED = "Juda koʻp soʻrov yuborildi. Birozdan soʻng qayta urinib koʻring."
+
+#: Generate'dan tashqari, pul turadigan yordamchi chaqiruvlar — kunlik chegara (IP boʻyicha).
+#: Kirgan foydalanuvchiga uch barobar, Pro'ga cheklov yoʻq.
+ACTION_DAILY_LIMITS: dict[str, int] = {"analyze": 60, "enrich": 20, "translate": 30}
 
 
 def _since() -> datetime:
@@ -100,6 +105,57 @@ async def check_quota(
 
 
 _check_quota_impl = check_quota
+
+
+async def check_action_quota(
+    session: AsyncSession,
+    action: str,
+    ip: str,
+    user: User | None = None,
+) -> None:
+    """Yordamchi chaqiruvlar uchun kunlik chegara (`analyze`, `enrich`, `translate`).
+
+    Bu endpointlar generate limitiga kirmaydi, lekin har biri pul turadi (LLM yoki
+    tarjima xizmati). Chegara boʻlmasa, saytni ochmasdan ham skript bilan hisobni
+    boʻshatib yuborish mumkin edi. Baza ishlamasa — oʻtkazamiz (bu asosiy oqim emas).
+    """
+    limit = ACTION_DAILY_LIMITS.get(action)
+    if limit is None:
+        return
+    if user is not None:
+        if user.is_pro:
+            return
+        limit *= 3
+    try:
+        used = await session.scalar(
+            select(func.count())
+            .select_from(UsageLog)
+            .where(
+                UsageLog.action == action,
+                UsageLog.ip == ip,
+                UsageLog.created_at >= _since(),
+            )
+        )
+    except Exception:
+        log.warning("action limitini oʻqib boʻlmadi: %s", action, exc_info=True)
+        return
+    if (used or 0) >= limit:
+        events.record(
+            "limit_reached",
+            {"who": "action", "action": action},
+            user_id=user.id if user is not None else None,
+        )
+        raise HTTPException(status_code=429, detail=ACTION_EXHAUSTED)
+
+
+async def record_action(action: str, ip: str, user_id: uuid.UUID | None = None) -> None:
+    """Yordamchi chaqiruvni hisobga oladi (kunlik chegara shu qatorlar boʻyicha sanaladi)."""
+    try:
+        async with SessionLocal() as session:
+            session.add(UsageLog(user_id=user_id, ip=ip, action=action))
+            await session.commit()
+    except Exception:
+        log.warning("usage_log (%s) yozilmadi", action, exc_info=True)
 
 
 async def check_guest_quota(session: AsyncSession, guest_id: str | None, ip: str) -> None:

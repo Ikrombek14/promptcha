@@ -59,9 +59,14 @@ def _event(name: str, data: dict) -> dict:
 
 
 @router.post("/analyze")
-@limiter.limit("30/minute")
-async def analyze(request: Request, body: AnalyzeRequest):
+@limiter.limit("20/minute")
+async def analyze(
+    request: Request, body: AnalyzeRequest, session: Session, user: CurrentUser
+):
     """Matnni tahlil: tur + 2–3 ta eng mos vosita (foydalanuvchi yozib toʻxtagach chaqiriladi)."""
+    ip = client_ip(request)
+    await usage.check_action_quota(session, "analyze", ip, user)
+    await usage.record_action("analyze", ip, user.id if user else None)
     try:
         c = await pipeline.classify(body.text)
     except pipeline.PipelineError as e:
@@ -77,9 +82,14 @@ async def analyze(request: Request, body: AnalyzeRequest):
 
 
 @router.post("/enrich")
-@limiter.limit("20/minute")
-async def enrich(request: Request, body: EnrichRequest, user: CurrentUser):
+@limiter.limit("10/minute")
+async def enrich(
+    request: Request, body: EnrichRequest, session: Session, user: CurrentUser
+):
     """«Gʻoyani boyitish»: qisqa matnni 2–4 jumlaga kengaytiradi (foydalanuvchi tilida)."""
+    ip = client_ip(request)
+    await usage.check_action_quota(session, "enrich", ip, user)
+    await usage.record_action("enrich", ip, user.id if user else None)
     meter = metering.new()
     try:
         text = await pipeline.enrich(body.text, body.locale)
@@ -93,15 +103,20 @@ async def enrich(request: Request, body: EnrichRequest, user: CurrentUser):
 
 
 @router.post("/translate")
-@limiter.limit("20/minute")
-async def translate(request: Request, body: TranslateRequest):
+@limiter.limit("10/minute")
+async def translate(
+    request: Request, body: TranslateRequest, session: Session, user: CurrentUser
+):
     """Tayyor promptni foydalanuvchi tiliga oʻgiradi (talab boʻyicha — har belgi pullik)."""
+    ip = client_ip(request)
+    await usage.check_action_quota(session, "translate", ip, user)
+    await usage.record_action("translate", ip, user.id if user else None)
     text = await translate_service.translate(body.text, body.locale)
     return {"text": pipeline.uz_fix(text) if body.locale == "uz" else text}
 
 
 @router.post("/generate")
-@limiter.limit("20/minute")
+@limiter.limit("10/minute")
 async def generate(
     request: Request,
     body: GenerateRequest,

@@ -285,6 +285,20 @@ def segment_types_block(kind: str) -> str:
     return f"<segment_types>\n{lines}\n</segment_types>"
 
 
+PLACEHOLDER_RULE = chr(10).join(
+    [
+        "<placeholders>",
+        "A fact the user did not give is written as [NOM] — square brackets, ALL CAPS, in the "
+        "user's own language ([RESTORAN NOMI], [NARX], [TELEFON], [MANZIL], [RASM]).",
+        "Never write a bare label that a tool would render as real content: a menu titled "
+        '"Biznes nomi", a logo saying "BRAND", a price "narx soʻm" — these are defects.',
+        "The same fact always uses the same token. Keep them few: 6 at most, and never for "
+        "something the user already wrote.",
+        "Never invent a name, price, date, phone number or address to fill the gap.",
+        "</placeholders>",
+    ]
+)
+
 # Umumiy rubrika — generate (oʻz-oʻzini tekshirish) va review (baholash) bir xil mezonlar bilan
 RUBRIC = chr(10).join(
     [
@@ -295,6 +309,9 @@ RUBRIC = chr(10).join(
         "4. audience_tone — who it is for and the answer language/tone are explicit.",
         "5. constraints — what to avoid, limits (budget, time, platform), ask-before-guessing when something important is unknown.",
         "6. no_filler — no generic phrases, no duplicated sections, matches the tool's syntax.",
+        "7. consistent — reads as one finished brief: no repeated or contradictory lines, every "
+        "block the playbook requires is present in order, and every unknown fact appears as the "
+        "SAME bracketed ALL-CAPS placeholder, never as a plain word that looks like a real value.",
         "</rubric>",
     ]
 )

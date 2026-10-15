@@ -100,7 +100,7 @@ class ReviewResult(BaseModel):
     """Tayyor promptni rubrika boʻyicha tekshirish: ball + izohlar («qoida — nega») + boʻlaklar."""
 
     score: int = Field(default=0, ge=0, le=100)
-    criteria: list[ReviewCriterion] = Field(default_factory=list, max_length=6)
+    criteria: list[ReviewCriterion] = Field(default_factory=list, max_length=8)
     notes: list[str] = Field(default_factory=list, max_length=4)
     # Model koʻp boʻlak qaytarishi mumkin — chegara qoʻymaymiz (validatsiya yiqilmasin),
     # serverda tozalanadi va kesiladi (`pipeline.review`).

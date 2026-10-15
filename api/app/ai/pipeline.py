@@ -15,6 +15,7 @@ from app.ai import llm, metering
 from app.ai.catalog import TOOLS, classifier_guide
 from app.ai.llm import ProviderError
 from app.ai.prompts import (
+    PLACEHOLDER_RULE,
     KIND_NAMES,
     RATIO_KINDS,
     RUBRIC,
@@ -285,6 +286,7 @@ def _generate_system(
         system_prompt(ai, kind),
         playbook_rules_block(playbook(kind, archetype)),
         RUBRIC,
+        PLACEHOLDER_RULE,
         (
             f"<task>\nTarget tool: {TOOLS[ai].name}. Output kind: {KIND_NAMES[kind]}.\n"
             f"Write the final prompt in {lang}. Output ONLY the prompt text — no preamble, "
@@ -450,17 +452,30 @@ async def review(
     brief: Brief | None = None,
     kind: str = "text",
 ) -> ReviewResult:
-    """Tayyor promptni baholaydi: ball 0–100, 6 mezon, 2–4 izoh, rangli boʻlaklar + anatomiya."""
+    """Tayyor promptni baholaydi: ball 0–100, 7 mezon, 2–4 izoh, rangli boʻlaklar + anatomiya."""
     # `plain` — faqat server toʻldiradigan oraliq matn; modelga taklif qilinmaydi
     types_no_plain = ", ".join(t for t in segment_types(kind) if t != "plain")
     system = (
         f"A prompt for {TOOLS[ai].name} was written from the user's request and brief. "
         "Grade it strictly against the rubric and break it down for a beginner.\n"
-        "criteria: exactly 6 items with names task_clear, facts_kept, measurable, audience_tone, "
-        "constraints, no_filler. Each gets score = 0-10 (10 = a professional would not touch it, "
+        "criteria: exactly 7 items with names task_clear, facts_kept, measurable, audience_tone, "
+        "constraints, no_filler, consistent. Each gets score = 0-10 (10 = a professional would not touch it, "
         "7 = acceptable, 4 = clearly weak, 0 = missing). note = what exactly is missing, only when "
         f"score < 8 (short, concrete, in {locale_name(locale)}); otherwise an empty note. "
-        f"score: 0–100 (roughly: each criterion ~16 points; deduct "
+        "For `facts_kept`, judge THE PROMPT, not the brief: a fact the prompt decided sensibly "
+        "(page size, style, colour, printing method, tone) is NOT missing — a prompt that picks a "
+        "reasonable default is better than one full of placeholders. Never ask for a placeholder "
+        "because an id appears in the brief's `missing` list. Placeholders are required only for "
+        "content the finished piece must literally show and the user did not give: their own name, "
+        "prices, phone, address, a photo. Deduct when a real user fact was dropped, changed or "
+        "invented.\n"
+        "For `consistent`, look for these defects explicitly and score 4 or lower if you find any: "
+        "the same section or line appearing twice; two lines that contradict each other; a missing "
+        "block that the playbook requires; a placeholder written as a plain word instead of "
+        "[CAPS IN BRACKETS] (for example a menu headed \"Biznes nomi\" or a price \"narx soʻm\"); "
+        "two different tokens used for the same unknown fact; an instruction the target tool "
+        "cannot carry out. "
+        f"score: 0–100 (roughly: each criterion ~14 points; deduct "
         "partially for weak spots). Be honest — 90+ only for prompts a professional would send "
         "as is.\n"
         "notes: the 2–4 most important decisions in the prompt, one line each, for a beginner: "
@@ -468,7 +483,9 @@ async def review(
         f"then why it matters (max 18 words, in {locale_name(locale)}). If a criterion failed, "
         "one note says what the user should add. No fluff, no numbering.\n"
         "segments: mark the meaningful spans of the prompt so the user can see its structure. "
-        f"4–10 spans, IN THE ORDER THEY APPEAR in the prompt, each with one of these types: "
+        "4–6 spans, IN THE ORDER THEY APPEAR in the prompt. Mark only the few phrases that carry "
+        "the idea — a span is a phrase, not a whole sentence, and together they cover less than "
+        "half the prompt. If everything is highlighted the colours mean nothing. Types: "
         f"{types_no_plain}. COPY RULE: every `text` is an exact substring of the prompt, copied "
         "character by character (same spelling, case, punctuation, line breaks) — never reworded, "
         "translated, merged or shortened; if you cannot copy a span exactly, leave it out. Do NOT "

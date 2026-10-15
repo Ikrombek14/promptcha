@@ -60,7 +60,6 @@ export function Workbench() {
   const t = useTranslations("app");
   const tr = useTranslations("result");
   const tc = useTranslations("clarify");
-  const ta = useTranslations("auth");
   const locale = useLocale() as Locale;
   const user = useUser();
 
@@ -88,13 +87,6 @@ export function Workbench() {
     ? user.remaining_today
     : user === null
       ? guestLeft
-      : null;
-  const remainingLabel: string | null = user
-    ? user.remaining_today === null
-      ? null
-      : ta("remainingToday", { n: user.remaining_today })
-    : remaining !== null
-      ? t("guestLeft", { n: remaining })
       : null;
   const abortRef = useRef<AbortController | null>(null);
 
@@ -551,7 +543,6 @@ export function Workbench() {
                 tools={s.tools}
                 ai={s.ai}
                 onAi={(ai) => patch({ ai, aiPicked: true, resolvedAi: null })}
-                aiPicked={s.aiPicked}
                 analyzing={analyzing}
                 ratio={s.ratio}
                 onRatio={(ratio: Ratio) => patch({ ratio })}
@@ -561,7 +552,6 @@ export function Workbench() {
                 hasResult={hasResult}
                 exhausted={exhausted}
                 isUser={Boolean(user)}
-                remainingLabel={remainingLabel}
                 onStop={stop}
                 onReset={resetAll}
               />

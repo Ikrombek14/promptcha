@@ -44,13 +44,6 @@
     "connectionLost": "Aloqa uzildi, natija olinmadi. Qayta urinib koʻring.",
     "ideaLabel": "Gʻoyangiz",
     "counter": "{n} / {max}",
-    "voice": "Ovoz bilan aytish",
-    "voiceListening": "Tinglanmoqda…",
-    "voiceError": "Mikrofon ishlamadi.",
-    "enrich": "Gʻoyani boyitish",
-    "enriching": "Boyitilmoqda…",
-    "enrichError": "Gʻoyani boyitib boʻlmadi.",
-    "enrichUndo": "Qaytarish",
     "typeLabel": "Natija turi",
     "modelLabel": "Model",
     "modelAuto": "Avtomatik",
@@ -153,7 +146,8 @@
     "examplesLabel": "Namunalar",
     "translateNote": "Tarjima faqat tushunish uchun. Modelga inglizcha variantni yuboring.",
     "showTranslation": "Tarjimasini koʻrish",
-    "hideTranslation": "Tarjimani yashirish"
+    "hideTranslation": "Tarjimani yashirish",
+    "toFill": "Toʻldirish kerak:"
   },
   "auth": {
     "title": "Kirish",
@@ -228,28 +222,6 @@
     "stack": "Texnologiya",
     "features": "Funksiyalar",
     "acceptance": "Qabul mezoni"
-  },
-  "quick": {
-    "storybook": "Ertak uslubi",
-    "cinematic": "Kinematografik",
-    "watercolor": "Akvarel",
-    "warmer": "Iliqroq ranglar",
-    "slowmo": "Sekin harakat",
-    "closeup": "Yaqin kadr",
-    "goldenhour": "Oltin soat",
-    "dynamic": "Dinamik kamera",
-    "shorter": "Qisqartirish",
-    "simpler": "Oddiyroq til",
-    "examples": "Namunalar qoʻshish",
-    "stricter": "Qatʼiy format",
-    "tests": "Testlar qoʻshish",
-    "simplestack": "Oddiy texnologiya",
-    "detail": "Batafsilroq",
-    "edge": "Chekka holatlar",
-    "minimal": "Minimalizm",
-    "bolder": "Jasurroq ranglar",
-    "contrast": "Kontrast kuchli",
-    "variants": "Variantlar"
   },
   "examples": [
     {

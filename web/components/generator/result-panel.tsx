@@ -2,14 +2,13 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import {
   Bookmark,
   Check,
   Copy,
   Languages,
   LoaderCircle,
-  Plus,
   Sparkles,
   WandSparkles,
 } from "lucide-react";
@@ -28,10 +27,12 @@ import {
   translatePrompt,
 } from "@/lib/api";
 import { SLOT_OF, legendTypes, segClass, slotColor } from "@/lib/segments";
-import { quickEdits } from "@/lib/quick-edits";
 import { track } from "@/lib/events";
 import { fadeUp, stagger } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+
+/** Promptdagi [JOʻRIK] — foydalanuvchi almashtirishi kerak boʻlgan joy */
+const PLACEHOLDER_RE = /\[[^\]\n]{2,40}\]/g;
 
 /** Shu baldan past boʻlsa «Yaxshilash» taklif qilinadi */
 const IMPROVE_BELOW = 75;
@@ -69,7 +70,6 @@ export function ResultPanel({
 }: Props) {
   const t = useTranslations("result");
   const ts = useTranslations("segments");
-  const tq = useTranslations("quick");
   const locale = useLocale() as Locale;
   const reduce = useReducedMotion();
   const meta = AI_META[ai];
@@ -107,6 +107,11 @@ export function ResultPanel({
       setTranslating(false);
     }
   };
+
+  // Promptdagi [JOʻRIKLAR] — foydalanuvchi nimani almashtirishi kerakligini bilsin
+  const placeholders = Array.from(
+    new Set(prompt.match(PLACEHOLDER_RE) ?? []),
+  ).slice(0, 8);
 
   const legend = legendTypes(kind);
   const words = wordCount(prompt);
@@ -195,6 +200,20 @@ export function ResultPanel({
           </div>
         )}
 
+        {!streaming && placeholders.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 border-t border-border px-5 py-3">
+            <span className="text-body-sm font-bold text-text-2">{t("toFill")}</span>
+            {placeholders.map((ph) => (
+              <span
+                key={ph}
+                className="inline-flex h-7 items-center rounded-[var(--radius-sm)] border border-[color-mix(in_oklab,var(--seg-light),var(--border)_45%)] bg-[color-mix(in_oklab,var(--seg-light),var(--surface)_88%)] px-2 font-mono text-label-sm text-text-2"
+              >
+                {ph}
+              </span>
+            ))}
+          </div>
+        )}
+
         {!streaming && (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border px-5 py-2.5">
             <span className="font-mono text-label-sm text-subtle">
@@ -275,9 +294,6 @@ export function ResultPanel({
                     {p.type in SLOT_OF ? ts(p.type) : p.type}
                   </span>
                 </span>
-                <span className="truncate font-mono text-code-sm text-text-2">
-                  {p.excerpt}
-                </span>
                 <p className="text-body-sm text-muted">{p.why}</p>
               </article>
             ))}
@@ -300,47 +316,25 @@ export function ResultPanel({
         </motion.ul>
       )}
 
-      {/* Tez oʻzgartirish + yaxshilash */}
-      {onImprove && !streaming && prompt && (
-        <motion.div variants={fadeUp} className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-1 text-body-sm font-bold text-text-2">{t("quick")}</span>
-            {quickEdits(kind).map((q) => (
-              <button
-                key={q.id}
-                type="button"
-                onClick={() => onImprove([q.instruction])}
-                className="flex h-9 items-center gap-1.5 rounded-full border border-border-strong px-3 text-body-sm font-semibold text-muted transition-colors hover:border-[color-mix(in_oklab,var(--border-strong),var(--text)_30%)] hover:text-text"
-              >
-                <Plus size={14} strokeWidth={2} />
-                {tq(q.id)}
-              </button>
-            ))}
-          </div>
-          <AnimatePresence initial={false}>
-            {score !== null && score < IMPROVE_BELOW && (
-              <motion.div
-                key="improve"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-border bg-surface-2 p-3.5"
-              >
-                <p className="text-body-sm text-muted">{t("improveHint")}</p>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  className="h-10 gap-2"
-                  onClick={() => onImprove([])}
-                >
-                  <WandSparkles size={15} />
-                  {t("improve")}
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+      {/* Yaxshilash — ball past boʻlsa */}
+      {onImprove && !streaming && prompt && score !== null && score < IMPROVE_BELOW && (
+        <motion.div
+          variants={fadeUp}
+          className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-border bg-surface-2 p-3.5"
+        >
+          <p className="text-body-sm text-muted">{t("improveHint")}</p>
+          <Button
+            variant="primary"
+            size="sm"
+            className="h-10 gap-2"
+            onClick={() => onImprove([])}
+          >
+            <WandSparkles size={15} />
+            {t("improve")}
+          </Button>
         </motion.div>
       )}
+
     </motion.section>
   );
 }
