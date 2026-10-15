@@ -21,16 +21,16 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-10 border-b border-border/70 bg-bg/85 backdrop-blur-xl">
-      <div className="mx-auto flex min-h-16 max-w-[1280px] flex-wrap items-center gap-4 px-4 md:px-8">
+      <div className="mx-auto flex min-h-16 max-w-[1280px] items-center gap-2 px-4 md:px-6 lg:gap-4 lg:px-8">
         <Link
           href="/app"
           aria-label="Promptcha"
-          className="flex items-center rounded-[var(--radius-sm)] text-[24px] leading-none"
+          className="flex shrink-0 items-center rounded-[var(--radius-sm)] text-[22px] leading-none md:text-[24px]"
         >
           <Logo state="breathe" />
         </Link>
 
-        <nav aria-label={t("nav")} className="ml-2 hidden gap-1 md:flex">
+        <nav aria-label={t("nav")} className="hidden gap-1 md:flex lg:ml-2">
           {NAV.map(({ href, key }) => {
             const active = pathname === href || pathname.startsWith(`${href}/`);
             return (

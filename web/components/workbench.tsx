@@ -567,10 +567,7 @@ export function Workbench() {
               ) : (
                 <EmptyResult
                   key="empty"
-                  onExample={(text) => {
-                    onTextChange(text);
-                    void maybeAnalyze();
-                  }}
+                  onExample={onTextChange}
                 />
               )}
             </AnimatePresence>

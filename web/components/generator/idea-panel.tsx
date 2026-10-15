@@ -348,7 +348,8 @@ export function IdeaPanel({
         <div className="grid grid-cols-3 gap-2">
           {TYPES.map(({ value, key, Icon }) => {
             const on = kind === value;
-            const auto = value === null;
+            // «Avto» tanlangan boʻlsa tahlil taxmin qilgan tur nuqta bilan belgilanadi
+            const guessed = kind === null && value !== null && value === suggestedKind;
             return (
               <button
                 key={key}
@@ -356,14 +357,17 @@ export function IdeaPanel({
                 aria-pressed={on}
                 disabled={busy}
                 onClick={() => onKind(value)}
+                title={guessed ? t("kindSuggested", { kind: t(`kinds.${value}`) }) : undefined}
                 className={cn(optBase, on ? optOn : optOff, "h-11 justify-start px-3")}
               >
                 <Icon size={16} className="shrink-0" />
-                <span className="truncate">
-                  {auto && on && suggestedKind
-                    ? t("kindAutoResolved", { kind: t(`kinds.${suggestedKind}`) })
-                    : t(key)}
-                </span>
+                <span className="truncate">{t(key)}</span>
+                {guessed && (
+                  <span
+                    aria-hidden
+                    className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-accent"
+                  />
+                )}
               </button>
             );
           })}
