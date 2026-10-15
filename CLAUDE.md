@@ -223,13 +223,21 @@ fayllar koʻriladi**.
   hurmat qilinadi. Favicon — `#171A22` ustida «P».
 - **Generator ikki panel:** chapda gʻoya (4fr), oʻngda natija (6fr); `lg` dan past — bitta ustun va
   pastda yopishqoq panel. Natija chiqqach mobilda chap panel qisqa xulosaga yigʻiladi («Tahrirlash»).
-- **Aniqlashtiruvchi savollar ixtiyoriy** (egasi qarori): natijani bloklamaydi, gʻoya maydoni ostida
-  chip boʻlib chiqadi; javobsiz bosilsa javoblar `(not specified)` boʻlib ketadi va prompt yasaladi.
+- **Bosqichma-bosqich koʻrsatish (egasi qarori):** yozayotganda chap panelda faqat gʻoya maydoni va
+  asosiy tugma turadi — tur/model/nisbat qatori **prompt yasalgandan keyin** chiqadi (nima tanlangani
+  koʻrinadi va oʻzgartirib qayta yasash mumkin).
+- **Aniqlashtiruvchi savollar ixtiyoriy va oʻng panelda** (`ClarifyCard`): raqamlangan savollar, chiplar,
+  «Boshqa…» maydoni va asosiy tugma shu kartada («Davom etish» / javob berilmasa «Savolsiz yasash»).
+  Savol holatida chapdagi asosiy tugma yashiriladi — ekranda bitta asosiy harakat qoladi. Javobsiz
+  yuborilsa javoblar `(not specified)` boʻlib ketadi va prompt yasaladi.
 - **Qaror qatori (2026-10-15, egasi qarori):** tur, model va nisbat roʻyxat boʻlib joy egallamaydi — bitta 40px qatorda uchta ixcham tanlov (`components/generator/picker.tsx`). Qiymatlar gʻoyadan aniqlanadi (`/analyze`), sayt tanlagani ✦ bilan belgilanadi, bosilganda roʻyxat ochiladi. Roʻyxat `position: fixed` — panelning ichki skrolli uni kesmaydi, pastda joy boʻlmasa yuqoriga ochiladi. Nisbat faqat rasm/video turida koʻrinadi.
 - **Rangli prompt:** `explain` hodisasidagi `segments` (`{type,text}`) va `parts` (`{type,excerpt,why}`).
   Toifalar kind boʻyicha: rasm/video — object|composition|light|params; matn/dizayn —
   role|task|requirements|format; ilova — goal|stack|features|acceptance (+`plain`). Frontend ularni
   toʻrtta rang uyasiga solishtiradi (`lib/segments.ts`, `.sg-*` klasslari).
+- **Boʻlaklarni qavsharlash** (`_stitch_segments`): mos kelmagan boʻlak tashlab ketiladi, qolganlari
+  rangli boʻlib qoladi (avval «hammasi yoki hech nima» edi). Boʻshliqlar farq qilsa `\s+` bilan
+  topiladi; natija baribir harfma-harf asl prompt boʻladi.
 - **Nisbat** (`ratio`: 1:1, 4:5, 16:9, 9:16) faqat rasm/video turlarida koʻrsatiladi va soʻrovga qoʻshiladi.
 - **«Gʻoyani boyitish»** — `POST /api/prompts/enrich`; **ovoz bilan aytish** — brauzerning Web Speech API'si
   (qoʻllab-quvvatlamasa tugma koʻrinmaydi).
