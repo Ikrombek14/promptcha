@@ -41,6 +41,8 @@ ACTION_EXHAUSTED = "Juda koʻp soʻrov yuborildi. Birozdan soʻng qayta urinib k
 #: Generate'dan tashqari, pul turadigan yordamchi chaqiruvlar — kunlik chegara (IP boʻyicha).
 #: Kirgan foydalanuvchiga uch barobar, Pro'ga cheklov yoʻq.
 ACTION_DAILY_LIMITS: dict[str, int] = {"analyze": 60, "enrich": 20, "translate": 30}
+#: Bitta IP dan kuniga eng koʻpi (hisob soniga qaramay) — asosiy chegaraning shuncha barobari
+ACTION_IP_CEILING = 4
 
 
 def _since() -> datetime:
@@ -126,13 +128,13 @@ async def check_action_quota(
     Baza ishlamasa — 503 (fail-closed), xuddi generate limiti kabi: oʻlchab boʻlmaydigan
     chaqiruv pul sarflamasligi kerak.
     """
-    limit = ACTION_DAILY_LIMITS.get(action)
-    if limit is None:
+    base = ACTION_DAILY_LIMITS.get(action)
+    if base is None:
         return
-    if user is not None:
-        if user.is_pro:
-            return
-        limit *= 3
+    if user is not None and user.is_pro:
+        return
+    # Hisob egasi boʻyicha: kirganda uch barobar, mehmonda asosiy chegara
+    limit = base * 3 if user is not None else base
     owner = UsageLog.user_id == user.id if user is not None else UsageLog.ip == ip
     try:
         used = await session.scalar(
@@ -140,9 +142,27 @@ async def check_action_quota(
             .select_from(UsageLog)
             .where(UsageLog.action == action, owner, UsageLog.created_at >= _since())
         )
+        # Bitta mashinadan koʻp hisob ochib chegarani kattalashtirib boʻlmasin:
+        # IP shifti hammaga baravar (Google hisobi tekin — aks holda xarajat cheksiz)
+        ip_used = await session.scalar(
+            select(func.count())
+            .select_from(UsageLog)
+            .where(
+                UsageLog.action == action,
+                UsageLog.ip == ip,
+                UsageLog.created_at >= _since(),
+            )
+        )
     except Exception:
         log.exception("action limitini oʻqib boʻlmadi: %s", action)
         raise HTTPException(status_code=503, detail=DB_DOWN) from None
+    if (ip_used or 0) >= base * ACTION_IP_CEILING:
+        events.record(
+            "limit_reached",
+            {"who": "ip_ceiling", "action": action},
+            user_id=user.id if user is not None else None,
+        )
+        raise HTTPException(status_code=429, detail=ACTION_EXHAUSTED)
     if (used or 0) >= limit:
         events.record(
             "limit_reached",

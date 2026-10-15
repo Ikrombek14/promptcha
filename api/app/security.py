@@ -142,7 +142,14 @@ class SecurityMiddleware:
 
 
 def client_ip(scope_or_request) -> str:
-    """Haqiqiy IP: Nginx orqasida boʻlsak X-Forwarded-For (faqat TRUST_PROXY=true), aks holda socket."""
+    """Haqiqiy IP: proxy orqasida boʻlsak `X-Forwarded-For` ning **oxirgi** qiymati.
+
+    Caddy/Nginx mijoz yuborgan `X-Forwarded-For` ga oʻzi koʻrgan IP ni **oxiriga** qoʻshadi.
+    Shuning uchun birinchi qiymat — mijozning oʻzi yozgani, ya'ni ishonchsiz: u bilan
+    limitni aylanib oʻtish ham, begona odamning kunlik hisobini yoqib yuborish ham mumkin.
+    Oxirgi qiymat esa bizning proxy qoʻshgani. `X-Real-IP` ishlatilmaydi — Caddy uni
+    oʻrnatmaydi, demak uni faqat mijoz yuborgan boʻlishi mumkin.
+    """
     from app.config import get_settings
 
     request = scope_or_request
@@ -150,8 +157,7 @@ def client_ip(scope_or_request) -> str:
     if get_settings().trust_proxy:
         xff = headers.get("x-forwarded-for")
         if xff:
-            return xff.split(",")[0].strip()
-        real = headers.get("x-real-ip")
-        if real:
-            return real.strip()
+            parts = [p.strip() for p in xff.split(",") if p.strip()]
+            if parts:
+                return parts[-1]
     return request.client.host if request.client else "unknown"

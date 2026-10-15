@@ -16,13 +16,16 @@ check = usage.check_action_quota
 
 
 class _Session:
-    """count() → `used` qaytaradi."""
+    """count() → `used` qaytaradi (ikkala soʻrov uchun ham: egasi va IP shifti)."""
 
-    def __init__(self, used: int):
+    def __init__(self, used: int, ip_used: int | None = None):
         self.used = used
+        self.ip_used = used if ip_used is None else ip_used
+        self.calls = 0
 
     async def scalar(self, _stmt):
-        return self.used
+        self.calls += 1
+        return self.used if self.calls == 1 else self.ip_used
 
 
 async def test_under_the_limit_passes():
@@ -43,6 +46,16 @@ async def test_signed_in_user_gets_three_times_more(make_user):
     await check(_Session(limit + 1), "enrich", "1.2.3.4", user)
     with pytest.raises(Exception) as e:
         await check(_Session(limit * 3), "enrich", "1.2.3.4", user)
+    assert getattr(e.value, "status_code", None) == 429
+
+
+async def test_ip_ceiling_blocks_many_free_accounts(make_user):
+    """Bitta mashinadan koʻp hisob ochib chegarani kattalashtirib boʻlmaydi."""
+    base = usage.ACTION_DAILY_LIMITS["translate"]
+    ceiling = base * usage.ACTION_IP_CEILING
+    # yangi hisobda oʻz hisobi boʻsh, lekin IP allaqachon shiftga yetgan
+    with pytest.raises(Exception) as e:
+        await check(_Session(0, ip_used=ceiling), "translate", "1.2.3.4", make_user())
     assert getattr(e.value, "status_code", None) == 429
 
 

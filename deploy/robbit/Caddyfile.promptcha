@@ -23,6 +23,9 @@ promptcha.uz {
 	handle /api/* {
 		reverse_proxy 169.58.130.201:8010 {
 			header_up X-Internal-Key "__INTERNAL_API_KEY__"
+			# Mijoz yuborgan X-Forwarded-For ustiga yozamiz: limitlar IP ga tayanadi,
+			# soxta IP bilan chegarani aylanib oʻtish yoki begonanikini yoqish mumkin boʻlmasin
+			header_up X-Forwarded-For {remote_host}
 			flush_interval -1
 		}
 	}
