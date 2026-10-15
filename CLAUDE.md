@@ -261,11 +261,11 @@ fayllar koʻriladi**.
 - [x] Modellar + birinchi migratsiya (`alembic upgrade head` lokal bazada hali tekshirilmagan — parol kerak)
 - [x] `/api/prompts/generate` SSE bilan (auth'siz, test uchun) — 14 test o'tadi, haqiqiy API kalit bilan hali sinalmagan
 - [x] `design/` papkasini o'rganish, `design/tokens.md` yozish
-- [x] Step1–Step5 komponentlar (dizayn asosida) — `/[locale]/app` ishlaydi, build o'tadi
+- [x] Generator sahifasi — redizayn v2 (`components/generator/*`), jonli
 - [x] Google auth + guest → user ko'chirish (`/login`, header menyu; Google kalitlari serverga qoʻyilishi kerak)
 - [x] Admin panel `/admin` — statistika (faol foydalanuvchilar, tokenlar vosita/provayder/bosqich/foydalanuvchi kesimida), foydalanuvchilar (Pro/bonus), qoʻlda toʻlov, limitlar
 - [ ] Onlayn toʻlov (Payme/Click) — `payments` jadvali tayyor
-- [ ] Tarix sahifasi
+- [x] Tarix va Kutubxona sahifalari (`/history`, `/library`) — saqlash, qidiruv, holatlar
 - [ ] UserContext — kontekst xotirasi va settings'da ko'rsatish
 - [ ] uz/ru/en — UI matnlari va pipeline'ga locale
 - [ ] Landing
