@@ -56,7 +56,9 @@
     "ratioLabel": "Ratio",
     "continueAnswers": "Continue with answers",
     "editIdea": "Edit",
-    "ideaSummary": "Your idea"
+    "ideaSummary": "Your idea",
+    "decisions": "Type and model",
+    "decisionsHint": "picked from your idea — tap to change"
   },
   "clarify": {
     "title": "Clarification",

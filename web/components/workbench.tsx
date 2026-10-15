@@ -11,6 +11,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { AnimatePresence, MotionConfig } from "motion/react";
 import { Check, Copy, Pencil, RotateCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { IdeaPanel } from "@/components/generator/idea-panel";
 import { ResultPanel } from "@/components/generator/result-panel";
 import {
@@ -456,10 +457,10 @@ export function Workbench() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="mx-auto w-full max-w-[1280px] px-4 pb-28 pt-6 md:px-8 md:pb-16 md:pt-10">
-        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,4fr)_minmax(0,6fr)] lg:gap-6">
+      <div className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col px-4 pb-28 pt-5 md:px-8 lg:min-h-0 lg:pb-6 lg:pt-6">
+        <div className="grid min-h-0 flex-1 items-start gap-5 lg:grid-cols-[minmax(0,4fr)_minmax(0,6fr)] lg:items-stretch lg:gap-6">
           {/* chap: gʻoya va boshqaruvlar */}
-          <div className="min-w-0">
+          <div className="flex min-w-0 flex-col lg:min-h-0">
             {/* mobilda natija chiqqach — qisqa xulosa */}
             {collapsedOnMobile && (
               <section
@@ -498,7 +499,12 @@ export function Workbench() {
               </section>
             )}
 
-            <div className={collapsedOnMobile ? "hidden lg:block" : undefined}>
+            <div
+              className={cn(
+                "flex min-h-0 flex-1 flex-col",
+                collapsedOnMobile && "hidden lg:flex",
+              )}
+            >
               <IdeaPanel
                 text={s.text}
                 onTextChange={onTextChange}
@@ -510,6 +516,7 @@ export function Workbench() {
                 tools={s.tools}
                 ai={s.ai}
                 onAi={(ai) => patch({ ai, aiPicked: true, resolvedAi: null })}
+                aiPicked={s.aiPicked}
                 analyzing={analyzing}
                 ratio={s.ratio}
                 onRatio={(ratio: Ratio) => patch({ ratio })}
@@ -528,7 +535,7 @@ export function Workbench() {
           </div>
 
           {/* oʻng: natija */}
-          <div className="min-w-0">
+          <div className="flex min-w-0 flex-col lg:min-h-0">
             <AnimatePresence mode="wait" initial={false}>
               {s.phase === "error" ? (
                 <ErrorResult

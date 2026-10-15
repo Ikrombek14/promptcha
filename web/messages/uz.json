@@ -56,7 +56,9 @@
     "ratioLabel": "Nisbat",
     "continueAnswers": "Javoblar bilan davom etish",
     "editIdea": "Tahrirlash",
-    "ideaSummary": "Gʻoyangiz"
+    "ideaSummary": "Gʻoyangiz",
+    "decisions": "Tur va model",
+    "decisionsHint": "gʻoyangizdan aniqlanadi — bosib oʻzgartiring"
   },
   "clarify": {
     "title": "Aniqlashtirish",

@@ -113,7 +113,7 @@ export function ResultPanel({
   return (
     <motion.section
       aria-labelledby="h-out"
-      className="flex min-w-0 flex-col gap-6 rounded-[var(--radius-xl)] border border-border bg-surface p-5 md:p-7"
+      className="flex min-h-0 min-w-0 flex-col gap-6 rounded-[var(--radius-xl)] border border-border bg-surface p-5 [&>*]:shrink-0 md:p-6 lg:h-full lg:overflow-y-auto"
       variants={stagger}
       initial={reduce ? false : "hidden"}
       animate="show"

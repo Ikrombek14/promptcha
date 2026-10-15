@@ -56,7 +56,9 @@
     "ratioLabel": "Соотношение",
     "continueAnswers": "Продолжить с ответами",
     "editIdea": "Изменить",
-    "ideaSummary": "Ваша идея"
+    "ideaSummary": "Ваша идея",
+    "decisions": "Тип и модель",
+    "decisionsHint": "определяются по идее — нажмите, чтобы изменить"
   },
   "clarify": {
     "title": "Уточнение",

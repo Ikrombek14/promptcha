@@ -18,7 +18,7 @@ import { fadeUp, stagger } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const panel =
-  "flex min-h-80 min-w-0 flex-col gap-6 rounded-[var(--radius-xl)] border border-border bg-surface p-5 md:p-7";
+  "flex min-h-80 min-w-0 flex-col gap-6 rounded-[var(--radius-xl)] border border-border bg-surface p-5 md:p-6 lg:h-full lg:min-h-0 lg:overflow-y-auto";
 
 /** Boʻsh holat: nima boʻlishini aytadi va uchta namuna taklif qiladi. */
 export function EmptyResult({ onExample }: { onExample: (text: string) => void }) {

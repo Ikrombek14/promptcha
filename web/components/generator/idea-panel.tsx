@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "motion/react";
 import {
-  Check,
   Image as ImageIcon,
   LayoutGrid,
   LoaderCircle,
@@ -21,6 +20,7 @@ import {
 import { Link } from "@/i18n/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Callout } from "@/components/ui/callout";
+import { Picker, type PickerOption } from "@/components/generator/picker";
 import {
   ClarifyFields,
   type Pick as ClarifyPick,
@@ -29,26 +29,18 @@ import { AI_META, type AiTool, type Kind, type Locale } from "@/lib/ai-tools";
 import { type Ratio, RATIOS, RATIO_KINDS, RATIO_SHAPE } from "@/lib/segments";
 import type { ClarifyQuestion } from "@/lib/api";
 import { ApiError, enrichIdea } from "@/lib/api";
-import { fadeUp, stagger } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 export const MAX_CHARS = 2000;
 
-const TYPES: { value: Kind | null; key: string; Icon: typeof Sparkles }[] = [
-  { value: null, key: "kindAuto", Icon: Sparkles },
-  { value: "image", key: "kinds.image", Icon: ImageIcon },
-  { value: "video", key: "kinds.video", Icon: VideoIcon },
-  { value: "app", key: "kinds.app", Icon: LayoutGrid },
-  { value: "design", key: "kinds.design", Icon: Palette },
-  { value: "text", key: "kinds.text", Icon: TypeIcon },
-];
-
-/** Tanlangan / tanlanmagan boshqaruv uslubi (dizayndagi `.opt`). */
-const optBase =
-  "flex items-center gap-2 rounded-[var(--radius-md)] border text-body-sm font-semibold transition-[background-color,border-color,color] duration-150 disabled:pointer-events-none disabled:opacity-50";
-const optOff =
-  "border-border-strong bg-surface-2 text-muted hover:border-[color-mix(in_oklab,var(--border-strong),var(--text)_30%)] hover:text-text";
-const optOn = "border-selected-border bg-[var(--selected-bg)] text-text";
+const KIND_ICON: Record<Kind, React.ReactNode> = {
+  image: <ImageIcon size={15} className="shrink-0" />,
+  video: <VideoIcon size={15} className="shrink-0" />,
+  app: <LayoutGrid size={15} className="shrink-0" />,
+  design: <Palette size={15} className="shrink-0" />,
+  text: <TypeIcon size={15} className="shrink-0" />,
+};
+const KINDS: Kind[] = ["image", "video", "app", "design", "text"];
 
 type Props = {
   text: string;
@@ -58,12 +50,14 @@ type Props = {
 
   kind: Kind | null;
   onKind: (k: Kind | null) => void;
-  /** Tahlil taxmin qilgan tur (Avto tanlangan boʻlsa koʻrsatiladi) */
+  /** Tahlil taxmin qilgan tur */
   suggestedKind: Kind | null;
 
   tools: AiTool[];
   ai: AiTool | null;
   onAi: (ai: AiTool | null) => void;
+  /** Vositani foydalanuvchi oʻzi tanlagan (aks holda tahlil tanlagan) */
+  aiPicked: boolean;
   analyzing: boolean;
 
   ratio: Ratio;
@@ -74,7 +68,6 @@ type Props = {
   onPicks: (p: Record<string, ClarifyPick>) => void;
 
   busy: boolean;
-  /** Natija bor — tugma «qayta yaratish» boʻladi */
   hasResult: boolean;
   exhausted: boolean;
   isUser: boolean;
@@ -89,7 +82,9 @@ type SpeechRec = {
   interimResults: boolean;
   start: () => void;
   stop: () => void;
-  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onresult:
+    | ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void)
+    | null;
   onerror: (() => void) | null;
   onend: (() => void) | null;
 };
@@ -113,6 +108,7 @@ export function IdeaPanel({
   tools,
   ai,
   onAi,
+  aiPicked,
   analyzing,
   ratio,
   onRatio,
@@ -135,7 +131,6 @@ export function IdeaPanel({
   const showRatio = effectiveKind !== null && RATIO_KINDS.includes(effectiveKind);
 
   // Ovoz bilan aytish — brauzer Web Speech API'si bor boʻlsa koʻrinadi
-  // Workbench faqat brauzerda chiziladi (ssr:false) — qoʻllab-quvvatlash bir marta tekshiriladi
   const [speechReady] = useState(() => {
     if (typeof window === "undefined") return false;
     const w = window as unknown as {
@@ -211,6 +206,42 @@ export function IdeaPanel({
     }
   };
 
+  // Qaror qatori: tur / model / nisbat. Qiymatlar gʻoyadan aniqlanadi,
+  // bosilganda roʻyxat ochiladi — shuning uchun bitta qator joy egallaydi.
+  const kindOptions: PickerOption<string>[] = [
+    {
+      value: "auto",
+      label: t("kindAuto"),
+      icon: <Sparkles size={15} className="shrink-0" />,
+    },
+    ...KINDS.map((k) => ({ value: k, label: t(`kinds.${k}`), icon: KIND_ICON[k] })),
+  ];
+  // «Avto» tanlangan boʻlsa tahlil aniqlagan tur koʻrsatiladi (✦ belgisi bilan)
+  const kindValue: string = kind ?? suggestedKind ?? "auto";
+  const kindIsAuto = kind === null && suggestedKind !== null;
+
+  const modelOptions: PickerOption<string>[] = tools.length
+    ? tools.map((tool) => ({
+        value: tool,
+        label: AI_META[tool].name,
+        hint: AI_META[tool].version || tt(`sub.${tool}`),
+        dot: AI_META[tool].dot,
+      }))
+    : [{ value: "auto", label: t("modelAuto"), hint: t("modelAutoSub") }];
+  const modelValue: string = ai ?? "auto";
+
+  const ratioOptions: PickerOption<Ratio>[] = RATIOS.map((r) => ({
+    value: r,
+    label: r,
+    icon: (
+      <span
+        aria-hidden
+        className="inline-block shrink-0 rounded-[2px] border-[1.5px] border-current"
+        style={{ width: RATIO_SHAPE[r].w, height: RATIO_SHAPE[r].h }}
+      />
+    ),
+  }));
+
   const primaryLabel = busy
     ? t("generating")
     : questions.length
@@ -220,25 +251,22 @@ export function IdeaPanel({
         : t("generate");
 
   return (
-    <motion.section
+    <section
       aria-labelledby="h-input"
-      className="flex min-w-0 flex-col gap-7 rounded-[var(--radius-xl)] border border-border bg-surface p-5 md:p-7"
-      variants={stagger}
-      initial="hidden"
-      animate="show"
+      className="flex min-h-0 min-w-0 flex-col gap-4 rounded-[var(--radius-xl)] border border-border bg-surface p-5 md:p-6 lg:h-full lg:overflow-y-auto"
     >
-      <motion.div variants={fadeUp} className="flex flex-col gap-2">
+      <div className="flex shrink-0 flex-col gap-1.5">
         <h1
           id="h-input"
-          className="text-[28px] font-extrabold leading-[1.15] tracking-[-0.025em] text-text"
+          className="text-[26px] font-extrabold leading-[1.15] tracking-[-0.025em] text-text"
         >
           {t("title")}
         </h1>
-        <p className="text-body-md text-muted">{t("subtitle")}</p>
-      </motion.div>
+        <p className="text-body-sm text-muted">{t("subtitle")}</p>
+      </div>
 
-      {/* Gʻoya maydoni */}
-      <motion.div variants={fadeUp} className="flex flex-col gap-2">
+      {/* Gʻoya maydoni — qolgan boʻsh joyni oʻzi egallaydi */}
+      <div className="flex min-h-0 flex-1 flex-col gap-2">
         <div className="flex items-baseline justify-between gap-3">
           <label htmlFor="idea" className="text-body-sm font-bold text-text-2">
             {t("ideaLabel")}
@@ -247,10 +275,10 @@ export function IdeaPanel({
             {t("counter", { n: text.length, max: MAX_CHARS })}
           </span>
         </div>
-        <div className="flex flex-col rounded-[var(--radius-lg)] border border-border-strong bg-sunk focus-within:border-accent">
+        <div className="flex min-h-0 flex-1 flex-col rounded-[var(--radius-lg)] border border-border-strong bg-sunk focus-within:border-accent">
           <textarea
             id="idea"
-            rows={4}
+            rows={3}
             maxLength={MAX_CHARS}
             value={text}
             disabled={busy}
@@ -263,9 +291,9 @@ export function IdeaPanel({
                 onSubmit();
               }
             }}
-            className="min-h-28 w-full resize-none rounded-[var(--radius-lg)] bg-transparent px-4 pb-2 pt-4 text-body-md text-text outline-offset-[-2px] placeholder:text-subtle disabled:opacity-60"
+            className="min-h-24 w-full flex-1 resize-none rounded-[var(--radius-lg)] bg-transparent px-4 pb-2 pt-3.5 text-body-md text-text outline-offset-[-2px] placeholder:text-subtle disabled:opacity-60"
           />
-          <div className="flex flex-wrap items-center justify-between gap-1 p-2 pl-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-1 p-1.5 pl-2">
             {speechReady ? (
               <Button
                 variant="ghost"
@@ -318,13 +346,14 @@ export function IdeaPanel({
             {voiceError ? t("voiceError") : enrichError}
           </p>
         )}
-      </motion.div>
+      </div>
 
       {/* Aniqlashtiruvchi savollar — ixtiyoriy */}
       <AnimatePresence initial={false}>
         {questions.length > 0 && (
           <motion.div
             key="clarify"
+            className="shrink-0"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4, transition: { duration: 0.15 } }}
@@ -340,124 +369,55 @@ export function IdeaPanel({
         )}
       </AnimatePresence>
 
-      {/* Natija turi */}
-      <motion.fieldset variants={fadeUp} className="m-0 border-0 p-0">
-        <legend className="mb-2.5 p-0 text-body-sm font-bold text-text-2">
-          {t("typeLabel")}
-        </legend>
-        <div className="grid grid-cols-3 gap-2">
-          {TYPES.map(({ value, key, Icon }) => {
-            const on = kind === value;
-            // «Avto» tanlangan boʻlsa tahlil taxmin qilgan tur nuqta bilan belgilanadi
-            const guessed = kind === null && value !== null && value === suggestedKind;
-            return (
-              <button
-                key={key}
-                type="button"
-                aria-pressed={on}
-                disabled={busy}
-                onClick={() => onKind(value)}
-                title={guessed ? t("kindSuggested", { kind: t(`kinds.${value}`) }) : undefined}
-                className={cn(optBase, on ? optOn : optOff, "h-11 justify-start px-3")}
-              >
-                <Icon size={16} className="shrink-0" />
-                <span className="truncate">{t(key)}</span>
-                {guessed && (
-                  <span
-                    aria-hidden
-                    className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-accent"
-                  />
-                )}
-              </button>
-            );
-          })}
+      {/* Qaror qatori */}
+      <div className="flex shrink-0 flex-col gap-2">
+        <div className="flex flex-wrap items-baseline gap-x-2">
+          <span className="text-body-sm font-bold text-text-2">{t("decisions")}</span>
+          <span className="inline-flex min-h-5 items-center gap-1.5 text-label-sm text-subtle">
+            {analyzing ? (
+              <>
+                <LoaderCircle size={12} className="animate-spin" />
+                {tt("analyzing")}
+              </>
+            ) : (
+              t("decisionsHint")
+            )}
+          </span>
         </div>
-      </motion.fieldset>
-
-      {/* Model */}
-      <motion.fieldset variants={fadeUp} className="m-0 border-0 p-0">
-        <legend className="mb-2.5 flex items-center gap-2 p-0 text-body-sm font-bold text-text-2">
-          {t("modelLabel")}
-          {analyzing && (
-            <span className="inline-flex items-center gap-1.5 font-normal text-label-sm text-subtle">
-              <LoaderCircle size={12} className="animate-spin" />
-              {tt("analyzing")}
-            </span>
-          )}
-        </legend>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {tools.length === 0 && (
-            <ModelCard
-              on={ai === null}
-              name={t("modelAuto")}
-              version=""
-              sub={t("modelAutoSub")}
-              dot="var(--muted)"
+        <div className="flex min-w-0 gap-2">
+          <Picker
+            label={t("typeLabel")}
+            value={kindValue}
+            options={kindOptions}
+            auto={kindIsAuto}
+            disabled={busy}
+            onChange={(v) => onKind(v === "auto" ? null : (v as Kind))}
+            className="flex-[3]"
+          />
+          <Picker
+            label={t("modelLabel")}
+            value={modelValue}
+            options={modelOptions}
+            auto={!aiPicked && tools.length > 0}
+            disabled={busy || !tools.length}
+            onChange={(v) => onAi(v === "auto" ? null : (v as AiTool))}
+            className="flex-[4]"
+          />
+          {showRatio && (
+            <Picker
+              label={t("ratioLabel")}
+              value={ratio}
+              options={ratioOptions}
               disabled={busy}
-              onClick={() => onAi(null)}
+              onChange={onRatio}
+              className="w-[104px] shrink-0"
             />
           )}
-          {tools.map((tool) => (
-            <ModelCard
-              key={tool}
-              on={ai === tool}
-              name={AI_META[tool].name}
-              version={AI_META[tool].version}
-              sub={tt(`sub.${tool}`)}
-              dot={AI_META[tool].dot}
-              disabled={busy}
-              onClick={() => onAi(tool)}
-            />
-          ))}
         </div>
-      </motion.fieldset>
-
-      {/* Nisbat — faqat rasm/video */}
-      <AnimatePresence initial={false}>
-        {showRatio && (
-          <motion.fieldset
-            key="ratio"
-            className="m-0 border-0 p-0"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4, transition: { duration: 0.15 } }}
-          >
-            <legend className="mb-2.5 p-0 text-body-sm font-bold text-text-2">
-              {t("ratioLabel")}
-            </legend>
-            <div className="flex flex-wrap gap-2">
-              {RATIOS.map((r) => {
-                const on = ratio === r;
-                const { w, h } = RATIO_SHAPE[r];
-                return (
-                  <button
-                    key={r}
-                    type="button"
-                    aria-pressed={on}
-                    disabled={busy}
-                    onClick={() => onRatio(r)}
-                    className={cn(
-                      optBase,
-                      on ? optOn : optOff,
-                      "h-11 min-w-16 justify-center px-3.5 font-mono text-code-sm font-medium",
-                    )}
-                  >
-                    <span
-                      aria-hidden
-                      className="inline-block rounded-[2px] border-[1.5px] border-current"
-                      style={{ width: w, height: h }}
-                    />
-                    {r}
-                  </button>
-                );
-              })}
-            </div>
-          </motion.fieldset>
-        )}
-      </AnimatePresence>
+      </div>
 
       {/* Asosiy harakat */}
-      <motion.div variants={fadeUp} className="flex flex-col gap-3">
+      <div className="flex shrink-0 flex-col gap-2">
         {busy ? (
           <Button
             variant="secondary"
@@ -500,75 +460,17 @@ export function IdeaPanel({
             )}
           </Callout>
         ) : (
-          <div className="flex min-h-10 flex-col items-center gap-1">
+          <div className="flex min-h-9 items-center justify-center gap-3">
             {(text || hasResult) && (
-              <Button variant="ghost" size="sm" className="h-10 gap-2" onClick={onReset}>
-                <RotateCcw size={15} />
+              <Button variant="ghost" size="sm" className="h-9 gap-2" onClick={onReset}>
+                <RotateCcw size={14} />
                 {t("reset")}
               </Button>
             )}
             <p className="font-mono text-label-sm text-subtle">{remainingLabel}</p>
           </div>
         )}
-      </motion.div>
-    </motion.section>
-  );
-}
-
-function ModelCard({
-  on,
-  name,
-  version,
-  sub,
-  dot,
-  disabled,
-  onClick,
-}: {
-  on: boolean;
-  name: string;
-  version: string;
-  sub: string;
-  dot: string;
-  disabled?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={on}
-      disabled={disabled}
-      onClick={onClick}
-      className={cn(
-        optBase,
-        on ? optOn : optOff,
-        "min-h-16 items-start justify-between gap-2 rounded-[var(--radius-lg)] px-3.5 py-3 text-left",
-      )}
-    >
-      <span className="flex min-w-0 flex-col gap-1">
-        <span className="flex min-w-0 items-center gap-2 text-body-md font-bold text-text">
-          <span
-            aria-hidden
-            className="h-2 w-2 shrink-0 rounded-full"
-            style={{ background: dot }}
-          />
-          <span className="truncate">{name}</span>
-        </span>
-        {/* Versiya tavsif qatorida — uzun nom bilan birga sigʻsin */}
-        <span className="min-w-0 text-body-sm font-medium text-muted">
-          {version && (
-            <span className="font-mono text-label-sm text-subtle">{version} · </span>
-          )}
-          {sub}
-        </span>
-      </span>
-      {on && (
-        <span
-          aria-hidden
-          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent"
-        >
-          <Check size={12} strokeWidth={3} />
-        </span>
-      )}
-    </button>
+      </div>
+    </section>
   );
 }

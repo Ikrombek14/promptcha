@@ -59,14 +59,14 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       suppressHydrationWarning
-      className={`${manrope.variable} ${jetbrainsMono.variable}`}
+      className={`${manrope.variable} ${jetbrainsMono.variable} lg:h-full`}
     >
       <head>
         <Script id="promptcha-theme" strategy="beforeInteractive">
           {themeScript}
         </Script>
       </head>
-      <body className="flex min-h-full flex-col bg-bg text-text">
+      <body className="flex min-h-full flex-col bg-bg text-text lg:h-full lg:overflow-hidden">
         <NextIntlClientProvider>
           <a
             href="#main"
@@ -75,7 +75,7 @@ export default async function LocaleLayout({
             {locale === "ru" ? "К содержимому" : locale === "en" ? "Skip to content" : "Asosiy qismga oʻtish"}
           </a>
           <SiteHeader />
-          <main id="main" className="flex flex-1 flex-col">
+          <main id="main" className="flex flex-1 flex-col lg:min-h-0">
             {children}
           </main>
         </NextIntlClientProvider>
