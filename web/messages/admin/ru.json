@@ -6,7 +6,8 @@
       "overview": "Обзор",
       "users": "Пользователи",
       "payments": "Платежи",
-      "settings": "Настройки"
+      "settings": "Настройки",
+      "funnel": "Воронка"
     },
     "common": {
       "loading": "Загрузка…",
@@ -124,6 +125,27 @@
       "save": "Сохранить",
       "saving": "Сохранение…",
       "saved": "Сохранено"
+    },
+    "funnel": {
+      "title": "Воронка",
+      "days": "{n} дней",
+      "steps": "Шаги",
+      "bySession": "по сессиям",
+      "step": {
+        "idea_submitted": "Идея отправлена",
+        "prompt_generated": "Промпт создан",
+        "prompt_copied": "Скопирован",
+        "prompt_feedback": "Ответ «сработал?»"
+      },
+      "byKind": "По типам",
+      "kind": "Тип",
+      "count": "Количество",
+      "avgScore": "Средний балл",
+      "feedback": "Промпт сработал?",
+      "feedbackHint": "ответ пользователя",
+      "worked": "Сработал",
+      "notWorked": "Не сработал",
+      "empty": "Пока нет данных"
     }
   }
 }

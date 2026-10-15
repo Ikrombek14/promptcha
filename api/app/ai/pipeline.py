@@ -457,8 +457,10 @@ async def review(
         f"A prompt for {TOOLS[ai].name} was written from the user's request and brief. "
         "Grade it strictly against the rubric and break it down for a beginner.\n"
         "criteria: exactly 6 items with names task_clear, facts_kept, measurable, audience_tone, "
-        "constraints, no_filler; ok=true/false; note = what is missing when not ok (short, "
-        f"in {locale_name(locale)}). score: 0–100 (roughly: each criterion ~16 points; deduct "
+        "constraints, no_filler. Each gets score = 0-10 (10 = a professional would not touch it, "
+        "7 = acceptable, 4 = clearly weak, 0 = missing). note = what exactly is missing, only when "
+        f"score < 8 (short, concrete, in {locale_name(locale)}); otherwise an empty note. "
+        f"score: 0–100 (roughly: each criterion ~16 points; deduct "
         "partially for weak spots). Be honest — 90+ only for prompts a professional would send "
         "as is.\n"
         "notes: the 2–4 most important decisions in the prompt, one line each, for a beginner: "
@@ -491,6 +493,7 @@ async def review(
     result.notes = [_localize(n, locale) for n in result.notes[:4]]
     for c in result.criteria:
         c.note = _localize(c.note, locale)
+        c.ok = c.score >= 7  # eski maydon ball bilan moslanadi
     result.segments = _clean_segments(prompt, result.segments, kind)
     result.parts = _clean_parts(result.parts, kind, locale)
     return result

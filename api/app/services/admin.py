@@ -14,11 +14,11 @@ from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from fastapi import HTTPException
-from sqlalchemy import func, or_, select
+from sqlalchemy import String, cast, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
-from app.models import LlmCall, Payment, UsageLog, User
+from app.models import Event, LlmCall, Payment, UsageLog, User
 from app.services import settings as app_settings
 from app.services.auth import is_admin_email
 
@@ -445,3 +445,87 @@ __all__ = [
     "stats",
     "update_settings",
 ]
+
+
+# --------------------------------------------------------------------------- voronka (A.1)
+
+#: Voronka qadamlari — `events.name` tartibda
+FUNNEL_STEPS: tuple[str, ...] = (
+    "idea_submitted",
+    "prompt_generated",
+    "prompt_copied",
+    "prompt_feedback",
+)
+
+
+async def funnel(session: AsyncSession, days: int = 30) -> dict[str, Any]:
+    """Kunlik voronka: gʻoya → prompt → nusxa → «ishladi», va tur kesimida.
+
+    Hisob **sessiya** boʻyicha (bir odam bir kunda necha marta oʻtgani emas, nechta
+    sessiya oʻtgani) — shuning uchun `count(distinct session_id)`.
+    """
+    since = _window(days, datetime.now(UTC))
+    base = Event.created_at >= since
+
+    rows = await session.execute(
+        select(
+            Event.name,
+            func.count(func.distinct(func.coalesce(Event.session_id, cast(Event.id, String)))),
+            func.count(),
+        )
+        .where(base, Event.name.in_(FUNNEL_STEPS))
+        .group_by(Event.name)
+    )
+    by_name = {name: (sessions or 0, total or 0) for name, sessions, total in rows}
+    steps = [
+        {"name": n, "sessions": by_name.get(n, (0, 0))[0], "total": by_name.get(n, (0, 0))[1]}
+        for n in FUNNEL_STEPS
+    ]
+
+    # Tur boʻyicha: nechta prompt yasaldi va oʻrtacha ball
+    kind_rows = await session.execute(
+        select(
+            Event.payload["kind"].as_string().label("kind"),
+            func.count(),
+            func.avg(Event.payload["score"].as_integer()),
+        )
+        .where(base, Event.name == "prompt_generated")
+        .group_by("kind")
+        .order_by(func.count().desc())
+    )
+    by_kind = [
+        {"kind": k or "—", "count": c or 0, "avg_score": round(float(a), 1) if a else None}
+        for k, c, a in kind_rows
+    ]
+
+    # «Ishladimi?» javoblari
+    fb_rows = await session.execute(
+        select(Event.payload["answer"].as_string().label("answer"), func.count())
+        .where(base, Event.name == "prompt_feedback")
+        .group_by("answer")
+    )
+    feedback = {(a or "—"): c for a, c in fb_rows}
+
+    # Kunlik: gʻoya va prompt
+    daily_rows = await session.execute(
+        select(
+            func.date_trunc("day", Event.created_at).label("d"),
+            func.count().filter(Event.name == "idea_submitted"),
+            func.count().filter(Event.name == "prompt_generated"),
+            func.count().filter(Event.name == "prompt_copied"),
+        )
+        .where(base, Event.name.in_(FUNNEL_STEPS))
+        .group_by("d")
+        .order_by("d")
+    )
+    daily = [
+        {
+            "day": d.date().isoformat(),
+            "ideas": i or 0,
+            "prompts": p or 0,
+            "copies": c or 0,
+        }
+        for d, i, p, c in daily_rows
+    ]
+
+    return {"days": days, "steps": steps, "by_kind": by_kind, "feedback": feedback, "daily": daily}

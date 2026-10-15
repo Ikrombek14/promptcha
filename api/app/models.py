@@ -1,4 +1,4 @@
-"""SQLAlchemy modellari: User, UserContext, Prompt, UsageLog, LlmCall, Payment, AppSetting."""
+"""SQLAlchemy modellari: User, UserContext, Prompt, UsageLog, LlmCall, Payment, AppSetting, Event."""
 
 import uuid
 from datetime import UTC, datetime
@@ -92,8 +92,13 @@ class Prompt(Base):
     output_language: Mapped[str] = mapped_column(String(5), default="en")
     share_slug: Mapped[str | None] = mapped_column(String(32), unique=True, index=True)
     is_public: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Tekshiruv mezonlari: [{name, score (0–10), ok, note}] — «90+ ga yetkazish» va voronka uchun
+    criteria: Mapped[list | None] = mapped_column(JSON)
     # Foydalanuvchi «Kutubxonaga saqlash» bosgan (tarix — hammasi, kutubxona — faqat shular)
     is_saved: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    # «Prompt ishladimi?» javobi: worked | not_worked | null (hali soʻralmagan)
+    feedback: Mapped[str | None] = mapped_column(String(16))
+    feedback_note: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), index=True
     )
@@ -184,4 +189,30 @@ class AppSetting(Base):
     value: Mapped[str] = mapped_column(Text)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class Event(Base):
+    """Mahsulot hodisalari: voronka va «30 kunda isbot» metrikalari uchun.
+
+    Yozuv asosiy oqimni sekinlashtirmaydi (fon vazifasi, xato yutiladi). Shaxsiy maʼlumot
+    saqlanmaydi — faqat gʻoya matni kabi foydalanuvchi oʻzi kiritgan narsalar `payload` da.
+    """
+
+    __tablename__ = "events"
+    __table_args__ = (
+        Index("ix_events_name_created", "name", "created_at"),
+        Index("ix_events_session", "session_id", "created_at"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=_uuid)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    guest_id: Mapped[str | None] = mapped_column(String(64), index=True)
+    session_id: Mapped[str | None] = mapped_column(String(64))
+    name: Mapped[str] = mapped_column(String(48))
+    payload: Mapped[dict | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), index=True
     )

@@ -36,6 +36,7 @@ import {
   startGenerate,
 } from "@/lib/api";
 import { type Draft, EMPTY_DRAFT, loadDraft, saveDraft } from "@/lib/draft";
+import { sessionId, track } from "@/lib/events";
 import {
   guestRemaining,
   readGuest,
@@ -354,6 +355,7 @@ export function Workbench() {
           locale,
           output_language: "en",
           guest_id: readGuest().id,
+          session_id: sessionId(),
           improve,
         });
         await attach(jobId);
@@ -399,9 +401,19 @@ export function Workbench() {
       const answers = Object.fromEntries(
         s.questions.map((q) => [q.id, picked[q.id] ?? "(not specified)"]),
       );
+      track(
+        "questions_answered",
+        { answered: Object.keys(picked).length, asked: s.questions.length },
+        readGuest().id,
+      );
       void run(answers, s.kind ?? s.suggestedKind);
       return;
     }
+    track(
+      "idea_submitted",
+      { input: "text", locale, chars: s.text.trim().length, kind: s.kind ?? "auto" },
+      readGuest().id,
+    );
     patch({ answers: {}, questions: [], resolvedAi: null });
     setPicks({});
     void run({}, s.kind);
@@ -443,6 +455,7 @@ export function Workbench() {
   const copyBar = async () => {
     try {
       await navigator.clipboard.writeText(s.prompt);
+      track("prompt_copied", { prompt_id: s.promptId, where: "mobile" }, readGuest().id);
       setCopiedBar(true);
       setTimeout(() => setCopiedBar(false), 1600);
     } catch {

@@ -25,6 +25,8 @@ export type GenerateBody = {
   locale: Locale;
   output_language?: Locale;
   guest_id?: string | null;
+  /** Brauzer sessiyasi — hodisalar voronkasi uchun */
+  session_id?: string | null;
   improve?: ImproveBody | null;
 };
 

@@ -23,6 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db import SessionLocal
 from app.models import LlmCall, Prompt, UsageLog, User
 from app.schemas import GenerateRequest
+from app.services import events
 from app.services import settings as app_settings
 
 if TYPE_CHECKING:
@@ -84,7 +85,14 @@ async def check_quota(
         )
         if (daily_ip or 0) >= ip_limit:
             raise HTTPException(status_code=429, detail=IP_EXHAUSTED)
-    except HTTPException:
+    except HTTPException as e:
+        if e.status_code == 429:
+            events.record(
+                "limit_reached",
+                {"who": "user" if user is not None else "guest", "detail": str(e.detail)[:120]},
+                user_id=user.id if user is not None else None,
+                guest_id=guest_id,
+            )
         raise
     except Exception:
         log.exception("usage_log oʻqib boʻlmadi")
@@ -185,6 +193,7 @@ async def save_prompt(
     done: dict,
     notes: list[str] | None,
     score: int | None = None,
+    criteria: list[dict] | None = None,
 ) -> Prompt | None:
     """Kirgan foydalanuvchi uchun tarix: `prompts` qatori (avto-saqlash). `score` — review balli."""
     try:
@@ -198,6 +207,7 @@ async def save_prompt(
                 result=str(done.get("prompt") or ""),
                 explanations=list(notes) if notes else None,
                 score=score,
+                criteria=list(criteria) if criteria else None,
                 locale=body.locale,
                 output_language=body.output_language,
             )

@@ -29,6 +29,7 @@ import {
 } from "@/lib/api";
 import { SLOT_OF, legendTypes, segClass, slotColor } from "@/lib/segments";
 import { quickEdits } from "@/lib/quick-edits";
+import { track } from "@/lib/events";
 import { fadeUp, stagger } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -83,6 +84,7 @@ export function ResultPanel({
     try {
       // Nusxa olganda har doim inglizcha asl matn (AI'lar unga yaxshiroq javob beradi)
       await navigator.clipboard.writeText(prompt);
+      track("prompt_copied", { prompt_id: promptId, where: "panel" });
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch {
