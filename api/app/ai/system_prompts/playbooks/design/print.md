@@ -7,6 +7,7 @@
 - style: look (clean minimal, warm traditional, premium, playful for kids) | ask: What style? | default: clean, readable, one accent color, lots of white space
 - printing: how it will be printed (local print shop, home printer, black-and-white) | ask: Where will it be printed — a print shop or a home printer? | default: local print shop, full color, CMYK, 3 mm bleed
 ## Must include
+- Audience and language: who reads it and the exact language and script of every text on the piece (e.g. "all text in Uzbek, Latin script")
 - Item, size in mm, orientation, single or double-sided, number of pages/panels
 - Content blocks in reading order with exact text or [placeholders]: headline, sections, items with prices, contact line
 - Typography: 1–2 fonts supporting Uzbek Latin and Cyrillic, minimum body 10 pt for print (12 pt for menus read at a table), heading sizes
