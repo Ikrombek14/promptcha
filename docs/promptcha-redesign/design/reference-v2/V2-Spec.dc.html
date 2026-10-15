@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Promptcha — toʻliq spek</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0C10}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+button:focus-visible,a:focus-visible,textarea:focus-visible{outline:2px solid #7AA2FF;outline-offset:2px}
+a{color:#EDEEF2}a:hover{color:#FFFFFF}
+</style>
+</helmet>
+<div style="width: 1366px; height: 768px; overflow: hidden; display: flex; flex-direction: column; background: #0B0C10; color: #EDEEF2; font-family: 'Manrope', system-ui, sans-serif">
+
+<header style="height: 56px; flex: 0 0 56px; padding: 0 28px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid #1C1F27">
+<a href="#" aria-label="Promptcha bosh sahifa" style="text-decoration: none; font-size: 22px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; color: #EDEEF2">Prompt<span style="color: #8C93A4">cha</span></a>
+<nav aria-label="Asosiy menyu" style="display: flex; gap: 4px; margin-left: 16px">
+<a href="#" aria-current="page" style="padding: 18px 10px; font-size: 14px; font-weight: 700; color: #EDEEF2; text-decoration: none; box-shadow: inset 0 -2px 0 #EDEEF2">Generator</a>
+<a href="#" style="padding: 18px 10px; font-size: 14px; font-weight: 600; color: #8C93A4; text-decoration: none">Tarix</a>
+</nav>
+<div style="flex: 1 1 0"></div>
+<span style="height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid #2A2F3A; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #BFC4D0"><span aria-hidden="true" style="display: flex; gap: 3px"><span style="width: 6px; height: 6px; border-radius: 999px; background: #EDEEF2"></span><span style="width: 6px; height: 6px; border-radius: 999px; background: #EDEEF2"></span><span style="width: 6px; height: 6px; border-radius: 999px; background: #3A4050"></span></span>Bugun 2 ta bepul qoldi</span>
+<a href="#" style="height: 32px; padding: 0 5px 0 12px; border-radius: 999px; background: #171A21; border: 1px solid #2A2F3A; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #EDEEF2; text-decoration: none">10 kredit<span aria-hidden="true" style="width: 22px; height: 22px; border-radius: 999px; background: #3A63F0; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg></span></a>
+<button type="button" aria-label="Profil menyusi" style="width: 34px; height: 34px; border-radius: 999px; background: #2B2240; color: #D9C6FF; font-size: 12px; font-weight: 800">IK</button>
+</header>
+
+<main style="flex: 1 1 0; min-height: 0; padding: 20px 28px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px">
+
+<section aria-labelledby="h-in" style="min-height: 0; background: #13151B; border: 1px solid #22262F; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px">
+<h1 id="h-in" style="margin: 0; font-size: 22px; line-height: 1.2; font-weight: 800; letter-spacing: -0.025em">Fikringizni aniq promptga aylantiring</h1>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="idea" style="font-size: 13px; font-weight: 700; color: #D5D9E3">Gʻoyangiz</label>
+<textarea id="idea" rows="2" style="resize: none; background: #0E1015; border: 1px solid #2A2F3A; border-radius: 12px; padding: 12px 14px; font: inherit; font-size: 15px; line-height: 1.5; color: #EDEEF2; height: 72px">Oʻquv markazim uchun oʻquvchilar davomatini belgilaydigan oddiy web ilova</textarea>
+</div>
+<div style="display: flex; gap: 8px; align-items: center">
+<span style="height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid #4C7DFF; background: rgba(58,99,240,0.16); display: inline-flex; align-items: center; font-size: 13px; font-weight: 700">Ilova</span>
+<span style="height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid #262A35; background: #171A21; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700">Lovable</span>
+<button type="button" style="height: 32px; padding: 0 8px; font-size: 13px; font-weight: 700; color: #9DB8FF">Oʻzgartirish</button>
+</div>
+<fieldset style="margin: 0; padding: 0; border: 0">
+<legend style="padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #D5D9E3">Natija hajmi</legend>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<button type="button" aria-pressed="false" style="min-height: 60px; padding: 10px 14px; border: 1px solid #262A35; background: #171A21; border-radius: 12px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left"><span style="font-size: 14px; font-weight: 700">Tez prompt</span><span style="font-size: 12px; color: #9AA1B2">Bitta xabar · bepul</span></button>
+<button type="button" aria-pressed="true" style="min-height: 60px; padding: 10px 14px; border: 1px solid #4C7DFF; background: rgba(58,99,240,0.16); border-radius: 12px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left"><span style="font-size: 14px; font-weight: 700">Toʻliq spek</span><span style="font-size: 12px; color: #C9D3F5">8 boʻlim · 2 kredit</span></button>
+</div>
+</fieldset>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; font-weight: 700; color: #D5D9E3">Aniqlashtirish</span>
+<div style="border: 1px solid #232733; border-radius: 12px; background: #0E1015">
+<div style="padding: 10px 14px; border-bottom: 1px solid #1C1F27; display: flex; justify-content: space-between; gap: 12px; font-size: 13px"><span style="color: #9AA1B2">Kim foydalanadi?</span><span style="font-weight: 700">Ustoz va admin</span></div>
+<div style="padding: 10px 14px; border-bottom: 1px solid #1C1F27; display: flex; justify-content: space-between; gap: 12px; font-size: 13px"><span style="color: #9AA1B2">Hisobot kerakmi?</span><span style="font-weight: 700">Ha, oylik</span></div>
+<div style="padding: 10px 14px; display: flex; justify-content: space-between; gap: 12px; font-size: 13px"><span style="color: #9AA1B2">Toʻlov qabul qiladimi?</span><span style="font-weight: 700">Yoʻq</span></div>
+</div>
+</div>
+<div style="margin-top: auto; display: flex; gap: 8px">
+<button type="button" style="flex: 1 1 0; height: 46px; border-radius: 12px; border: 1px solid #2A2F3A; background: #171A21; font-size: 15px; font-weight: 700">Qayta yaratish</button>
+<button type="button" style="height: 46px; padding: 0 16px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #9AA1B2">Boshidan</button>
+</div>
+</section>
+
+<section aria-labelledby="h-out" style="min-height: 0; background: #13151B; border: 1px solid #22262F; border-radius: 16px; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 12px">
+<h2 id="h-out" style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.02em">Toʻliq spek</h2>
+<span style="height: 26px; padding: 0 10px; border-radius: 999px; background: #1C2030; border: 1px solid #2B3245; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #C9D3F5"><span style="width: 6px; height: 6px; border-radius: 999px; background: #7AA2FF"></span>Lovable</span>
+<div style="flex: 1 1 0"></div>
+<span style="display: flex; align-items: center; gap: 10px">
+<span style="position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">
+<svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" style="position: absolute; inset: 0; transform: rotate(-90deg)"><circle cx="20" cy="20" r="17" fill="none" stroke="#262A35" stroke-width="3.5"></circle><circle cx="20" cy="20" r="17" fill="none" stroke="#5FD3B5" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="100.4 106.8"></circle></svg>
+<span style="font-size: 13px; font-weight: 800">94</span>
+</span>
+<span style="display: flex; flex-direction: column; line-height: 1.25"><span style="font-size: 13px; font-weight: 700">Aʼlo</span><span style="font-size: 12px; color: #9AA1B2">100 balldan</span></span>
+</span>
+</div>
+
+<div role="tablist" aria-label="Spek boʻlimlari" style="display: flex; gap: 6px; flex-wrap: wrap">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="7">
+<button type="button" role="tab" onClick="{{t.pick}}" aria-selected="{{t.on}}" style="height: 34px; padding: 0 12px; border-radius: 9px; border: 1px solid; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; {{t.style}}"><span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; color: #7A8294">{{t.n}}</span>{{t.label}}</button>
+</sc-for>
+</div>
+
+<div role="tabpanel" style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; background: #0E1015; border: 1px solid #232733; border-radius: 14px">
+<div style="flex: 1 1 0; min-height: 0; overflow: auto; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #7A8294">## {{cur.head}}</span>
+<p style="margin: 0; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; line-height: 1.8; color: #C9CEDA; white-space: pre-line">{{cur.body}}</p>
+<p style="margin: 6px 0 0; padding: 10px 12px; border-radius: 10px; background: #171A21; font-size: 13px; line-height: 1.5; color: #9AA1B2">{{cur.why}}</p>
+</div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 20px; border-top: 1px solid #1C1F27">
+<span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #7A8294">7 boʻlim · 312 soʻz · bitta xabar</span>
+<div style="flex: 1 1 0"></div>
+<button type="button" style="height: 36px; padding: 0 12px; border-radius: 9px; border: 1px solid #2A2F3A; font-size: 13px; font-weight: 700">Ulashish</button>
+<button type="button" style="height: 36px; padding: 0 14px; border-radius: 9px; background: #EDEEF2; color: #0B0C10; font-size: 13px; font-weight: 700">Lovable uchun nusxa olish</button>
+</div>
+</div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1366,"height":768}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var self = this;
+    var tab = (this.state || {}).tab || 2;
+    var ON = 'background:rgba(58,99,240,.16);border-color:#4C7DFF;color:#EDEEF2;';
+    var OFF = 'background:#171A21;border-color:#262A35;color:#A3AABA;';
+    var S = [
+      { label: 'Maqsad', head: 'Goal', body: 'Build a simple web app for a learning center to mark daily student attendance.\nA teacher marks one group in under 30 seconds; the admin sees monthly reports.', why: 'Bir jumlada nima va kim uchun — Lovable butun ilovani shu maqsad atrofida quradi.' },
+      { label: 'Rollar', head: 'Roles', body: 'Admin — manages groups, teachers and students; sees all reports.\nTeacher — sees only own groups; marks present / absent / late.\nNo student accounts.', why: 'Rollar aniq boʻlmasa, ilova hammaga hamma narsani koʻrsatib qoʻyadi.' },
+      { label: 'Sahifalar', head: 'Pages', body: '1. Login — email + password\n2. Today — the teacher’s groups for today\n3. Group attendance — student list, 3-state toggle, Save\n4. Reports (admin) — month picker, student × day table, CSV export\n5. Settings (admin) — groups, teachers, students', why: 'Sahifalar roʻyxati — Lovable eng koʻp adashadigan joy. Raqamlangan roʻyxat birinchi urinishda toʻgʻri qurilishini taʼminlaydi.' },
+      { label: 'Maʼlumotlar', head: 'Data', body: 'users(id, email, role: admin | teacher)\ngroups(id, name, teacher_id, days, time)\nstudents(id, full_name, phone, group_id)\nattendance(id, student_id, date, status: present | absent | late)', why: 'Jadvallar oldindan berilsa, keyin "maʼlumot yoʻqoldi" muammosi chiqmaydi.' },
+      { label: 'Oqimlar', head: 'Flows', body: 'Teacher opens Today → taps a group → everyone defaults to present → taps exceptions → Save.\nSaving again the same day updates the record, never duplicates.', why: 'Asosiy harakat qadamma-qadam yozilgan — kreditni tejaydigan eng muhim boʻlim.' },
+      { label: 'Dizayn', head: 'Design', body: 'Clean, mobile-first, tap targets at least 44px.\nInterface text in Uzbek. Light theme, one accent colour.', why: 'Ustozlar telefondan belgilaydi — shuning uchun mobil birinchi.' },
+      { label: 'Qilinmasin', head: 'Out of scope', body: 'No payments, no SMS, no student logins, no dark mode in v1.', why: 'Nima qilinmasligini aytish ortiqcha funksiyalarga kredit ketishining oldini oladi.' }
+    ];
+    var tabs = S.map(function (s, i) {
+      return { n: String(i + 1), label: s.label, on: i === tab, style: i === tab ? ON : OFF, pick: function () { self.setState({ tab: i }); } };
+    });
+    return { tabs: tabs, cur: S[tab] };
+  }
+}
+</script>
+</body>
+</html>

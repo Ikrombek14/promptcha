@@ -2,6 +2,7 @@
 
 Bu papka Promptcha (promptcha.uz) generator sahifasining yangi dizayni va yangi logosini oʻz ichiga oladi.
 Vazifa: shu dizaynni **loyihaning mavjud stekida** (framework, komponentlar, stil usuli) joriy qilish.
+Ishlar tartibi va yangi funksiyalar `TASKS.md` da. **Agar README va TASKS.md bir-biriga zid boʻlsa, TASKS.md va `design/reference-v2/` ustun.**
 Bu yerdagi HTML fayllar — namuna, ularni toʻgʻridan-toʻgʻri koʻchirma; loyihadagi tuzilmaga moslab qayta yoz.
 
 ## 0. Ishni boshlashdan oldin
@@ -45,7 +46,7 @@ Bu yerdagi HTML fayllar — namuna, ularni toʻgʻridan-toʻgʻri koʻchirma; lo
 
 **Chap panel:**
 1. Sarlavha "Fikringizni aniq promptga aylantiring" + izoh.
-2. `<label>` "Gʻoyangiz" + hisoblagich `45 / 500`. Textarea pastida ikki tugma: "Ovoz bilan aytish" (mikrofon), "Gʻoyani boyitish". Agar loyihada bu funksiyalar boʻlmasa — tugmalarni qoʻyma yoki menga ayt.
+2. `<label>` "Gʻoyangiz" + hisoblagich `45 / 500`. Textarea pastida "Ovoz bilan aytish" tugmasi — u C-bosqichda (`TASKS.md`, C.2) ishga tushadi, ungacha tugmani qoʻyma. "Gʻoyani boyitish" tugmasi hozircha kerak emas.
 3. **Natija turi** (fieldset, 3×2 grid, ikonkali): Avto, Rasm, Video, Ilova, Dizayn, Matn.
 4. **Model** (2 ustunli karta: nom + versiya + qisqa izoh, tanlanganida koʻk ✓). **Muhim:** model roʻyxati tanlangan turga bogʻliq. Turi oʻzgarganda birinchi model avtomatik tanlanadi. Roʻyxatni loyihadagi haqiqiy modellardan ol; namunadagi nomlar (Kling, Lovable va h.k.) faqat misol.
 5. **Nisbat** (faqat Rasm/Video uchun): 1:1, 4:5, 16:9, 9:16 — har birida kichik shakl ikonkasi. Tanlangan nisbat promptdagi `--ar` ga yoziladi.

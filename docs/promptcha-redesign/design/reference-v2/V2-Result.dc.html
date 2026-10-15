@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Promptcha — natija</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0C10}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+button:focus-visible,a:focus-visible,textarea:focus-visible{outline:2px solid #7AA2FF;outline-offset:2px}
+a{color:#EDEEF2}a:hover{color:#FFFFFF}
+.sg{border-radius:4px;padding:1px 3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.sg-a{background:rgba(122,162,255,.13);box-shadow:inset 0 -2px 0 rgba(122,162,255,.8);color:#DDE6FF}
+.sg-b{background:rgba(242,178,102,.12);box-shadow:inset 0 -2px 0 rgba(242,178,102,.8);color:#FBE6CC}
+.sg-c{background:rgba(196,155,255,.13);box-shadow:inset 0 -2px 0 rgba(196,155,255,.8);color:#EEE2FF}
+.sg-d{background:rgba(95,211,181,.12);box-shadow:inset 0 -2px 0 rgba(95,211,181,.8);color:#D3F5EC}
+</style>
+</helmet>
+<div style="width: 1366px; height: 768px; overflow: hidden; display: flex; flex-direction: column; background: #0B0C10; color: #EDEEF2; font-family: 'Manrope', system-ui, sans-serif">
+
+<header style="height: 56px; flex: 0 0 56px; padding: 0 28px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid #1C1F27">
+<a href="#" aria-label="Promptcha bosh sahifa" style="text-decoration: none; font-size: 22px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; color: #EDEEF2">Prompt<span style="color: #8C93A4">cha</span></a>
+<nav aria-label="Asosiy menyu" style="display: flex; gap: 4px; margin-left: 16px">
+<a href="#" aria-current="page" style="padding: 18px 10px; font-size: 14px; font-weight: 700; color: #EDEEF2; text-decoration: none; box-shadow: inset 0 -2px 0 #EDEEF2">Generator</a>
+<a href="#" style="padding: 18px 10px; font-size: 14px; font-weight: 600; color: #8C93A4; text-decoration: none">Tarix</a>
+</nav>
+<div style="flex: 1 1 0"></div>
+<span style="height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid #2A2F3A; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #BFC4D0"><span aria-hidden="true" style="display: flex; gap: 3px"><span style="width: 6px; height: 6px; border-radius: 999px; background: #EDEEF2"></span><span style="width: 6px; height: 6px; border-radius: 999px; background: #3A4050"></span><span style="width: 6px; height: 6px; border-radius: 999px; background: #3A4050"></span></span>Bugun 1 ta bepul qoldi</span>
+<a href="#" style="height: 32px; padding: 0 5px 0 12px; border-radius: 999px; background: #171A21; border: 1px solid #2A2F3A; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #EDEEF2; text-decoration: none">12 kredit<span aria-hidden="true" style="width: 22px; height: 22px; border-radius: 999px; background: #3A63F0; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg></span></a>
+<div role="group" aria-label="Interfeys tili" style="display: flex; padding: 2px; border: 1px solid #232733; border-radius: 9px; background: #111318">
+<button type="button" aria-pressed="true" style="height: 28px; min-width: 36px; padding: 0 8px; border-radius: 7px; background: #232733; font-size: 12px; font-weight: 700; color: #EDEEF2">Oʻz</button>
+<button type="button" aria-pressed="false" style="height: 28px; min-width: 36px; padding: 0 8px; border-radius: 7px; font-size: 12px; font-weight: 700; color: #8C93A4">Ру</button>
+<button type="button" aria-pressed="false" style="height: 28px; min-width: 36px; padding: 0 8px; border-radius: 7px; font-size: 12px; font-weight: 700; color: #8C93A4">En</button>
+</div>
+<button type="button" aria-label="Profil menyusi" style="width: 34px; height: 34px; border-radius: 999px; background: #2B2240; color: #D9C6FF; font-size: 12px; font-weight: 800">IK</button>
+</header>
+
+<main style="flex: 1 1 0; min-height: 0; padding: 20px 28px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px">
+
+<section aria-labelledby="h-in" style="min-height: 0; background: #13151B; border: 1px solid #22262F; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px">
+<h1 id="h-in" style="margin: 0; font-size: 22px; line-height: 1.2; font-weight: 800; letter-spacing: -0.025em">Fikringizni aniq promptga aylantiring</h1>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><label for="idea" style="font-size: 13px; font-weight: 700; color: #D5D9E3">Gʻoyangiz</label><span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #7A8294">45 / 500</span></div>
+<textarea id="idea" rows="3" style="resize: none; background: #0E1015; border: 1px solid #2A2F3A; border-radius: 12px; padding: 12px 14px; font: inherit; font-size: 15px; line-height: 1.5; color: #EDEEF2; height: 84px">Menga oyda turgan bolani rasmini chizib ber</textarea>
+</div>
+<fieldset style="margin: 0; padding: 0; border: 0">
+<legend style="padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #D5D9E3">Natija turi</legend>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<button type="button" aria-pressed="false" style="height: 40px; border: 1px solid #262A35; background: #171A21; border-radius: 10px; font-size: 14px; font-weight: 600; color: #A3AABA">Avto</button>
+<button type="button" aria-pressed="true" style="height: 40px; border: 1px solid #4C7DFF; background: rgba(58,99,240,0.16); border-radius: 10px; font-size: 14px; font-weight: 600; color: #EDEEF2">Rasm</button>
+<button type="button" aria-pressed="false" style="height: 40px; border: 1px solid #262A35; background: #171A21; border-radius: 10px; font-size: 14px; font-weight: 600; color: #A3AABA">Video</button>
+<button type="button" aria-pressed="false" style="height: 40px; border: 1px solid #262A35; background: #171A21; border-radius: 10px; font-size: 14px; font-weight: 600; color: #A3AABA">Ilova</button>
+<button type="button" aria-pressed="false" style="height: 40px; border: 1px solid #262A35; background: #171A21; border-radius: 10px; font-size: 14px; font-weight: 600; color: #A3AABA">Dizayn</button>
+<button type="button" aria-pressed="false" style="height: 40px; border: 1px solid #262A35; background: #171A21; border-radius: 10px; font-size: 14px; font-weight: 600; color: #A3AABA">Matn</button>
+</div>
+</fieldset>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; font-weight: 700; color: #D5D9E3">Vosita</span>
+<div style="min-height: 52px; padding: 8px 8px 8px 14px; border: 1px solid #262A35; background: #171A21; border-radius: 12px; display: flex; align-items: center; gap: 12px">
+<span style="display: flex; flex-direction: column; gap: 2px; flex: 1 1 0; min-width: 0"><span style="font-size: 14px; font-weight: 700">Midjourney <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; color: #7A8294">v7</span></span><span style="font-size: 12px; color: #9AA1B2">Tavsiya etiladi: badiiy rasm uchun</span></span>
+<button type="button" style="height: 36px; padding: 0 12px; border-radius: 9px; font-size: 13px; font-weight: 700; color: #9DB8FF">Oʻzgartirish</button>
+</div>
+</div>
+<fieldset style="margin: 0; padding: 0; border: 0">
+<legend style="padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #D5D9E3">Nisbat</legend>
+<div style="display: flex; gap: 8px">
+<button type="button" aria-pressed="true" style="height: 36px; min-width: 60px; border: 1px solid #4C7DFF; background: rgba(58,99,240,0.16); border-radius: 9px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: #EDEEF2">1:1</button>
+<button type="button" aria-pressed="false" style="height: 36px; min-width: 60px; border: 1px solid #262A35; background: #171A21; border-radius: 9px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: #A3AABA">4:5</button>
+<button type="button" aria-pressed="false" style="height: 36px; min-width: 60px; border: 1px solid #262A35; background: #171A21; border-radius: 9px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: #A3AABA">16:9</button>
+<button type="button" aria-pressed="false" style="height: 36px; min-width: 60px; border: 1px solid #262A35; background: #171A21; border-radius: 9px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: #A3AABA">9:16</button>
+</div>
+</fieldset>
+<div style="margin-top: auto; display: flex; gap: 8px">
+<button type="button" style="flex: 1 1 0; height: 46px; border-radius: 12px; border: 1px solid #2A2F3A; background: #171A21; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>Qayta yaratish</button>
+<button type="button" style="height: 46px; padding: 0 16px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #9AA1B2">Boshidan</button>
+</div>
+</section>
+
+<section aria-labelledby="h-out" style="min-height: 0; background: #13151B; border: 1px solid #22262F; border-radius: 16px; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 12px">
+<h2 id="h-out" style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.02em">Tayyor prompt</h2>
+<span style="height: 26px; padding: 0 10px; border-radius: 999px; background: #1C2030; border: 1px solid #2B3245; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #C9D3F5"><span style="width: 6px; height: 6px; border-radius: 999px; background: #7AA2FF"></span>Midjourney v7</span>
+<div style="flex: 1 1 0"></div>
+<span style="display: flex; align-items: center; gap: 10px">
+<span style="position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">
+<svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" style="position: absolute; inset: 0; transform: rotate(-90deg)"><circle cx="20" cy="20" r="17" fill="none" stroke="#262A35" stroke-width="3.5"></circle><circle cx="20" cy="20" r="17" fill="none" stroke="#F2B266" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="76.9 106.8"></circle></svg>
+<span style="font-size: 13px; font-weight: 800">72</span>
+</span>
+<span style="display: flex; flex-direction: column; line-height: 1.25"><span style="font-size: 13px; font-weight: 700">Yaxshi</span><span style="font-size: 12px; color: #9AA1B2">100 balldan</span></span>
+</span>
+</div>
+
+<div style="background: #0E1015; border: 1px solid #232733; border-radius: 14px">
+<p style="margin: 0; padding: 16px 18px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; line-height: 1.8; color: #B7BDCB"><span style="color: #6B7385">/imagine prompt:</span> <span class="sg sg-a">A child standing on the moon's surface, wearing a silver spacesuit</span>, <span class="sg sg-c">looking up at Earth in the starry sky</span>, lunar dust and craters around, <span class="sg sg-b">soft moonlight</span>, highly detailed <span class="sg sg-d">--v 7 --ar 1:1</span></p>
+<div style="display: flex; align-items: center; gap: 16px; padding: 8px 10px 8px 18px; border-top: 1px solid #1C1F27">
+<span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #7A8294">38 soʻz</span>
+<a href="#" style="font-size: 13px; font-weight: 600; color: #9AA1B2">Tarjimasini koʻrish</a>
+<div style="flex: 1 1 0"></div>
+<button type="button" aria-label="Tarixga saqlash" style="width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #9AA1B2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg></button>
+<button type="button" style="height: 36px; padding: 0 12px; border-radius: 9px; border: 1px solid #2A2F3A; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><path d="m16 6-4-4-4 4"></path><path d="M12 2v13"></path></svg>Ulashish</button>
+<button type="button" style="height: 36px; padding: 0 14px; border-radius: 9px; background: #EDEEF2; color: #0B0C10; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>Nusxa olish</button>
+</div>
+</div>
+
+<div style="border: 1px solid #2E3754; background: #151A28; border-radius: 14px; padding: 16px 18px; display: flex; align-items: center; gap: 20px">
+<div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 15px; font-weight: 800">72 → 90+ uchun 3 ta narsa yetishmayapti</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #1C2133; border: 1px solid #2B3245; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #C9D3F5"><span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; color: #7A8294">4/10</span>Kayfiyat aniq emas</span>
+<span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #1C2133; border: 1px solid #2B3245; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #C9D3F5"><span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; color: #7A8294">5/10</span>Kamera burchagi yoʻq</span>
+<span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #1C2133; border: 1px solid #2B3245; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #C9D3F5"><span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; color: #7A8294">6/10</span>Rang palitrasi umumiy</span>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 0 0 auto">
+<button type="button" style="height: 46px; padding: 0 20px; border-radius: 12px; background: #3A63F0; color: #FFFFFF; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg>90+ ga yetkazish</button>
+<span style="font-size: 12px; color: #9AA1B2">1 kredit · 12 ta bor</span>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px; min-height: 0">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h3 style="margin: 0; font-size: 15px; font-weight: 800">Prompt anatomiyasi</h3><span style="font-size: 12px; color: #7A8294">Rangli boʻlaklar nimaga kerak</span></div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+<article style="background: #171A21; border: 1px solid #232733; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #9DB8FF"><span style="width: 8px; height: 8px; border-radius: 2px; background: #7AA2FF"></span>Obyekt</span>
+<p style="margin: 0; font-size: 13px; line-height: 1.45; color: #9AA1B2">Qahramon eng boshida — model unga koʻproq eʼtibor beradi.</p>
+</article>
+<article style="background: #171A21; border: 1px solid #232733; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #D4B6FF"><span style="width: 8px; height: 8px; border-radius: 2px; background: #C49BFF"></span>Kompozitsiya</span>
+<p style="margin: 0; font-size: 13px; line-height: 1.45; color: #9AA1B2">Yuqoriga qarash orzu hissini beradi.</p>
+</article>
+<article style="background: #171A21; border: 1px solid #232733; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #F5C68E"><span style="width: 8px; height: 8px; border-radius: 2px; background: #F2B266"></span>Yorugʻlik</span>
+<p style="margin: 0; font-size: 13px; line-height: 1.45; color: #9AA1B2">Kayfiyatni belgilaydi, lekin hozir juda umumiy.</p>
+</article>
+<article style="background: #171A21; border: 1px solid #232733; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #8FE3CC"><span style="width: 8px; height: 8px; border-radius: 2px; background: #5FD3B5"></span>Parametrlar</span>
+<p style="margin: 0; font-size: 13px; line-height: 1.45; color: #9AA1B2">Midjourney versiyasi va kvadrat nisbat.</p>
+</article>
+</div>
+</div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1366,"height":768}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
